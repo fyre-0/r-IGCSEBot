@@ -1,5 +1,5 @@
 from constants import TOKEN, LINK, GUILD_ID, LOG_CHANNEL_ID, CREATE_DM_CHANNEL_ID, SUBJECT_ROLES, SESSION_ROLES
-from bot import discord, bot, keywords, typing, tasks, commands, requests, json, time, datetime
+from bot import discord, bot, keywords, typing, tasks, commands, requests, json, time, datetime, pymongo
 from data import reactionroles_data, helper_roles, subreddits, study_roles
 
 # events
@@ -1577,29 +1577,20 @@ async def code(interaction: discord.Interaction):
     await interaction.response.send_modal(modal = Code())
 
 
-async def togglechannellock(channelid, unlock, *, unlocktime=0):
-    """Function for locking/unlocking a discord channel"""
-
-    guild = bot.get_guild(GUILD_ID)
-    everyonerole = guild.roles.everyone
-
-    channel = bot.get_channel(channelid)
-    overwrite = channel.overwrites_for(everyonerole)
-    overwrite.send_messages = unlock
-
-    await channel.set_permissions(everyonerole, overwrite=overwrite)
-    await channel.send(f"{'Unl' if unlock else 'L'}ocked channel.")
-
-    if not unlock:
-      # If the channel was locked, send another embed with unlock time
-      embed = discord.Embed(description=f"Unlocking channel <t:{unlocktime}:R>.")
-      await channel.send(embed=embed)
-
 @bot.slash_command(name="channellock", description="Locks a channel at a specified time")
 async def lockcommand(interaction: discord.Interaction,
-                        channelinput: discord.TextChannel =  discord.SlashOption(name="channel_name", description="Which channel do you want to lock?", required=True),
-                        locktime: str = discord.SlashOption(name="lock_time", description="At what time do you want the channel to be locked?", required=True),
-                        unlocktime: str = discord.SlashOption(name="unlock_time", description="At what time do you want the channel to be unlocked?", required=True)):
+                        channelinput: discord.TextChannel
+                          = discord.SlashOption(name="channel_name",
+                                                description="Which channel do you want to lock?",
+                                                required=True),
+                        locktime: str
+                          = discord.SlashOption(name="lock_time",
+                                                description="At what time do you want the channel to be locked?",
+                                                required=True),
+                        unlocktime: str
+                          = discord.SlashOption(name="unlock_time",
+                                                description="At what time do you want the channel to be unlocked?",
+                                                required=True)):
 
   # perms validation
   if not await is_moderator(interaction.user) and not await has_role(interaction.user, "Bot Developer"):
@@ -1607,6 +1598,20 @@ async def lockcommand(interaction: discord.Interaction,
                                "you don't have the permission to perform this action.",
                                 ephemeral=True)
         return
+
+  # effectively resets channellock database. for developer purposes || TODO make this work
+  if locktime == "resolveall" and unlocktime == "!@#$%^&*()":
+    client = pymongo.MongoClient(LINK)
+    db = client.rigcse
+    locks = db["channellock"]
+    result = locks.find({"resolved": False})
+    for result in results:
+      locks.update_one({"_id": result["_id"]}, {"$set": {"resolved": True}})
+
+  # allow instant unlocking of channels
+  if unlocktime == 'now':
+    locktime = 0
+    unlocktime = time.time() + 3
 
   # input validation
   try:
@@ -1625,7 +1630,7 @@ async def lockcommand(interaction: discord.Interaction,
     await interaction.send("Unlock time must be after lock time.", ephemeral=True)
     return
   elif unlocktime < t:
-    await interaction.send(f"Unlock time has already passed (current time: {round(time.time())}).", ephemeral=True)
+    await interaction.send(f"Unlock time has already passed (current time: {t}).", ephemeral=True)
     return
 
   locktimeinunix = f"<t:{locktime}:F>"
@@ -1637,7 +1642,7 @@ async def lockcommand(interaction: discord.Interaction,
   await logchannel.send(f"Channel Name: {channelid}\n" f"Lock Time: {locktime} ({locktimeinunix})\n" f"Unlock Time: {unlocktime} ({unlocktimeinunix})\n")
 
   client = pymongo.MongoClient(LINK)
-  db = client.IGCSEBot
+  db = client.rigcse
   locks = db["channellock"]
 
   # inserts the lock and unlock as 2 separate entries
