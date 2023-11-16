@@ -1,11 +1,7 @@
 import os
 
-# TOKEN = os.environ.get("IGCSEBOT_TOKEN")
-# LINK = os.environ.get("MONGO_LINK")
-
-TOKEN = "OTQ3ODU3NDY3NzI2MDAwMTU4.GpHKda.XC9ds95ag5sPpt2aMUWkK4KaZSyepFeguYk5pI"
-LINK = "mongodb+srv://User1301:7LrahykjZHkZzf4F@cluster.x7drn.mongodb.net/?retryWrites=true&w=majority"
-
+TOKEN = os.environ.get("IGCSEBOT_TOKEN")
+LINK = os.environ.get("MONGO_LINK")
 
 GUILD_ID = 1111128710133854289 # 576460042774118420 
 LOG_CHANNEL_ID = 1152467554321842257 # 1017792876584906782 
