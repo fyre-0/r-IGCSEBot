@@ -20,7 +20,7 @@ async def togglechannellock(channelid, unlock, *, unlocktime=0):
       embed = discord.Embed(description=f"Unlocking channel <t:{unlocktime}:R>.")
       await channel.send(embed=embed)
 
-@tasks.loop(seconds=6)
+@tasks.loop(seconds=60)
 async def checklocks():
     """Checks the database every 60 seconds to see if anything needs to be locked or unlocked """
     client = pymongo.MongoClient(LINK)
