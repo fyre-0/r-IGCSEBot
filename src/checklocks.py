@@ -29,7 +29,7 @@ async def togglechannellock(channelid, unlock, *, unlocktime=0):
 async def checklocks():
     """Checks the database every 60 seconds to see if anything needs to be locked or unlocked """
     client = pymongo.MongoClient(LINK)
-    db = client.rigcse
+    db = client.IGCSEBot
     locks = db["channellock"]
     try:
         results = locks.find({"resolved": False})

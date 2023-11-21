@@ -1593,7 +1593,7 @@ async def lockcommand(interaction: discord.Interaction,
     # effectively resets channellock database. for developer purposes || TODO make this work
     if locktime == "resolveall" and unlocktime == "!@#$%^&*()":
         client = pymongo.MongoClient(LINK)
-        db = client.rigcse
+        db = client.IGCSEBot
         locks = db["channellock"]
         result = locks.find({"resolved": False})
         for result in results:
@@ -1633,7 +1633,7 @@ async def lockcommand(interaction: discord.Interaction,
     await logchannel.send(f"Channel Name: {channelid}\n" f"Lock Time: {locktime} ({locktimeinunix})\n" f"Unlock Time: {unlocktime} ({unlocktimeinunix})\n")
 
     client = pymongo.MongoClient(LINK)
-    db = client.rigcse
+    db = client.IGCSEBot
     locks = db["channellock"]
 
     # inserts the lock and unlock as 2 separate entries
