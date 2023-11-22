@@ -5,7 +5,7 @@ from checklocks import checklocks
 @bot.event
 async def on_ready():
     print(f"Logged in as {str(bot.user)}.")
-    await bot.change_presence(activity=discord.Game(name="r/IGCSE"))
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="r/IGCSE"))
     embed = discord.Embed(title=f"Guilds Info ({len(bot.guilds)})", colour=0x3498db, description="Statistics about the servers this bot is in.")
     checklocks.start()
 
