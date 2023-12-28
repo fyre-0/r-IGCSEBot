@@ -2,6 +2,7 @@ import datetime
 import time
 import typing
 import pymongo
+import random
 import requests
 import nextcord as discord
 import traceback
