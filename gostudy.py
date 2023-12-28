@@ -95,5 +95,3 @@ async def remove_gostudy(interaction: discord.Interaction,
             mute = db["mute"]
             mute.delete_one({"user_id": str(user_id)})
             await interaction.send(f"the Forced mute role for <@{user_id}> has been removed", ephemeral=True)
-
-bot.run(TOKEN)
