@@ -1,9 +1,12 @@
-from constants import LINK, GUILD_ID, FMROLE
-from bot import tasks, pymongo, bot, guild
-import time, traceback
+import time
+import traceback
+
+from bot import bot, guild, pymongo, tasks
+from constants import FMROLE, GUILD_ID, LINK
+
 
 async def togglechannellock(channelid, unlock, *, unlocktime=0):
-    #Function for locking/unlocking a discord channel
+    # Function for locking/unlocking a discord channel
     everyone = bot.get_guild(GUILD_ID).default_role
     channel = bot.get_channel(channelid)
     overwrite = channel.overwrites_for(everyone)
@@ -21,12 +24,13 @@ async def togglechannellock(channelid, unlock, *, unlocktime=0):
         print(e)
         print("failed to set permissions")
 
+
 async def toggleforumlock(threadid, unlock, unlocktime):
     thread = bot.get_channel(threadid)
 
-    #Locking the post:
+    # Locking the post:
     try:
-        thread = await thread.edit(locked= not unlock)
+        thread = await thread.edit(locked=not unlock)
         await thread.send(f"Thread has been {'unl' if unlock else 'l'}ocked.")
         if not unlock:
             await thread.send(f"Unlocking channel <t:{unlocktime}:R>.")
@@ -34,9 +38,10 @@ async def toggleforumlock(threadid, unlock, unlocktime):
         print(traceback.format_exc())
         print(e)
 
+
 @tasks.loop(seconds=60)
 async def checklocks():
-    #Checks the database every 60 seconds to see if anything needs to be locked or unlocked
+    # Checks the database every 60 seconds to see if anything needs to be locked or unlocked
     client = pymongo.MongoClient(LINK)
     db = client.IGCSEBot
     clocks = db["channellock"]
@@ -65,24 +70,20 @@ async def checklocks():
     except Exception:
         print(traceback.format_exc())
 
+
 @tasks.loop(seconds=25)
 async def checktime():
-        timern = int(time.time()) + 1
-        client = pymongo.MongoClient(LINK)
-        db = client.IGCSEBot
-        mute = db["mute"]
-        try:
-            results = mute.find({"muted": True})
-            for result in results:
-                if result["unmute_time"] <= str(timern):
-                    user = int(result["user_id"])
-                    guild = bot.get_guild(GUILD_ID)
-                    member = guild.get_member(user)
-                    forced_mute_role = bot.get_guild(GUILD_ID).get_role(FMROLE)
-                    await member.remove_roles(forced_mute_role)
-                    mute.update_one({"_id": result["_id"]}, {"$set": {"muted": False}})
-                    time.sleep(5)
-                    mute.delete_one({"_id": result["_id"]})
-
-        except Exception:
-            print(traceback.format_exc())
+    now = int(time.time())
+    client = pymongo.MongoClient(LINK)
+    db = client.IGCSEBot
+    mute = db["mute"]
+    for record in mute.find({"muted": True}):
+        unmute_time = int(record["unmute_time"])
+        if now >= unmute_time:
+            member = guild.get_member(int(record["user_id"]))
+            forced_mute_role = guild.get_role(FMROLE)
+            if forced_mute_role in member.roles:
+                await member.remove_roles(forced_mute_role)
+                mute.update_one({"_id": record["_id"]}, {"$set": {"muted": False}})
+                time.sleep(5)
+                mute.delete_one({"_id": record["_id"]})

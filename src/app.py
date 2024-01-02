@@ -29,16 +29,12 @@ from bot import (
 )
 from constants import (
     ALEVEL_SUBJECT_CODES,
-    CREATE_DM_CHANNEL_ID,
     FEEDBACK_CHANNEL_ID,
     FEEDBACK_NAME,
     GUILD_ID,
     IGCSE_SUBJECT_CODES,
     LINK,
-    LOG_CHANNEL_ID,
     MODLOG_CHANNEL_ID,
-    SESSION_ROLES,
-    SUBJECT_ROLES,
     TOKEN,
     WELCOME_CHANNEL_ID,
 )
@@ -48,7 +44,7 @@ from data import helper_roles, reactionroles_data, study_roles, subreddits
 from db import gpdb, kwdb, repdb, rrdb
 
 # utility
-from roles import get_role, has_role, is_helper, is_moderator, is_server_booster
+from roles import has_role, is_helper, is_moderator, is_server_booster
 
 
 @bot.event
