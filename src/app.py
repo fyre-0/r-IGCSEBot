@@ -13,6 +13,7 @@ import on_raw_reaction_remove
 import on_ready
 import on_thread_join
 import on_voice_state_update
+import random_pyp
 from bans import is_banned
 from bot import (
     bot,
@@ -28,12 +29,10 @@ from bot import (
     typing,
 )
 from constants import (
-    ALEVEL_SUBJECT_CODES,
     CREATE_DM_CHANNEL_ID,
     FEEDBACK_CHANNEL_ID,
     FEEDBACK_NAME,
     GUILD_ID,
-    IGCSE_SUBJECT_CODES,
     LINK,
     LOG_CHANNEL_ID,
     MODLOG_CHANNEL_ID,
