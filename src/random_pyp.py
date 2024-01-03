@@ -3,10 +3,10 @@ import random
 import pyshorteners
 from data import CIE_IGCSE_SUBJECT_CODES, CIE_OLEVEL_SUBJECT_CODES, CIE_ALEVEL_SUBJECT_CODES, ciealsubjectsdata, cieigsubjectsdata, cieolsubjectsdata
 
-@bot.slash_command(name="random_pyp", description="gets a random CAIE past year paper.")
+@bot.slash_command(name="random_pyp", description="Gets a random CAIE past year paper.")
 async def random_pyp(interaction: discord.Interaction, 
-                     programme: str = discord.SlashOption(name="directories", description= "IGCSE, OLEVELS or ALEVELS?", choices=["IGCSE", "O-Level", "A-Level"], required=True),
-                     subject_code: str = discord.SlashOption(name="subject_code", description="please enter the subject code", required=True),
+                     programme: str = discord.SlashOption(name="programme", description= "IGCSE, OLEVELS or ALEVELS?", choices=["IGCSE", "O-Level", "A-Level"], required=True),
+                     subject_code: str = discord.SlashOption(name="subject_code", description="Enter the subject code", required=True),
                      paper_number: str = discord.SlashOption(name="paper_no", description= "Enter a paper number", required=True)):
 
             #PAPER_INFORMATION
