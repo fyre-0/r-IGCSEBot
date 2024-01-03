@@ -1,5 +1,4 @@
 from bot import bot, commands, datetime, discord, json, keywords, pymongo, requests, tasks, time, typing
-from constants import TOKEN
 import random
 import pyshorteners
 from data import CIE_IGCSE_SUBJECT_CODES, CIE_OLEVEL_SUBJECT_CODES, CIE_ALEVEL_SUBJECT_CODES, ciealsubjectsdata, cieigsubjectsdata, cieolsubjectsdata
@@ -188,5 +187,3 @@ async def random_pyp(interaction: discord.Interaction,
                         else: await interaction.send("Invalid Subject Code. Please Try again.", ephemeral=True)
                     else: await interaction.send("Invalid Paper Number. Please Try again.", ephemeral=True)
                 else: await interaction.send("Invalid Paper Number. Please Try again.", ephemeral=True)
-
-bot.run(TOKEN)
