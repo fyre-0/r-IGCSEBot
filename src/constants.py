@@ -1,9 +1,7 @@
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
-TOKEN = os.getenv("IGCSEBOT_TOKEN")
-LINK = os.getenv("MONGO_LINK")
+TOKEN = os.environ.get("IGCSEBOT_TOKEN")
+LINK = os.environ.get("MONGO_LINK")
 
 BETA = False
 
