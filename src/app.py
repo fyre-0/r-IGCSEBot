@@ -28,12 +28,10 @@ from bot import (
     typing,
 )
 from constants import (
-    ALEVEL_SUBJECT_CODES,
     CREATE_DM_CHANNEL_ID,
     FEEDBACK_CHANNEL_ID,
     FEEDBACK_NAME,
     GUILD_ID,
-    IGCSE_SUBJECT_CODES,
     LINK,
     LOG_CHANNEL_ID,
     MODLOG_CHANNEL_ID,
