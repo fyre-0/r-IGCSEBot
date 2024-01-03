@@ -3,11 +3,11 @@ from constants import FMROLE, GUILD_ID, LINK
 from roles import has_role, is_moderator
 
 
-@bot.slash_command(name="gostudy", description="disables the access to the offtopics for 1 hour.")
+@bot.slash_command(name="gostudy", description="Disables access to the offtopic channels for the next 1 hour.")
 async def gostudy(
     interaction: discord.Interaction,
     user: discord.User = discord.SlashOption(
-        name="name", description="who do you want to use this command on?", required=False
+        name="name", description="Who do you want to use this command on? (only for Mods)", required=False
     ),
 ):
     guild = bot.get_guild(GUILD_ID)
@@ -46,7 +46,7 @@ async def gostudy(
     message = await interaction.send("Are we ready to move forward?", view=view, ephemeral=True)
 
 
-@bot.slash_command(name="remove_gostudy", description="remove the Forced Mute role.")
+@bot.slash_command(name="remove_gostudy", description="Remove the Study Mute role.")
 async def remove_gostudy(
     interaction: discord.Interaction,
     user: discord.User = discord.SlashOption(
@@ -55,7 +55,7 @@ async def remove_gostudy(
 ):
     await interaction.response.defer(ephemeral=True)
     if not await is_moderator(interaction.user) and not await has_role(interaction.user, "Bot Developer"):
-        await interaction.send("You do not have the necessary permissions to perform this action", ephemeral=True)
+        await interaction.send("You do not have the necessary permissions to perform this action.", ephemeral=True)
         return
 
     guild = bot.get_guild(GUILD_ID)
@@ -71,4 +71,4 @@ async def remove_gostudy(
     mute = db["mute"]
     mute.delete_one({"user_id": str(user_id)})
 
-    await interaction.send(f"the Forced mute role for <@{user_id}> has been removed", ephemeral=True)
+    await interaction.send(f"The Study Mute role for <@{user_id}> has been removed.", ephemeral=True)
