@@ -121,7 +121,7 @@ async def on_raw_typing(payload):
     # thread to automatically remove user from typing list after 10 seconds
     threading.Thread(target=typing_timer, args=(payload.channel_id, payload.user_id, 10)).start()
 
-@tasks.loop(seconds=5)
+@tasks.loop(seconds=15)
 async def handle_slowmode():
     global channels_typing
     for channel_id in channels_typing:
