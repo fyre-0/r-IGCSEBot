@@ -132,7 +132,7 @@ async def handle_slowmode():
         slowmode = 0
             
         match number_of_users_typing:
-            case _ if number_of_users_typing >= 1:
+            case _ if number_of_users_typing >= 2:
                 slowmode = 3
             case _ if number_of_users_typing >= 4:
                 slowmode = 5
