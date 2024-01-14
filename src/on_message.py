@@ -1,8 +1,15 @@
 from constants import BETA, GUILD_ID, SHOULD_LOG_ALL, CREATE_DM_CHANNEL_ID, BOTLOG_CHANNEL_ID
-from data import REP_DISABLE_CHANNELS
+from data import REP_DISABLE_CHANNELS, AUTO_SLOWMODE_CHANNELS
 from bot import discord, bot, keywords
 from mongodb import gpdb, smdb, repdb, kwdb
 from roles import is_moderator, is_helper, is_chat_moderator, is_bot_developer
+import threading
+import time
+
+# global because it needs to be accessible by threads
+global channels_typing
+channels_typing = {}
+# for future reference: { "channel_id": [{ user_id, startedAt }, { user_id, startedAt }, { user_id, startedAt }] }
 
 async def counting(message):
     if message.author.bot:
@@ -90,6 +97,64 @@ async def handle_rep(message):
                   for member in members:
                         member = message.guild.get_member(member)
                         await member.add_roles(role)
+
+def typing_timer(channel_id, user_id, ttl):
+    time.sleep(ttl)
+    if str(channel_id) not in channels_typing:
+        return
+    for x in channels_typing[str(channel_id)]:
+        if x["user_id"] == user_id:
+            channels_typing[str(channel_id)].remove(x)
+            break
+
+@bot.event
+async def on_raw_typing(payload):
+    if (payload.channel_id not in AUTO_SLOWMODE_CHANNELS) or not payload.guild_id:
+        return
+    if str(payload.channel_id) not in channels_typing:
+        channels_typing[str(payload.channel_id)] = []
+    if payload.user_id not in [x["user_id"] for x in channels_typing[str(payload.channel_id)]]:
+        channels_typing[str(payload.channel_id)].append({"user_id": payload.user_id, "startedAt": payload.when})
+    else:
+        for x in channels_typing[str(payload.channel_id)]:
+            if x["user_id"] == payload.user_id:
+                x["startedAt"] = payload.when
+
+    # thread to automatically remove user from typing list after 10 seconds
+    threading.Thread(target=typing_timer, args=(payload.channel_id, payload.user_id, 10)).start()
+
+async def handle_slowmode():
+      while True:
+            await time.sleep(5)
+            for channel_id in channels_typing:
+                  channel = bot.get_channel(int(channel_id))
+                  if not channel:
+                        continue
+                  number_of_users_typing = len(channels_typing[channel_id])
+                  slowmode = 0
+            
+                  match number_of_users_typing:
+                        case _ if number_of_users_typing >= 2:
+                              slowmode = 3
+                        case _ if number_of_users_typing >= 4:
+                              slowmode = 5
+                        case _ if number_of_users_typing >= 6:
+                              slowmode = 10
+                        case _ if number_of_users_typing >= 9:
+                              slowmode = 15
+                        case _ if number_of_users_typing >= 15:
+                              slowmode = 30
+                        case _:
+                              slowmode = 0
+            
+                  if slowmode != channel.slowmode_delay:
+                        await channel.edit(slowmode_delay=slowmode)
+
+
+
+threading.Thread(target=handle_slowmode).start()
+                  
+     
 
 @bot.event
 async def on_message(message: discord.Message):
@@ -216,7 +281,12 @@ async def on_message(message: discord.Message):
             else:
                   await message.channel.send(autoreply)
 
-
+      if message.channel.id in AUTO_SLOWMODE_CHANNELS:
+            for x in channels_typing[str(message.channel.id)]:
+                  if x["user_id"] == message.author.id:
+                      channels_typing[str(message.channel.id)].remove(x)
+                      print(message.author.typing())
+                      break
 
       await bot.process_commands(message)                        
                         
