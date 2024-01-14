@@ -1,13 +1,11 @@
 from constants import BETA, GUILD_ID, SHOULD_LOG_ALL, CREATE_DM_CHANNEL_ID, BOTLOG_CHANNEL_ID
 from data import REP_DISABLE_CHANNELS, AUTO_SLOWMODE_CHANNELS
-from bot import discord, bot, keywords
+from bot import discord, bot, keywords, tasks
 from mongodb import gpdb, smdb, repdb, kwdb
 from roles import is_moderator, is_helper, is_chat_moderator, is_bot_developer
 import threading
 import time
 
-# global because it needs to be accessible by threads
-global channels_typing
 channels_typing = {}
 # for future reference: { "channel_id": [{ user_id, startedAt }, { user_id, startedAt }, { user_id, startedAt }] }
 
@@ -123,38 +121,34 @@ async def on_raw_typing(payload):
     # thread to automatically remove user from typing list after 10 seconds
     threading.Thread(target=typing_timer, args=(payload.channel_id, payload.user_id, 10)).start()
 
+@tasks.loop(seconds=5)
 async def handle_slowmode():
-      while True:
-            await time.sleep(5)
-            for channel_id in channels_typing:
-                  channel = bot.get_channel(int(channel_id))
-                  if not channel:
-                        continue
-                  number_of_users_typing = len(channels_typing[channel_id])
-                  slowmode = 0
+    global channels_typing
+    for channel_id in channels_typing:
+        channel = bot.get_channel(int(channel_id))
+        if not channel:
+            return
+        number_of_users_typing = len(channels_typing[channel_id])
+        slowmode = 0
             
-                  match number_of_users_typing:
-                        case _ if number_of_users_typing >= 2:
-                              slowmode = 3
-                        case _ if number_of_users_typing >= 4:
-                              slowmode = 5
-                        case _ if number_of_users_typing >= 6:
-                              slowmode = 10
-                        case _ if number_of_users_typing >= 9:
-                              slowmode = 15
-                        case _ if number_of_users_typing >= 15:
-                              slowmode = 30
-                        case _:
-                              slowmode = 0
+        match number_of_users_typing:
+            case _ if number_of_users_typing >= 1:
+                slowmode = 3
+            case _ if number_of_users_typing >= 4:
+                slowmode = 5
+            case _ if number_of_users_typing >= 6:
+                slowmode = 10
+            case _ if number_of_users_typing >= 9:
+                slowmode = 15
+            case _ if number_of_users_typing >= 15:
+               slowmode = 30
+            case _:
+                slowmode = 0
             
-                  if slowmode != channel.slowmode_delay:
-                        await channel.edit(slowmode_delay=slowmode)
+        if slowmode != channel.slowmode_delay:
+           await channel.edit(slowmode_delay=slowmode)
 
-
-
-threading.Thread(target=handle_slowmode).start()
-                  
-     
+handle_slowmode.start()
 
 @bot.event
 async def on_message(message: discord.Message):
