@@ -1,5 +1,5 @@
 from constants import BETA, GUILD_ID, SHOULD_LOG_ALL, CREATE_DM_CHANNEL_ID, BOTLOG_CHANNEL_ID
-from data import REP_DISABLE_CHANNELS, AUTO_SLOWMODE_CHANNELS
+from data import REP_DISABLE_CHANNELS, AUTO_SLOWMODE_CHANNELS, SUBJECT_CHANNELS, OFFTOPIC_CHANNELS
 from bot import discord, bot, keywords, tasks
 from mongodb import gpdb, smdb, repdb, kwdb
 from roles import is_moderator, is_helper, is_chat_moderator, is_bot_developer
@@ -107,7 +107,7 @@ def typing_timer(channel_id, user_id, ttl):
 
 @bot.event
 async def on_raw_typing(payload):
-    if (payload.channel_id not in AUTO_SLOWMODE_CHANNELS) or not payload.guild_id:
+    if message.channel.id in AUTO_SLOWMODE_CHANNELS or message.channel.id in SUBJECT_CHANNELS or message.channel.id in OFFTOPIC_CHANNELS or not payload.guild_id:
         return
     if payload.channel_id not in channels_typing:
         channels_typing[payload.channel_id] = []
@@ -272,7 +272,7 @@ async def on_message(message: discord.Message):
             else:
                   await message.channel.send(autoreply)
 
-      if message.channel.id in AUTO_SLOWMODE_CHANNELS:
+      if message.channel.id in AUTO_SLOWMODE_CHANNELS or message.channel.id in SUBJECT_CHANNELS or message.channel.id in OFFTOPIC_CHANNELS:
             for x in channels_typing[message.channel.id]:
                   if x["user_id"] == message.author.id:
                       channels_typing[message.channel.id].remove(x)
