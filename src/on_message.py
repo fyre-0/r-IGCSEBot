@@ -107,7 +107,7 @@ def typing_timer(channel_id, user_id, ttl):
 
 @bot.event
 async def on_raw_typing(payload):
-    if message.channel.id not in SUBJECT_CHANNELS or message.channel.id not in OFFTOPIC_CHANNELS or not payload.guild_id:
+    if message.channel.id not in AUTO_SLOWMODE_CHANNELS or message.channel.id not in SUBJECT_CHANNELS or message.channel.id not in OFFTOPIC_CHANNELS or not payload.guild_id:
         return
     if payload.channel_id not in channels_typing:
         channels_typing[payload.channel_id] = []
