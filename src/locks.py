@@ -13,14 +13,15 @@ async def Channellockcommand(interaction: discord.Interaction,
                 await interaction.send(f"Sorry {interaction.user.mention}," " you don't have the permission to perform this action.", ephemeral=True)
                 return
         
-        if locktime == "resolveall" and unlocktime == "!@#$%^&*()":
+        if locktime == "resolveall" and unlocktime == "11121314":
             client = pymongo.MongoClient(LINK)
             db = client.IGCSEBot
             locks = db["channellock"]
             results = locks.find({"resolved": False})
             for result in results:
                 locks.update_one({"_id": result["_id"]}, {"$set": {"resolved": True}})
-            await interaction.send(f"Resolve Successful!", ephemeral=True)
+            await interaction.send(f"All the documents in the channellock collection have been successfully resolved.", ephemeral=True)
+            return
                 
         overwrite = channelinput.overwrites_for(interaction.guild.default_role)                
         if overwrite.send_messages == False and overwrite.send_messages_in_threads == False:
@@ -94,14 +95,15 @@ async def Forumlockcommand(interaction: discord.Interaction, threadinput: discor
             locktime = 0
             unlocktime = time.time() + 5
 
-        if locktime == "resolveall" and unlocktime == "!@#$%^&*()":
+        if locktime == "resolveall" and unlocktime == "11121314":
             client = pymongo.MongoClient(LINK)
             db = client.IGCSEBot
-            locks = db["forumlock"]
+            locks = db["channellock"]
             results = locks.find({"resolved": False})
             for result in results:
                 locks.update_one({"_id": result["_id"]}, {"$set": {"resolved": True}})
-            await interaction.send(f"Resolve Successful!", ephemeral=True)                
+            await interaction.send(f"All the documents in the channellock collection have been successfully resolved.", ephemeral=True)
+            return                
 
         if threadinput.locked == True:
             await interaction.send(f"Sorry {interaction.user.mention}," " the thread has already been locked. please unlock and try again.", ephemeral=True)
