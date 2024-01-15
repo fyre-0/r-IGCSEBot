@@ -90,7 +90,7 @@ async def checkmute():
         except Exception:
             print(traceback.format_exc())
 
-@tasks.loop(seconds=15)
+@tasks.loop(seconds=30)
 async def handle_slowmode():
     for channel_id in AUTO_SLOWMODE_CHANNELS:
         slowmode = 3
@@ -102,10 +102,9 @@ async def handle_slowmode():
         number_of_messages = len(messages_in15s)
         if number_of_messages <= 10:
             slowmode = 0
-            if channel.slowmode_delay != slowmode or channel.slowmode_delay != None:
+            if channel.slowmode_delay != 0:
                 await channel.edit(slowmode_delay=slowmode)
-                slowmode_msg = await channel.send(f"Slowmode has been disabled.")
-                await slowmode_msg.delete(delay=2)
+            continue
 
         user_messages = {}
 
@@ -137,8 +136,6 @@ async def handle_slowmode():
             
         if channel.slowmode_delay != slowmode:
             await channel.edit(slowmode_delay=slowmode)
-            slowmode_msg = await channel.send(f"Slowmode has been set to {slowmode} seconds.")
-            await slowmode_msg.delete(delay=2)
 
 handle_slowmode.start()
 checklock.start()
