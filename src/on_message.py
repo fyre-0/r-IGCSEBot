@@ -98,23 +98,23 @@ async def handle_rep(message):
 
 def typing_timer(channel_id, user_id, ttl):
     time.sleep(ttl)
-    if str(channel_id) not in channels_typing:
+    if channel_id not in channels_typing:
         return
-    for x in channels_typing[str(channel_id)]:
+    for x in channels_typing[channel_id]:
         if x["user_id"] == user_id:
-            channels_typing[str(channel_id)].remove(x)
+            channels_typing[channel_id].remove(x)
             break
 
 @bot.event
 async def on_raw_typing(payload):
     if (payload.channel_id not in AUTO_SLOWMODE_CHANNELS) or not payload.guild_id:
         return
-    if str(payload.channel_id) not in channels_typing:
-        channels_typing[str(payload.channel_id)] = []
-    if payload.user_id not in [x["user_id"] for x in channels_typing[str(payload.channel_id)]]:
-        channels_typing[str(payload.channel_id)].append({"user_id": payload.user_id, "startedAt": payload.when})
+    if payload.channel_id not in channels_typing:
+        channels_typing[payload.channel_id] = []
+    if payload.user_id not in [x["user_id"] for x in channels_typing[payload.channel_id]]:
+        channels_typing[payload.channel_id].append({"user_id": payload.user_id, "startedAt": payload.when})
     else:
-        for x in channels_typing[str(payload.channel_id)]:
+        for x in channels_typing[payload.channel_id]:
             if x["user_id"] == payload.user_id:
                 x["startedAt"] = payload.when
 
@@ -125,7 +125,7 @@ async def on_raw_typing(payload):
 async def handle_slowmode():
     global channels_typing
     for channel_id in channels_typing:
-        channel = bot.get_channel(int(channel_id))
+        channel = bot.get_channel(channel_id)
         if not channel:
             return
         number_of_users_typing = len(channels_typing[channel_id])
@@ -276,9 +276,9 @@ async def on_message(message: discord.Message):
                   await message.channel.send(autoreply)
 
       if message.channel.id in AUTO_SLOWMODE_CHANNELS:
-            for x in channels_typing[str(message.channel.id)]:
+            for x in channels_typing[message.channel.id]:
                   if x["user_id"] == message.author.id:
-                      channels_typing[str(message.channel.id)].remove(x)
+                      channels_typing[message.channel.id].remove(x)
                       print(message.author.typing())
                       break
 
