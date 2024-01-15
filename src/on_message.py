@@ -107,7 +107,7 @@ def typing_timer(channel_id, user_id, ttl):
 
 @bot.event
 async def on_raw_typing(payload):
-    if payload.channel_id not in AUTO_SLOWMODE_CHANNELS and payload.channel_id not in SUBJECT_CHANNELS and payload.channel_id not in OFFTOPIC_CHANNELS:
+    if payload.channel_id not in AUTO_SLOWMODE_CHANNELS:
         return
     if payload.channel_id not in channels_typing:
         channels_typing[payload.channel_id] = []
@@ -277,7 +277,7 @@ async def on_message(message: discord.Message):
             else:
                   await message.channel.send(autoreply)
 
-      if message.channel.id in AUTO_SLOWMODE_CHANNELS or message.channel.id in SUBJECT_CHANNELS or message.channel.id in OFFTOPIC_CHANNELS:
+      if message.channel.id in AUTO_SLOWMODE_CHANNELS:
             for x in channels_typing[message.channel.id]:
                   if x["user_id"] == message.author.id:
                       channels_typing[message.channel.id].remove(x)
