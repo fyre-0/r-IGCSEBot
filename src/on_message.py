@@ -144,7 +144,7 @@ async def handle_slowmode():
             
         if slowmode != channel.slowmode_delay:
            await channel.edit(slowmode_delay=slowmode)
-
+           await channel.send(f"slowmode added to {slowmode} seconds")
 handle_slowmode.start()
 
 @bot.event
