@@ -131,19 +131,16 @@ async def handle_slowmode():
         number_of_users_typing = len(channels_typing[channel_id])
         slowmode = 0
             
-        match number_of_users_typing:
-            case _ if number_of_users_typing >= 2:
-                slowmode = 3
-            case _ if number_of_users_typing >= 4:
-                slowmode = 5
-            case _ if number_of_users_typing >= 6:
-                slowmode = 10
-            case _ if number_of_users_typing >= 9:
-                slowmode = 15
-            case _ if number_of_users_typing >= 15:
-               slowmode = 30
-            case _:
-                slowmode = 0
+        if number_of_users_typing >= 2:
+            slowmode = 3
+        elif number_of_users_typing >= 4:
+            slowmode = 5
+        elif number_of_users_typing >= 6:
+            slowmode = 10
+        elif number_of_users_typing >= 9:
+            slowmode = 15
+        elif number_of_users_typing >= 15:
+            slowmode = 30
             
         if slowmode != channel.slowmode_delay:
            await channel.edit(slowmode_delay=slowmode)
