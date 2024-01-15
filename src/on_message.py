@@ -132,14 +132,19 @@ async def handle_slowmode():
         slowmode = 0
             
         if number_of_users_typing >= 15:
+            await channel.send(f"more than 15 users typing")
             slowmode = 60
         elif number_of_users_typing >= 10:
+            await channel.send(f"more than 10 users typing")
             slowmode = 30
         elif number_of_users_typing >= 7:
+            await channel.send(f"more than 7 users typing")
             slowmode = 15
         elif number_of_users_typing >= 5:
+            await channel.send(f"more than 5 users typing")
             slowmode = 7
         elif number_of_users_typing >= 3:
+            await channel.send(f"more than 3 users typing")
             slowmode = 3
             
         if slowmode != channel.slowmode_delay:
