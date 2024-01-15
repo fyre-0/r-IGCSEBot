@@ -107,7 +107,7 @@ def typing_timer(channel_id, user_id, ttl):
 
 @bot.event
 async def on_raw_typing(payload):
-    if message.channel.id not in AUTO_SLOWMODE_CHANNELS or message.channel.id not in SUBJECT_CHANNELS or message.channel.id not in OFFTOPIC_CHANNELS or not payload.guild_id:
+    if payload.channel_id not in AUTO_SLOWMODE_CHANNELS or payload.channel_id not in SUBJECT_CHANNELS or payload.channel_id not in OFFTOPIC_CHANNELS or not payload.guild_id:
         return
     if payload.channel_id not in channels_typing:
         channels_typing[payload.channel_id] = []
@@ -132,24 +132,21 @@ async def handle_slowmode():
         slowmode = 0
             
         if number_of_users_typing >= 15:
-            await channel.send(f"more than 15 users typing")
             slowmode = 60
         elif number_of_users_typing >= 10:
-            await channel.send(f"more than 10 users typing")
             slowmode = 30
         elif number_of_users_typing >= 7:
-            await channel.send(f"more than 7 users typing")
             slowmode = 15
         elif number_of_users_typing >= 5:
-            await channel.send(f"more than 5 users typing")
             slowmode = 7
         elif number_of_users_typing >= 3:
-            await channel.send(f"more than 3 users typing")
             slowmode = 3
             
         if slowmode != channel.slowmode_delay:
            await channel.edit(slowmode_delay=slowmode)
-           await channel.send(f"slowmode added to {slowmode} seconds")
+           msg = await channel.send(f"Slowmode set to {slowmode}s")
+           await msg.delete(delay=5)
+
 handle_slowmode.start()
 
 @bot.event
@@ -284,7 +281,6 @@ async def on_message(message: discord.Message):
             for x in channels_typing[message.channel.id]:
                   if x["user_id"] == message.author.id:
                       channels_typing[message.channel.id].remove(x)
-                      print(message.author.typing())
                       break
 
       await bot.process_commands(message)                        
