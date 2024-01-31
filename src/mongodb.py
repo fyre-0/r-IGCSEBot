@@ -5,25 +5,31 @@ from datetime import datetime
 
 class ReactionRolesDB:
     def __init__(self, link: str):
-        self.client = pymongo.MongoClient(link, server_api=pymongo.server_api.ServerApi('1'))
+        self.client = pymongo.MongoClient(
+            link, server_api=pymongo.server_api.ServerApi('1'))
         self.db = self.client.IGCSEBot
         self.reaction_roles = self.db.reaction_roles
-    
+
     def new_rr(self, data):
-        self.reaction_roles.insert_one({"reaction": data[0], "role": data[1], "message": data[2]})
+        self.reaction_roles.insert_one(
+            {"reaction": data[0], "role": data[1], "message": data[2]})
 
     def get_rr(self, reaction, msg_id):
-        result = self.reaction_roles.find_one({"reaction": reaction, "message": msg_id})
+        result = self.reaction_roles.find_one(
+            {"reaction": reaction, "message": msg_id})
         if result is None:
             return None
         else:
             return result
 
+
 rrdb = ReactionRolesDB(LINK)
+
 
 class GuildPreferencesDB:
     def __init__(self, link: str):
-        self.client = pymongo.MongoClient(link, server_api=pymongo.server_api.ServerApi('1'))
+        self.client = pymongo.MongoClient(
+            link, server_api=pymongo.server_api.ServerApi('1'))
         self.db = self.client.IGCSEBot
         self.pref = self.db.guild_preferences
 
@@ -37,27 +43,32 @@ class GuildPreferencesDB:
         else:
             return result.get(pref, None)
 
+
 gpdb = GuildPreferencesDB(LINK)
 
 
 class ReputationDB:
     def __init__(self, link: str):
-        self.client = pymongo.MongoClient(link, server_api=pymongo.server_api.ServerApi('1'))
+        self.client = pymongo.MongoClient(
+            link, server_api=pymongo.server_api.ServerApi('1'))
         self.db = self.client.IGCSEBot
         self.reputation = self.db.reputation
 
     def bulk_insert_rep(self, rep_dict: dict, guild_id: int):
         # rep_dict = eval("{DICT}".replace("\n","")) to restore reputation from #rep-backup
-        insertion = [{"user_id": user_id, "rep": rep, "guild_id": guild_id} for user_id, rep in rep_dict.items()]
+        insertion = [{"user_id": user_id, "rep": rep, "guild_id": guild_id}
+                     for user_id, rep in rep_dict.items()]
         result = self.reputation.insert_many(insertion)
         return result
 
     def get_rep(self, user_id: int, guild_id: int):
-        result = self.reputation.find_one({"user_id": user_id, "guild_id": guild_id})
+        result = self.reputation.find_one(
+            {"user_id": user_id, "guild_id": guild_id})
         return result.get("rep", None)
 
     def change_rep(self, user_id, new_rep, guild_id):
-        self.reputation.update_one({"user_id": user_id, "guild_id": guild_id}, {"$set": {"rep": new_rep}})
+        self.reputation.update_one({"user_id": user_id, "guild_id": guild_id}, {
+                                   "$set": {"rep": new_rep}})
         return new_rep
 
     def delete_user(self, user_id: int, guild_id: int):
@@ -66,7 +77,8 @@ class ReputationDB:
     def add_rep(self, user_id: int, guild_id: int):
         rep = self.get_rep(user_id, guild_id)
         if rep is None:
-            self.reputation.insert_one({"user_id": user_id, "guild_id": guild_id, "rep": 1})
+            self.reputation.insert_one(
+                {"user_id": user_id, "guild_id": guild_id, "rep": 1})
             return 1
         else:
             rep += 1
@@ -74,15 +86,18 @@ class ReputationDB:
             return rep
 
     def rep_leaderboard(self, guild_id):
-        leaderboard = self.reputation.find({"guild_id": guild_id}, {"_id": 0, "guild_id": 0}).sort("rep", -1)
+        leaderboard = self.reputation.find(
+            {"guild_id": guild_id}, {"_id": 0, "guild_id": 0}).sort("rep", -1)
         return list(leaderboard)
 
 
 repdb = ReputationDB(LINK)
 
+
 class StickyMessageDB:
     def __init__(self, link: str):
-        self.client = pymongo.MongoClient(link, server_api=pymongo.server_api.ServerApi("1"))
+        self.client = pymongo.MongoClient(
+            link, server_api=pymongo.server_api.ServerApi("1"))
         self.db = self.client.IGCSEBot
         self.stickies = self.db.stickies
 
@@ -96,14 +111,16 @@ class StickyMessageDB:
                 if not stick_entry["sticking"]:
                     prev_stick = {"message_id": stick_entry["message_id"]}
 
-                    self.stickies.update_one(prev_stick, {"$set": {"sticking": True}})
+                    self.stickies.update_one(
+                        prev_stick, {"$set": {"sticking": True}})
                     stick_message = await message_channel.fetch_message(stick_entry["message_id"])
                     is_present_history = False
 
                     async for message in message_channel.history(limit=3):
                         if message.id == stick_entry["message_id"]:
                             is_present_history = True
-                            self.stickies.update_one(prev_stick, {"$set": {"sticking": False}})
+                            self.stickies.update_one(
+                                prev_stick, {"$set": {"sticking": False}})
 
                     if not is_present_history:
                         stick_embed = stick_message.embeds
@@ -112,9 +129,11 @@ class StickyMessageDB:
                         await stick_message.delete()
 
                         new_embed = await message_channel.send(embeds=stick_embed)
-                        self.stickies.insert_one({"channel_id": message_channel.id, "message_id": new_embed.id, "sticking": True})
+                        self.stickies.insert_one(
+                            {"channel_id": message_channel.id, "message_id": new_embed.id, "sticking": True})
 
-                        self.stickies.update_one({"message_id": new_embed.id}, {"$set": {"sticking": False}})
+                        self.stickies.update_one({"message_id": new_embed.id}, {
+                                                 "$set": {"sticking": False}})
 
     async def stick(self, reference_msg):
         embeds = reference_msg.embeds
@@ -122,7 +141,8 @@ class StickyMessageDB:
             return
         await reference_msg.edit(embed=embeds[0].set_footer(text="Stuck"))
 
-        self.stickies.insert_one({"channel_id": reference_msg.channel.id, "message_id": reference_msg.id, "sticking": False})
+        self.stickies.insert_one(
+            {"channel_id": reference_msg.channel.id, "message_id": reference_msg.id, "sticking": False})
         await self.check_stick_msg(reference_msg)
 
         return True
@@ -138,18 +158,22 @@ class StickyMessageDB:
 
         return True
 
+
 smdb = StickyMessageDB(LINK)
+
 
 class KeywordsDB:
     def __init__(self, link: str):
-        self.client = pymongo.MongoClient(link, server_api=pymongo.server_api.ServerApi('1'))
+        self.client = pymongo.MongoClient(
+            link, server_api=pymongo.server_api.ServerApi('1'))
         self.db = self.client.IGCSEBot
         self.keywords = self.db.keywords
 
     def get_keywords(self, guild_id: int):
-        result = self.keywords.find({"guild_id": guild_id}, {"_id": 0, "guild_id": 0})
+        result = self.keywords.find({"guild_id": guild_id}, {
+                                    "_id": 0, "guild_id": 0})
         return {i['keyword'].lower(): i['autoreply'] for i in result}
-    
+
     def keyword_list(self, guild_id: int):
         return self.keywords.find({"guild_id": guild_id}, {"_id": 0, "guild_id": 0})
 
@@ -159,14 +183,17 @@ class KeywordsDB:
     def remove_keyword(self, keyword: str, guild_id: int):
         return self.keywords.delete_one({"keyword": keyword.lower(), "guild_id": guild_id})
 
+
 kwdb = KeywordsDB(LINK)
+
 
 class PunishmentsDB:
     def __init__(self, link: str):
-        self.client = pymongo.MongoClient(link, server_api=pymongo.server_api.ServerApi('1'))
+        self.client = pymongo.MongoClient(
+            link, server_api=pymongo.server_api.ServerApi('1'))
         self.db = self.client.IGCSEBot
         self.punishment_history = self.db.punishment_history
-    
+
     def add_punishment(self, case_id: int | str, action_against: int, action_by: int, reason: str, action: str, when: datetime = datetime.utcnow(), duration: str = None):
         self.punishment_history.insert_one({
             "case_id": str(case_id),
@@ -177,11 +204,13 @@ class PunishmentsDB:
             "duration": duration,
             "when": when
         })
-    
+
     def get_punishments_by_user(self, user_id: int):
         return self.punishment_history.find({"action_against": str(user_id)})
 
+
 punishdb = PunishmentsDB(LINK)
+
 
 class QuestionsDB:
     def __init__(self, link: str):
@@ -190,7 +219,7 @@ class QuestionsDB:
         )
         self.db = self.client.IGCSEBot
         self.igcse_questions = self.db.igcse_questions
-        
+
     def get_questions(
         self,
         subject_code: str,
@@ -202,7 +231,7 @@ class QuestionsDB:
         if type == "mcq":
             mcq_filter = {
                 "$expr": {
-                        "$eq": [{"$type": "$answers"}, "string"]
+                    "$eq": [{"$type": "$answers"}, "string"]
                 },
             }
         else:
@@ -226,5 +255,6 @@ class QuestionsDB:
                 }
             },
         ])
+
 
 questionsdb = QuestionsDB(LINK)

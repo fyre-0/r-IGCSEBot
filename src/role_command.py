@@ -2,6 +2,7 @@ from bot import bot, discord
 from constants import GUILD_ID
 from data import reactionroles_data
 
+
 class DropdownRR(discord.ui.Select):
     def __init__(self, category, options):
         self._options = options
@@ -9,9 +10,11 @@ class DropdownRR(discord.ui.Select):
             discord.SelectOption(emoji=option[0], label=option[1], value=option[2]) for option in options
         ]
         if category == "Colors":
-            super().__init__(placeholder="Select your Color", min_values=0, max_values=1, options=selectOptions)
+            super().__init__(placeholder="Select your Color",
+                             min_values=0, max_values=1, options=selectOptions)
         else:
-            super().__init__(placeholder=f"Select your {category}", min_values=0, max_values=len(selectOptions), options=selectOptions)
+            super().__init__(placeholder=f"Select your {category}", min_values=0, max_values=len(
+                selectOptions), options=selectOptions)
 
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
@@ -35,6 +38,7 @@ class DropdownRR(discord.ui.Select):
         elif len(added_role_names) == 0 and len(removed_role_names) > 0:
             await interaction.send(f"Successfully unopted from roles: {', '.join(removed_role_names)}.", ephemeral=True)
 
+
 class DropdownViewRR(discord.ui.View):
     def __init__(self, roles_type):
         super().__init__(timeout=None)
@@ -42,9 +46,11 @@ class DropdownViewRR(discord.ui.View):
         for category, options in reactionroles_data[roles_type].items():
             self.add_item(DropdownRR(category, options))
 
+
 class RolePickerCategories(discord.ui.Select):
     def __init__(self):
-        options = ["Subject Roles", "Session Roles", "Study Ping Roles", "Server Roles"]
+        options = ["Subject Roles", "Session Roles",
+                   "Study Ping Roles", "Server Roles"]
         super().__init__(
             placeholder="Choose a roles category...",
             min_values=1,
@@ -57,6 +63,7 @@ class RolePickerCategories(discord.ui.Select):
         roles_type = self.values[0]
         view = DropdownViewRR(roles_type)
         await interaction.response.edit_message(content=f"Choose your {roles_type}", view=view)
+
 
 class RolePickerCategoriesView(discord.ui.View):
     def __init__(self):
@@ -83,6 +90,7 @@ class RolePickerCategoriesView(discord.ui.View):
 @bot.slash_command(description="Pick up your roles", guild_ids=[GUILD_ID])
 async def roles(interaction: discord.Interaction):
     await interaction.send(view=RolePickerCategoriesView(), ephemeral=True)
+
 
 @bot.command(description="Dropdown for picking up reaction roles", guild_ids=[GUILD_ID])
 async def roles(ctx):

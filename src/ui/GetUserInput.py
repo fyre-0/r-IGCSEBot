@@ -1,6 +1,7 @@
 import nextcord as discord
 from schemas.redis import TempSessionData
 
+
 class GetUserInput(discord.ui.Modal):
     def __init__(self):
         super().__init__(timeout=300, title="Customise this session")
@@ -26,7 +27,7 @@ class GetUserInput(discord.ui.Modal):
         self.add_item(self.limit)
 
     async def callback(self, interaction: discord.Interaction):
-        
+
         tempdata = TempSessionData.get(interaction.user.id)
         tempdata.minimum_year = int(self.minimum_year.value)
         tempdata.limit = int(self.limit.value)

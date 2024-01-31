@@ -1,7 +1,8 @@
 from redis_om import Field
 from .ExtendedModel import ExtendedModel
 from typing import Optional
-        
+
+
 class Question(ExtendedModel):
     question_name: str = Field(primary_key=True)
     questions: list[object]

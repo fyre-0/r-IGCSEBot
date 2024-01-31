@@ -1,6 +1,7 @@
 from bot import bot, discord
 from constants import GUILD_ID
 
+
 @bot.event
 async def on_voice_state_update(member, before, _):
     if member.guild.id == GUILD_ID:

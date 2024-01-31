@@ -3,6 +3,7 @@ from constants import GUILD_ID
 from roles import is_moderator, is_server_booster, has_role
 from data import reactionroles_data
 
+
 class DropdownRR(discord.ui.Select):
     def __init__(self, category, options):
         self._options = options
@@ -10,9 +11,11 @@ class DropdownRR(discord.ui.Select):
             discord.SelectOption(emoji=option[0], label=option[1], value=option[2]) for option in options
         ]
         if category == "Colors":
-            super().__init__(placeholder="Select your Color", min_values=0, max_values=1, options=selectOptions)
+            super().__init__(placeholder="Select your Color",
+                             min_values=0, max_values=1, options=selectOptions)
         else:
-            super().__init__(placeholder=f"Select your {category}", min_values=0, max_values=len(selectOptions), options=selectOptions)
+            super().__init__(placeholder=f"Select your {category}", min_values=0, max_values=len(
+                selectOptions), options=selectOptions)
 
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
@@ -43,6 +46,7 @@ class DropdownViewRR(discord.ui.View):
 
         for category, options in reactionroles_data[roles_type].items():
             self.add_item(DropdownRR(category, options))
+
 
 @bot.slash_command(description="Choose a display colour for your name", guild_ids=[GUILD_ID])
 async def colorroles(interaction: discord.Interaction):

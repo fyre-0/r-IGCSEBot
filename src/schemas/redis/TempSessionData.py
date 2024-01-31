@@ -2,6 +2,7 @@ from redis_om import Field
 from .ExtendedModel import ExtendedModel
 from typing import Optional
 
+
 class TempSessionData(ExtendedModel):
     user_id: str = Field(primary_key=True)
     subject: Optional[str]
