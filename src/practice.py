@@ -26,11 +26,17 @@ async def close_session(session: Session, message: str):
     questions = Question.find(Question.session_id == session.session_id).all()
     
     number_of_correct_answers: dict[str, str] = {}
+    number_of_answers = {}
     
     for question in questions:
         user_answers = question["user_answers"]
         correct_answer = question["answers"]
         for user in user_answers.keys():
+            if user not in number_of_answers.keys():
+                number_of_answers[user] = 0
+                
+            number_of_answers[user] += 1
+            
             if user not in number_of_correct_answers.keys():
                 number_of_correct_answers[user] = 0
             if user_answers[user] == correct_answer:
@@ -40,12 +46,12 @@ async def close_session(session: Session, message: str):
     solved_questions = list(filter(lambda x: x["solved"] == 1, questions))
     unsolved_message = ""
     if len(solved_questions) != len(questions):
-        unsolved_message = f" out of which only {len(solved_questions)} were solved"
+        unsolved_message = f" out of which only {len(solved_questions)} were solved by everyone"
     
     embed = discord.Embed(title="Session Ended!")
     embed.description = f"This session had {len(questions)} questions{unsolved_message}.\nThe scores for each user are as follows:\n\n"
     for user, score in number_of_correct_answers.items():
-        embed.description += f"<@{user}>: {score}\n"
+        embed.description += f"<@{user}>: {score}/{number_of_answers[user]}\n"
         
     await thread.send(embed=embed)
     await thread.send(message)
@@ -379,7 +385,7 @@ async def remove_from_session(interaction: discord.Interaction):
 
 async def session_info(interaction: discord.Interaction):
     
-    sessions = Session.find(Session.private == 0).all()
+    sessions = Session.find(Session.private == 0 or Session.started_by == interaction.user.id).all()
     
     if not sessions:
         await interaction.response.send_message("There are no public sessions available at the moment!", ephemeral=True)
