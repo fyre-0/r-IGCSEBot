@@ -38,9 +38,15 @@ class PrivateDMThreadDB:
     
     async def get_thread(self, member: discord.Member, create_anyway: bool = True):
         result = self.dm_threads.find_one({"_id": str(member.id)})
-        channel = await bot.fetch_channel(DMS_CLOSED_CHANNEL_ID)
+        channel: discord.TextChannel = await bot.fetch_channel(DMS_CLOSED_CHANNEL_ID)
 
         if result is None and create_anyway:
+            await channel.set_permissions(
+                member,
+                read_messages=True,
+                send_messages=False,
+                send_messages_in_threads=True
+            )
             thread = await channel.create_thread(name=member.name)
             return self.new_thread(member.id, thread.id)
         elif not create_anyway:

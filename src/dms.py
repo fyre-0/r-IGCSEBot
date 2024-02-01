@@ -9,6 +9,7 @@ async def send_dm(member: discord.Member, **kwargs):
     except:
         if member.guild.id == GUILD_ID:
             thread = await dmsdb.get_thread(member)
+            thread = bot.get_channel(thread)
             await thread.send(**kwargs)
             await thread.send(content=member.mention)
 
