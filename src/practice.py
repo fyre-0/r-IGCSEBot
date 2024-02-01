@@ -138,6 +138,9 @@ async def new_session(interaction: discord.Interaction):
 
     await msg.edit(content=f"Created a new practice session in {thread.mention}!", view=None)
     
+    if not tempdata["users"]:
+        tempdata["users"] = []
+        
     if str(interaction.user.id) in tempdata["users"]:
         tempdata["users"].remove(str(interaction.user.id))
     
