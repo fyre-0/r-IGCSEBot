@@ -1,4 +1,4 @@
-from bot import bot, discord
+from bot import bot, discord, commands
 from mongodb import dmsdb
 from roles import is_chat_moderator, is_moderator
 from constants import GUILD_ID, DMS_CLOSED_CHANNEL_ID
@@ -12,19 +12,23 @@ async def send_dm(member: discord.Member, **kwargs):
             await thread.send(**kwargs)
             await thread.send(content=member.mention)
 
-@bot.slash_command(description="Deletes DM thread", guild_ids=[GUILD_ID], dm_permission=False)
-async def delete_dm_thread(interaction: discord.Interaction, member: discord.Member = discord.SlashOption(name="member", description="Member to delete thread for (optional)", required=False)):
+@bot.command(name = "Delete DM thread")
+@commands.guild_only()
+async def delete_dm_thread(ctx, member: discord.Member = None):
+    if ctx.guild.id != GUILD_ID:
+        return
+    
     if not member:
-        if not await is_moderator(interaction.user) and not await is_chat_moderator(interaction.user):
-            await interaction.send("You are not permitted to use this command.", ephemeral=True)
+        if not await is_moderator(ctx.author) and not await is_chat_moderator(ctx.author):
+            await ctx.send(f"You are not permitted to use this command, {member.mention}!")
             return
     else:
-        member = interaction.user # Guaranteed to be discord.Member
+        member = ctx.author # Guaranteed to be discord.Member
     
     thread = await dmsdb.get_thread(member, False)
 
     if not thread:
-        await interaction.send("No thread found!", ephemeral=True)
+        await ctx.send("No thread found!")
     else:
         await dmsdb.del_thread(thread)
-        await interaction.send("DM thread deleted! If DMs are still closed, a new thread will be made.", ephemeral=True)
+        await ctx.send("DM thread deleted! If DMs are still closed, a new thread will be made.")
