@@ -5,6 +5,7 @@ from ui import GetUserInput, SelectMenuSubject, SelectMenuTopic, SelectMenuVisib
 from mongodb import questionsdb
 from data import practice_subjects
 import uuid
+import time
 
 async def get_from_db(primary_key: str, db: ExtendedModel) -> bool:
     try:
@@ -165,7 +166,8 @@ async def new_session(interaction: discord.Interaction):
         users=tempdata["users"],
         started_by=str(interaction.user.id),
         private=tempdata["private"],
-        paused=False
+        paused=False,
+        expire_time=int(time.time() + 7200) # 2 hours
     )
 
     for user_id in tempdata["users"]:
