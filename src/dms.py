@@ -9,7 +9,6 @@ async def send_dm(member: discord.Member, **kwargs):
     except:
         if member.guild.id == GUILD_ID:
             thread = await dmsdb.get_thread(member)
-            thread = bot.get_channel(thread)
             await thread.send(**kwargs)
             await thread.send(content=member.mention)
 
@@ -31,5 +30,5 @@ async def delete_dm_thread(ctx, member: discord.Member = None):
     if not thread:
         await ctx.send("No thread found!")
     else:
-        await dmsdb.del_thread(thread)
+        await dmsdb.del_thread(member, thread)
         await ctx.send("DM thread deleted! If DMs are still closed, a new thread will be made.")
