@@ -27,19 +27,21 @@ class PrivateDMThreadDB:
         self.client = client
         self.db = self.client.IGCSEBot
         self.dm_threads = self.db["private_dm_threads"]
-        self.channel = bot.get_channel(DMS_CLOSED_CHANNEL_ID)
     
     def new_thread(self, user_id: int, thread_id: int):
-        return int(self.dm_threads.insert_one({"_id": str(user_id), "thread_id": str(thread_id)})["thread_id"])
+        self.dm_threads.insert_one({"_id": str(user_id), "thread_id": str(thread_id)})
+        return thread_id
     
     def del_thread(self, thread: discord.Thread):
         self.dm_threads.delete_one({"thread_id": str(thread.id)})
         return thread.delete()
     
     async def get_thread(self, member: discord.Member, create_anyway: bool = True):
-        result = self.dm_threads.find_one({"_id": str(user_id)})
+        result = self.dm_threads.find_one({"_id": str(member.id)})
+        channel = await bot.fetch_channel(DMS_CLOSED_CHANNEL_ID)
+
         if result is None and create_anyway:
-            thread = await self.channel.create_thread(name=member.name)
+            thread = await channel.create_thread(name=member.name)
             return self.new_thread(member.id, thread.id)
         elif not create_anyway:
             return None
