@@ -13,7 +13,7 @@ async def send_dm(member: discord.Member, **kwargs):
             await thread.send(content=member.mention)
 
 @bot.slash_command(description="Deletes DM thread", guild_ids=[GUILD_ID], dm_permission=False)
-async def delete_dm_thread(interaction: discord.Interaction, member: discord.Member = None):
+async def delete_dm_thread(interaction: discord.Interaction, member: discord.Member = discord.SlashOption(name="member", description="Member to delete thread for (optional)", required=False)):
     if not member:
         if not await is_moderator(interaction.user) and not await is_chat_moderator(interaction.user):
             await interaction.send("You are not permitted to use this command.", ephemeral=True)
