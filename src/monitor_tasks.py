@@ -174,7 +174,7 @@ async def checkmute():
         except Exception:
             print(traceback.format_exc())
 
-@tasks.loop(seconds=30)
+@tasks.loop(seconds=20)
 async def handle_slowmode():
     for channel_id in AUTO_SLOWMODE_CHANNELS:
         slowmode = 3
@@ -182,6 +182,14 @@ async def handle_slowmode():
         time_15s_ago = current_time - datetime.timedelta(seconds=15)
         channel = bot.get_channel(channel_id)
         if not channel: continue
+        
+        if channel.last_message:
+            last_msg_time = channel.last_message.created_at
+            if last_msg_time < time_15s_ago:
+                slowmode = 0
+                if channel.slowmode_delay != 0:
+                    await channel.edit(slowmode_delay=slowmode)
+                    
         messages_in15s = await channel.history(after=time_15s_ago, limit=300).flatten()
         number_of_messages = len(messages_in15s)
         if number_of_messages <= 10:
