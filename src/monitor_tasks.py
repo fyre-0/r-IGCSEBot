@@ -189,14 +189,15 @@ async def handle_slowmode():
                 slowmode = 0
                 if channel.slowmode_delay != 0:
                     await channel.edit(slowmode_delay=slowmode)
+                continue
                     
         messages_in15s = await channel.history(after=time_15s_ago, limit=300).flatten()
         number_of_messages = len(messages_in15s)
-        if number_of_messages <= 10:
+        if number_of_messages <= 9:
             slowmode = 0
             if channel.slowmode_delay != 0:
                 await channel.edit(slowmode_delay=slowmode)
-            return
+            continue
 
         user_messages = {}
 
@@ -222,9 +223,9 @@ async def handle_slowmode():
         elif number_of_messages >= 30:
             slowmode = 45
         elif number_of_messages >= 20:
-            slowmode = 15
+            slowmode = 12
         elif number_of_messages >= 15:
-            slowmode = 7
+            slowmode = 6
             
         if channel.slowmode_delay != slowmode:
             await channel.edit(slowmode_delay=slowmode)
