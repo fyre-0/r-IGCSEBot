@@ -185,7 +185,7 @@ async def handle_slowmode():
         
         if channel.last_message:
             last_msg_time = channel.last_message.created_at
-            if last_msg_time < time_15s_ago:
+            if last_msg_time.timestamp() < time_15s_ago.timestamp():
                 slowmode = 0
                 if channel.slowmode_delay != 0:
                     await channel.edit(slowmode_delay=slowmode)
