@@ -1,6 +1,7 @@
-from constants import BETA, GUILD_ID, SHOULD_LOG_ALL, CREATE_DM_CHANNEL_ID, BOTLOG_CHANNEL_ID
+from constants import BETA, GUILD_ID, SHOULD_LOG_ALL, BOTLOG_CHANNEL_ID, MESSAGERECIEVED_ID, FORUMTHREAD_ID, CREATEDM_ID
 from data import REP_DISABLE_CHANNELS
 from bot import discord, bot, keywords
+
 from mongodb import gpdb, smdb, repdb, kwdb
 from roles import is_moderator, is_helper, is_chat_moderator, is_bot_developer
 
@@ -145,42 +146,42 @@ async def on_message(message: discord.Message):
             await message.add_reaction("✅")
             return
         
-      if message.channel.id == CREATEDM_ID:
-            await create_thread(message, False)
+    if message.channel.id == CREATEDM_ID:
+        await create_thread(message, False)
 
-      if message.guild.id == GUILD_ID:
-            if str(message.channel.type) in ["public_thread", "private_thread"] and message.channel.parent_id == FORUMTHREAD_ID:
-                  member = message.guild.get_member(int(message.channel.name))
-                  if message.content == ".sclose":
-                        embed = discord.Embed(title="DM Channel Silently Closed", description=f"DM Channel with {member.name} has been closed by the moderators of r/IGCSE, without notifying the user.", colour=discord.Colour.green())
-                        embed.set_author(name=str(message.author), icon_url=message.author.display_avatar.url)
-                        await message.delete()
-                        await message.channel.send(embed=embed)                      
-                        await message.channel.edit(name=f"{message.channel.name} (Closed)", archived=True)
-                        return
-                  dmchannel = await member.create_dm()
-                  if message.content == ".close":
-                        embed = discord.Embed(title="DM Channel Closed", description=f"DM Channel with {member} has been closed by the moderators of r/IGCSE.", colour=discord.Colour.green())
-                        embed.set_author(name=str(message.author), icon_url=message.author.display_avatar.url)
-                        await message.delete()
-                        await dmchannel.send(embed=embed)
-                        await message.channel.send(embed=embed)
-                        await message.channel.edit(name=f"{message.channel.name} (Closed)", archived=True)
-                        return
-                  embed = discord.Embed(title="Message from r/IGCSE Moderators", description=message.clean_content, colour=discord.Colour.green())
-                  embed.set_author(name=str(message.author), icon_url=message.author.display_avatar.url)
-                  try:
-                        await dmchannel.send(embed=embed)
-                        for attachment in message.attachments:
-                              await dmchannel.send(file=await attachment.to_file())
-                        await message.channel.send(embed=embed)
-                  except:
-                        perms = message.channel.overwrites_for(member)
-                        perms.send_messages, perms.read_messages, perms.view_channel, perms.read_message_history, perms.attach_files = True, True, True, True, True
-                        await message.channel.set_permissions(member, overwrite=perms)
-                        await message.channel.send(f"{member.mention}")
-                        return   
-                  await message.delete()
+    if message.guild.id == GUILD_ID:
+        if str(message.channel.type) in ["public_thread", "private_thread"] and message.channel.parent_id == FORUMTHREAD_ID:
+                member = message.guild.get_member(int(message.channel.name))
+                if message.content == ".sclose":
+                    embed = discord.Embed(title="DM Channel Silently Closed", description=f"DM Channel with {member.name} has been closed by the moderators of r/IGCSE, without notifying the user.", colour=discord.Colour.green())
+                    embed.set_author(name=str(message.author), icon_url=message.author.display_avatar.url)
+                    await message.delete()
+                    await message.channel.send(embed=embed)                      
+                    await message.channel.edit(name=f"{message.channel.name} (Closed)", archived=True)
+                    return
+                dmchannel = await member.create_dm()
+                if message.content == ".close":
+                    embed = discord.Embed(title="DM Channel Closed", description=f"DM Channel with {member} has been closed by the moderators of r/IGCSE.", colour=discord.Colour.green())
+                    embed.set_author(name=str(message.author), icon_url=message.author.display_avatar.url)
+                    await message.delete()
+                    await dmchannel.send(embed=embed)
+                    await message.channel.send(embed=embed)
+                    await message.channel.edit(name=f"{message.channel.name} (Closed)", archived=True)
+                    return
+                embed = discord.Embed(title="Message from r/IGCSE Moderators", description=message.clean_content, colour=discord.Colour.green())
+                embed.set_author(name=str(message.author), icon_url=message.author.display_avatar.url)
+                try:
+                    await dmchannel.send(embed=embed)
+                    for attachment in message.attachments:
+                            await dmchannel.send(file=await attachment.to_file())
+                    await message.channel.send(embed=embed)
+                except:
+                    perms = message.channel.overwrites_for(member)
+                    perms.send_messages, perms.read_messages, perms.view_channel, perms.read_message_history, perms.attach_files = True, True, True, True, True
+                    await message.channel.set_permissions(member, overwrite=perms)
+                    await message.channel.send(f"{member.mention}")
+                    return   
+                await message.delete()
     channel_id_rep = message.channel.id
     if (type(message.channel) == discord.threads.Thread):
         # Threads have different IDs than parent channel
