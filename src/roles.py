@@ -2,7 +2,7 @@ from bot import discord, bot
 from constants import GUILD_ID, MODERATOR_ROLES, CHAT_MODERATOR_ROLE, BOT_DEVELOPER_ROLE
 
 async def has_role(member: discord.Member, role_name: str):
-    return any(role_name.lower() == role.lower() for role in member.roles)
+    return any(role_name.lower() == role.name.lower() for role in member.roles)
 
 async def get_role(role_name: str):
     return discord.utils.get(bot.get_guild(GUILD_ID).roles, name=role_name)
