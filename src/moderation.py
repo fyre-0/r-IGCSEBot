@@ -230,6 +230,10 @@ async def ban(interaction: discord.Interaction,
     if await is_banned(user, interaction.guild):
         await interaction.send("User is banned from the server!", ephemeral=True)
         return
+    if interaction.user.id == user.id:
+        await interaction.send("You can not ban yourself!", ephemeral=True)
+        return
+    
     await interaction.response.defer()
     try:
         if interaction.guild.id == GUILD_ID:
