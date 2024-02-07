@@ -8,12 +8,6 @@ from ui import MCQButtonsView
 async def on_ready():
     print(f"Logged in as {str(bot.user)}.")
     await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="r/IGCSE"))
-    checklock.start()
-    checkmute.start()
-    autorefreshhelpers.start()
-    handle_slowmode.start()
-    send_questions.start()
-    expire_sessions.start()
     views = View.find().all()
     for view in views:
         bot.add_view(MCQButtonsView(view["view_id"]), message_id=int(view["message_id"]))
