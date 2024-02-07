@@ -12,7 +12,13 @@ async def get_role(role_name: str):
     return discord.utils.get(guild.roles, name = role_name)
 
 async def is_moderator(member: discord.Member):
-    return member.guild_permissions.administrator or MODERATOR_ROLES in [role.id for role in member.roles]
+    roles = [role.id for role in member.roles]
+    if MODERATOR_ROLES in roles:
+        return True
+    elif member.guild_permissions.administrator:
+        return True
+    return False
+
 
 async def is_chat_moderator(member: discord.Member):
     return CHAT_MODERATOR_ROLES in [role.id for role in member.roles]
