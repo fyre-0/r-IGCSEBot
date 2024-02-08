@@ -211,7 +211,6 @@ async def helper(interaction: discord.Interaction, message_id: str = discord.Sla
     view.helper_role = helper_role
     view.user = interaction.user
 
-
 @bot.command(name="refreshhelpers", description="Refresh the helper count in the description of subject channels", guild_ids=[GUILD_ID])
 async def refreshhelpers(ctx):
     if not await is_moderator(ctx.author) and not await is_bot_developer(ctx.author):
