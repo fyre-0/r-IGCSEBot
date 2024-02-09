@@ -219,7 +219,7 @@ async def on_message(message: discord.Message):
     if message.channel.id == BOTUPDATES_CHANNEL:
         if message.embeds:
             embed = message.embeds[0]
-            if "new commit" in embed.title:
+            if "new commit" in embed.title and "[r-IGCSEBot:main]" in embed.title:
                 print("New commit. Automatically rebooting the bot")
                 # bot should automatically restart when killed
                 sys.exit(0)
