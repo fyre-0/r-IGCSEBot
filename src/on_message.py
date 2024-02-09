@@ -1,7 +1,7 @@
-from constants import BETA, GUILD_ID, SHOULD_LOG_ALL, BOTLOG_CHANNEL_ID, MODMAIL_LOGS_ID, FORUMTHREAD_ID, CREATEDM_ID
+from constants import BETA, GUILD_ID, SHOULD_LOG_ALL, BOTLOG_CHANNEL_ID, MODMAIL_LOGS_ID, FORUMTHREAD_ID, CREATEDM_ID, BOTUPDATES_CHANNEL
 from data import REP_DISABLE_CHANNELS
 from bot import discord, bot, keywords
-
+import sys
 from mongodb import gpdb, smdb, repdb, kwdb
 from roles import is_moderator, is_helper, is_chat_moderator, is_bot_developer
 
@@ -215,5 +215,14 @@ async def on_message(message: discord.Message):
                 await message.channel.send(embed = keyword_embed)
         else:
                 await message.channel.send(autoreply)
+    
+    if message.channel.id == BOTUPDATES_CHANNEL:
+        if message.embeds:
+            embed = message.embeds[0]
+            if "new commit" in embed.title and "[r-IGCSEBot:main]" in embed.title:
+                print("New commit. Automatically rebooting the bot")
+                # bot should automatically restart when killed
+                sys.exit(0)
+                
 
     await bot.process_commands(message)
