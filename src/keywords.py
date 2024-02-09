@@ -118,7 +118,7 @@ async def list_keywords(interaction: discord.Interaction):
         if page == 1:
             first.disabled, prev.disabled, nex.disabled, last.disabled = True, True, False, False
         else:
-            first.disabled, prev.disabled, nex.disabled, last.disabled = False
+            first.disabled, prev.disabled, nex.disabled, last.disabled = False, False, False, False
         view.add_item(first); view.add_item(prev); view.add_item(nex); view.add_item(last)
         await b_interaction.response.edit_message(embed=pages[page - 1], view=view)
 
@@ -132,7 +132,7 @@ async def list_keywords(interaction: discord.Interaction):
         if page == len(pages):
             first.disabled, prev.disabled, nex.disabled, last.disabled = False, False, True, True
         else:
-            first.disabled, prev.disabled, nex.disabled, last.disabled = False
+            first.disabled, prev.disabled, nex.disabled, last.disabled = False, False, False, False
         view.add_item(first); view.add_item(prev); view.add_item(nex); view.add_item(last)
         await b_interaction.response.edit_message(embed=pages[page - 1], view=view)
 
