@@ -4,6 +4,7 @@ from constants import FEEDBACK_CHANNEL_ID, FEEDBACK_NAME, GUILD_ID, LINK, BOTLOG
 from data import helper_roles, reactionroles_data, study_roles, subreddits, CIE_IGCSE_SUBJECT_CODES, CIE_ALEVEL_SUBJECT_CODES, CIE_OLEVEL_SUBJECT_CODES, ciealsubjectsdata, cieigsubjectsdata, cieolsubjectsdata, SESSION_ROLES, SUBJECT_ROLES, REP_DISABLE_CHANNELS
 from roles import is_moderator, is_server_booster, is_helper, get_role, has_role, is_bot_developer, is_chat_moderator
 from mongodb import gpdb, repdb, rrdb, smdb, kwdb
+import re
 
 # Importing Files
 import moderation
@@ -276,18 +277,26 @@ async def joke(interaction: discord.Interaction):
     await interaction.send(joke)
 
 
-@bot.slash_command(name="meme", description="Get a random meme")
+@bot.slash_command(name="meme", description="Get a random meme", guild_ids=[GUILD_ID])
 async def meme(interaction=discord.Interaction, subreddit: str = discord.SlashOption(name="subreddit", description="From which subreddit", required=False, default="")):
+    if subreddit != "" and re.match(r"^([a-z0-9][_a-z0-9]{2,20})$", subreddit) is None:
+        await interaction.send("Invalid subreddit.")
+        return
+
     await interaction.response.defer()
 
     async def get_sfw_meme():
         response = requests.request(
             "GET", f"https://meme-api.com/gimme/{subreddit}")
+
+        if not response.ok:
+            await interaction.send("Error fetching meme.")
+            return
+        
         data = json.loads(response.text)
 
-        if (response.status_code == 404) or ('count' in data):
-            await interaction.send("Invalid subreddit")
-            return
+        if "count" in data:
+            data = data["memes"][0]
 
         return data['url'] if not data['nsfw'] else get_sfw_meme()
 
