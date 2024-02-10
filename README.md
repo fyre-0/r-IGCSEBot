@@ -39,7 +39,7 @@ The `v1.0` version of this bot rolled into use on July 5, 2021 and has come a lo
 <img width="60%" alt="Image" src="https://github.com/Sachin-dot-py/r-IGCSEBot/assets/61686882/8a4a74d2-e183-4c3f-bbf8-acc3bc2827f5">
 
 # Local Installation Guide 
-1. Make sure you have Python 3.7+ installed (preferably 3.12.1)
+1. [Make sure you have Python 3.7+ installed (preferably 3.12.1)](https://www.python.org/downloads/source/)
 2. Install the requirements (`pip install -r requirements.txt`)
 2. [Generate a Discord Bot API Token](https://www.writebots.com/discord-bot-token/)
 3. [Create a MongoDB database named `IGCSEBot`](https://www.mongodb.com/basics/create-database).
