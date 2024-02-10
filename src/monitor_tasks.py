@@ -268,8 +268,6 @@ async def send_questions():
             message_id=mcq_msg.id
         )
         view.save()
-        print(bot.views())
-        print(bot.views(persistent=False))
 
 
 @tasks.loop(minutes=2)
