@@ -83,7 +83,7 @@ async def list_keywords(interaction: discord.Interaction):
 
     nex, last = discord.ui.Button(emoji="➡️", style=discord.ButtonStyle.blurple), discord.ui.Button(emoji="⏩", style=discord.ButtonStyle.blurple)
     if page == 1:
-        first.disabled, prev.disabled = True
+        first.disabled, prev.disabled, nex.disabled, last.disabled = True, True, False, False
     view = discord.ui.View(timeout=120)
 
 
