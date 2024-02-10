@@ -1,5 +1,5 @@
 # Importing Variables
-from bot import bot, datetime, discord, json, pymongo, requests, time, ast, pyjokes, traceback
+from bot import bot, datetime, discord, json, pymongo, requests, time, ast, traceback
 from constants import FEEDBACK_CHANNEL_ID, FEEDBACK_NAME, GUILD_ID, LINK, BOTLOG_CHANNEL_ID, MODLOG_CHANNEL_ID, TOKEN, WELCOME_CHANNEL_ID, FORCED_MUTE_ROLE, CHATMOD_APP_CHANNEL, MOD_CHANNEL, CONFESSION_CHANNEL, STUDY_SESSION_CHANNEL
 from data import helper_roles, reactionroles_data, study_roles, subreddits, CIE_IGCSE_SUBJECT_CODES, CIE_ALEVEL_SUBJECT_CODES, CIE_OLEVEL_SUBJECT_CODES, ciealsubjectsdata, cieigsubjectsdata, cieolsubjectsdata, SESSION_ROLES, SUBJECT_ROLES, REP_DISABLE_CHANNELS
 from roles import is_moderator, is_server_booster, is_helper, get_role, has_role, is_bot_developer, is_chat_moderator
@@ -270,14 +270,28 @@ async def ping(interaction: discord.Interaction):
     await interaction.send("Pong!")
 
 
-@bot.slash_command(name="joke", description="Get a random joke")
-async def joke(interaction: discord.Interaction):
+@bot.slash_command(name="joke", description="Get a random joke", guild_ids=[GUILD_ID])
+async def joke(interaction: discord.Interaction, category: str = discord.SlashOption(name="category", description="Joke category", required=False, choices=["Programming", "Miscellaneous", "Dark", "Pun", "Spooky", "Christmas"])):
     await interaction.response.defer()
-    joke = pyjokes.get_joke()
+
+    url = f"https://v2.jokeapi.dev/joke/{'Any' if category is None else category}?blacklistFlags=nsfw,religious,political,racist,sexist,explicit"
+    res = requests.request("GET", url)
+
+    if not res.ok:
+        await interaction.send("Error fetching joke.")
+        return
+
+    data = json.loads(res.text)
+
+    if data["type"] == "single":
+        joke = data["joke"]
+    else:
+        joke = data["setup"] + "\n" + data["delivery"]
+    
     await interaction.send(joke)
 
 
-@bot.slash_command(name="meme", description="Get a random meme", guild_ids=[GUILD_ID])
+@bot.slash_command(name="meme", description="Get a random meme")
 async def meme(interaction=discord.Interaction, subreddit: str = discord.SlashOption(name="subreddit", description="From which subreddit", required=False, default="")):
     if subreddit != "" and re.match(r"^([a-z0-9][_a-z0-9]{2,20})$", subreddit) is None:
         await interaction.send("Invalid subreddit.")

@@ -10,7 +10,6 @@ import json
 import random
 import pyshorteners
 import ast
-import pyjokes
 
 from nextcord.ext import tasks, commands
 from constants import GUILD_ID
