@@ -4,6 +4,12 @@ from constants import FEEDBACK_CHANNEL_ID, FEEDBACK_NAME, GUILD_ID, LINK, BOTLOG
 from data import helper_roles, reactionroles_data, study_roles, subreddits, CIE_IGCSE_SUBJECT_CODES, CIE_ALEVEL_SUBJECT_CODES, CIE_OLEVEL_SUBJECT_CODES, ciealsubjectsdata, cieigsubjectsdata, cieolsubjectsdata, SESSION_ROLES, SUBJECT_ROLES, REP_DISABLE_CHANNELS
 from roles import is_moderator, is_server_booster, is_helper, get_role, has_role, is_bot_developer, is_chat_moderator
 from mongodb import gpdb, repdb, rrdb, smdb, kwdb
+from autodeploy import webhook_handler_app
+
+import asyncio
+import os
+from hypercorn.config import Config
+from hypercorn.asyncio import serve
 
 # Importing Files
 import moderation
@@ -893,3 +899,8 @@ async def send_editcommand(interaction: discord.Interaction,
         await interaction.response.send_modal(modal=EditMessage(channel))
 
 bot.run(TOKEN)
+
+config = Config()
+config.bind = [f"0.0.0.0:{os.environ.get('SERVER_PORT', 8080)}"]
+
+asyncio.run(serve(webhook_handler_app, config))
