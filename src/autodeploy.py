@@ -7,10 +7,6 @@ webhook_handler_app = Quart(__name__)
 
 @webhook_handler_app.post("/github-webhook")
 async def github():
-    # Requests will be forwarded from a nginx reverse proxy
-    if request.remote_addr != "127.0.0.1":
-        return {"error": "Invalid IP"}, 403
-    
     payload = await request.get_data()
     signature = request.headers.get("X-Hub-Signature-256")
     
