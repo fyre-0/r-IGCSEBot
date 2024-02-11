@@ -86,7 +86,6 @@ async def list_keywords(interaction: discord.Interaction):
         first.disabled, prev.disabled, nex.disabled, last.disabled = True, True, False, False
     view = discord.ui.View(timeout=120)
 
-
     async def timeout():
         nonlocal message
         disabled = discord.ui.View()
