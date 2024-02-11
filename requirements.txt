@@ -7,3 +7,5 @@ pubchempy
 pyquery
 python-dotenv
 redis-om
+quart
+hypercorn
