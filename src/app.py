@@ -901,10 +901,4 @@ async def send_editcommand(interaction: discord.Interaction,
 config = Config()
 config.bind = [f"0.0.0.0:{os.environ.get('SERVER_PORT', 8080)}"]
 
-async def main():
-    await asyncio.gather(
-        bot.start(TOKEN),
-        serve(webhook_handler_app, config)
-    )
-
-asyncio.run(main())
+bot.run(TOKEN)
