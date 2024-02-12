@@ -38,7 +38,7 @@ async def update_leaderboard():
         roles = await guild.fetch_roles()
         role = discord.utils.get(roles, id=862192631261298717)
     if [member.id for member in role.members].sort() != members.sort():
-        print(f"Leaderboard has changed, updating roles...")
+        print("Leaderboard has changed, updating roles...")
         for m in role.members:
             await m.remove_roles(role)
         for member in members:

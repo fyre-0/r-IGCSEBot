@@ -12,7 +12,7 @@ class Select(discord.ui.Select):
     async def callback(self, interaction: discord.Interaction):
         tempdata = TempSessionData.get(interaction.user.id)
 
-        if tempdata[self.name] and type(tempdata[self.name]) == list:
+        if tempdata[self.name] and isinstance(tempdata[self.name], list):
             tempdata[self.name] = tempdata[self.name] + interaction.data["values"]
         elif len(interaction.data["values"]) == 1 and self.name != "topics":
             tempdata[self.name] = interaction.data["values"][0]

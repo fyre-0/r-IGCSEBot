@@ -1,4 +1,4 @@
-from bot import bot, discord, tasks, pymongo, bot, guild
+from bot import bot, discord, tasks, pymongo
 from constants import LINK, GUILD_ID, FORCED_MUTE_ROLE, MODLOG_CHANNEL_ID
 import time
 import traceback
@@ -320,8 +320,12 @@ async def send_questions():
         if not thread:
             continue
 
-        questions = Question.find(Question.session_id == session.session_id).all()
-        questions: list[Question] = list(filter(lambda x: x["solved"] == 0, questions))
+        questions = list(
+            filter(
+                lambda x: x["solved"] == 0,
+                Question.find(Question.session_id == session.session_id).all(),
+            )
+        )
 
         if len(questions) == 0 or not questions:
             await close_session(

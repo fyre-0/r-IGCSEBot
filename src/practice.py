@@ -24,7 +24,7 @@ async def get_from_db(primary_key: str, db: ExtendedModel) -> bool:
         return None
 
 
-async def save_questions(questions: list, session_id: str) -> list[Question]:
+async def save_questions(questions: list, session_id: str):
     questions_mapped = list(
         map(
             lambda x: Question(

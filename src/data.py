@@ -730,7 +730,6 @@ cieigsubjectsdata = {
     "7184": "Arabic-First-Language-9-1",
     "0544": "Arabic-Foreign-Language",
     "0400": "Art-and-Design",
-    "0986": "Art-and-Design-9-1",
     "0538": "Bahasa-Indonesia",
     "0610": "Biology",
     "0970": "Biology-9-1",
@@ -864,13 +863,13 @@ cieolsubjectsdata = {
 
 practice_subjects = {
     "0455": "Economics",
-    #'0606': "Additional Mathematics",
-    #'0607': "International Mathematics",
+    # '0606': "Additional Mathematics",
+    # '0607': "International Mathematics",
     "0620": "Chemistry",
-    #'0580': "Mathematics",
+    # '0580': "Mathematics",
     "0625": "Physics",
     "0610": "Biology",
-    #'0417': "Information & Communication Technology (ICT)"
+    # '0417': "Information & Communication Technology (ICT)"
 }
 
 topics_for_practice = {

@@ -45,7 +45,7 @@ async def history(
 
         if result["action"] in allowed_actions_for_total:
             total += 1
-        if type(result["when"]) == datetime.datetime:
+        if isinstance(result["when"], datetime.datetime):
             date_of_event = result["when"].strftime("%d %b, %Y at %I:%M %p")
         else:
             date_of_event = datetime.datetime.fromisoformat(

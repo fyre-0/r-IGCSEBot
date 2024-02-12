@@ -191,7 +191,7 @@ class SelectMenuTopic(discord.ui.View):
             for i in range(len(topics) // 25):
                 self.topic = Select(
                     name="topics",
-                    placeholder=f"Choose a topic (menu {i+1})",
+                    placeholder=f"Choose a topic (menu {i + 1})",
                     options=list(
                         map(
                             lambda x: discord.SelectOption(label=x, value=x),
