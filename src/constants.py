@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 TOKEN = os.environ.get("IGCSEBOT_TOKEN")
 LINK = os.environ.get("MONGO_LINK")
-BETA = os.environ.get("BETA") != 'False'
+BETA = os.environ.get("BETA") != "False"
 
 
 BOTMAIN = 861445044790886467

@@ -1,5 +1,7 @@
 {
   "scripts": {
-    "start": "python3.12 ./src/app.py"
+    "start": "python3.12 ./src/app.py",
+    "format": "python3.12 -m black ./src",
+    "lint": "python3.12 -m flake8 ./src --ignore=E203,E501,W503,F401"
   }
 }
