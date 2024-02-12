@@ -7,25 +7,17 @@ from mongodb import gpdb, repdb, rrdb, smdb, kwdb
 import re
 
 # Importing Files
+from events import (on_ready, on_application_command_error, on_command_error, on_member_join, on_message, on_raw_reaction_add, on_raw_reaction_remove, on_thread_create, on_voice_state_update)
 import moderation
 import auto_moderation
-import on_member_join
-import on_ready
-import on_thread_create
 import random_pyp
-import on_voice_state_update
 import gostudy
-import on_application_command_error
-import on_command_error
-import on_raw_reaction_add
-import on_raw_reaction_remove
 import role_command
 import colorroles
 import reputation
 import hotm
 import locks
 import keywords
-import on_message
 import practice
 import chem_info
 
