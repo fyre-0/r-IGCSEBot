@@ -1,6 +1,6 @@
 from bot import bot, discord, commands
 from mongodb import dmsdb
-from roles import is_chat_moderator, is_moderator
+from utils.roles import is_chat_moderator, is_moderator
 from constants import GUILD_ID, DMS_CLOSED_CHANNEL_ID
 
 

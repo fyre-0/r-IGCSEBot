@@ -1,5 +1,5 @@
 from bot import bot, discord
-from dms import send_dm
+from commands.dms import send_dm
 from constants import GUILD_ID, WELCOME_CHANNEL_ID, BETA
 
 welcome_embed = discord.Embed.from_dict(

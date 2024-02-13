@@ -1,6 +1,6 @@
 from bot import bot, time
 from mongodb import gpdb, punishdb
-from moderation import convert_time
+from commands.moderation import convert_time
 
 SECONDS_PER_MINUTE = 60
 SECONDS_PER_HOUR = SECONDS_PER_MINUTE * 60

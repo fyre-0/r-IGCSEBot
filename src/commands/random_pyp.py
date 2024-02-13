@@ -1,5 +1,5 @@
 from bot import bot, commands, discord, random, pyshorteners
-from data import (
+from utils.data import (
     CIE_IGCSE_SUBJECT_CODES,
     CIE_OLEVEL_SUBJECT_CODES,
     CIE_ALEVEL_SUBJECT_CODES,

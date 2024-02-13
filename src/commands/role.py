@@ -1,6 +1,6 @@
 from bot import bot, discord
 from constants import GUILD_ID
-from data import reactionroles_data
+from utils.data import reactionroles_data
 
 
 class DropdownRR(discord.ui.Select):

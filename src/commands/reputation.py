@@ -1,6 +1,6 @@
 from bot import bot, discord, time
 from mongodb import repdb
-from roles import is_moderator, is_bot_developer
+from utils.roles import is_moderator, is_bot_developer
 from constants import MODLOG_CHANNEL_ID
 
 

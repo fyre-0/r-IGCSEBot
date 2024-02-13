@@ -1,7 +1,7 @@
 from bot import discord, bot, requests
 from constants import GUILD_ID
 from mongodb import gpdb, rrdb
-from roles import is_moderator
+from utils.roles import is_moderator
 
 
 @bot.event

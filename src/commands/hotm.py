@@ -1,6 +1,6 @@
 from bot import discord, bot, pymongo
 from constants import GUILD_ID, LINK, HOTM_VOTING_CHANNEL
-from roles import is_helper, is_moderator
+from utils.roles import is_helper, is_moderator
 
 
 @bot.slash_command(description="Vote for the helper of the month", guild_ids=[GUILD_ID])

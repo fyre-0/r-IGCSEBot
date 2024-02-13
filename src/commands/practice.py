@@ -11,7 +11,7 @@ from ui import (
     AddRemoveUserView,
 )
 from mongodb import questionsdb
-from data import practice_subjects
+from utils.data import practice_subjects
 import uuid
 import time
 

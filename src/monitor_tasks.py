@@ -2,10 +2,10 @@ from bot import bot, discord, tasks, pymongo
 from constants import LINK, GUILD_ID, FORCED_MUTE_ROLE, MODLOG_CHANNEL_ID
 import time
 import traceback
-from data import AUTO_SLOWMODE_CHANNELS, helper_roles
+from utils.data import AUTO_SLOWMODE_CHANNELS, helper_roles
 from schemas.redis import Session, Question, View
 from ui import MCQButtonsView
-from practice import close_session
+from commands.practice import close_session
 import datetime
 
 

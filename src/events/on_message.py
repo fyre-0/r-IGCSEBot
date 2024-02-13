@@ -8,11 +8,11 @@ from constants import (
     CREATEDM_ID,
     BOTUPDATES_CHANNEL,
 )
-from data import REP_DISABLE_CHANNELS
+from utils.data import REP_DISABLE_CHANNELS
 from bot import discord, bot, keywords
 import sys
 from mongodb import gpdb, smdb, repdb, kwdb
-from roles import is_moderator, is_helper, is_chat_moderator, is_bot_developer
+from utils.roles import is_moderator, is_helper, is_chat_moderator, is_bot_developer
 
 
 async def get_thread(message: discord.Message, is_dm: bool):

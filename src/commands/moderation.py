@@ -1,7 +1,7 @@
 from bot import bot, discord, pymongo, datetime, time
-from dms import send_dm
-from bans import is_banned
-from roles import is_chat_moderator, is_moderator
+from commands.dms import send_dm
+from utils.bans import is_banned
+from utils.roles import is_chat_moderator, is_moderator
 from mongodb import gpdb, punishdb
 from constants import GUILD_ID
 

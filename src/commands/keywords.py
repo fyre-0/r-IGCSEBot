@@ -1,7 +1,7 @@
 from bot import bot, discord, pymongo, keywords, time
 from constants import LINK, GUILD_ID, MODLOG_CHANNEL_ID
 from mongodb import kwdb
-from roles import is_moderator, is_bot_developer
+from utils.roles import is_moderator, is_bot_developer
 
 
 class AddKeywords(discord.ui.Modal):

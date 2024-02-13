@@ -1,7 +1,7 @@
 from bot import bot, discord
 from constants import GUILD_ID
-from roles import is_moderator, is_server_booster, has_role
-from data import reactionroles_data
+from utils.roles import is_moderator, is_server_booster, has_role
+from utils.data import reactionroles_data
 
 
 class DropdownRR(discord.ui.Select):
