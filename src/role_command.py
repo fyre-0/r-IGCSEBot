@@ -115,8 +115,3 @@ class RolePickerCategoriesView(discord.ui.View):
 @bot.slash_command(description="Pick up your roles", guild_ids=[GUILD_ID])
 async def roles(interaction: discord.Interaction):
     await interaction.send(view=RolePickerCategoriesView(), ephemeral=True)
-
-
-@bot.command(description="Dropdown for picking up reaction roles", guild_ids=[GUILD_ID])
-async def roles(ctx):
-    await ctx.send(view=RolePickerCategoriesView())

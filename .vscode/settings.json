@@ -1,5 +1,3 @@
 {
-    "python.analysis.extraPaths": [
-        "./src/events"
-    ]
+  "flake8.args": ["--ignore=E203,E501,W503,F401"],
 }
