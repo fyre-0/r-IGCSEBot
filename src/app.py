@@ -1,33 +1,75 @@
 # Importing Variables
 from bot import bot, datetime, discord, json, pymongo, requests, time, ast, traceback
-from constants import FEEDBACK_CHANNEL_ID, FEEDBACK_NAME, GUILD_ID, LINK, BOTLOG_CHANNEL_ID, MODLOG_CHANNEL_ID, TOKEN, WELCOME_CHANNEL_ID, FORCED_MUTE_ROLE, CHATMOD_APP_CHANNEL, MOD_CHANNEL, CONFESSION_CHANNEL, STUDY_SESSION_CHANNEL
-from data import helper_roles, reactionroles_data, study_roles, subreddits, CIE_IGCSE_SUBJECT_CODES, CIE_ALEVEL_SUBJECT_CODES, CIE_OLEVEL_SUBJECT_CODES, ciealsubjectsdata, cieigsubjectsdata, cieolsubjectsdata, SESSION_ROLES, SUBJECT_ROLES, REP_DISABLE_CHANNELS
-from roles import is_moderator, is_server_booster, is_helper, get_role, has_role, is_bot_developer, is_chat_moderator
-from mongodb import gpdb, repdb, rrdb, smdb, kwdb
+from utils.constants import (
+    FEEDBACK_CHANNEL_ID,
+    FEEDBACK_NAME,
+    GUILD_ID,
+    LINK,
+    BOTLOG_CHANNEL_ID,
+    MODLOG_CHANNEL_ID,
+    TOKEN,
+    WELCOME_CHANNEL_ID,
+    FORCED_MUTE_ROLE,
+    CHATMOD_APP_CHANNEL,
+    MOD_CHANNEL,
+    CONFESSION_CHANNEL,
+    STUDY_SESSION_CHANNEL,
+)
+from utils.data import (
+    helper_roles,
+    reactionroles_data,
+    study_roles,
+    subreddits,
+    CIE_IGCSE_SUBJECT_CODES,
+    CIE_ALEVEL_SUBJECT_CODES,
+    CIE_OLEVEL_SUBJECT_CODES,
+    ciealsubjectsdata,
+    cieigsubjectsdata,
+    cieolsubjectsdata,
+    SESSION_ROLES,
+    SUBJECT_ROLES,
+    REP_DISABLE_CHANNELS,
+)
+from utils.roles import (
+    is_moderator,
+    is_server_booster,
+    is_helper,
+    get_role,
+    has_role,
+    is_bot_developer,
+    is_chat_moderator,
+)
+from utils.mongodb import gpdb, repdb, rrdb, smdb, kwdb
 import re
 
 # Importing Files
-import moderation
-import auto_moderation
-import on_member_join
-import on_ready
-import on_thread_create
-import random_pyp
-import on_voice_state_update
-import gostudy
-import on_application_command_error
-import on_command_error
-import on_raw_reaction_add
-import on_raw_reaction_remove
-import role_command
-import colorroles
-import reputation
-import hotm
-import locks
-import keywords
-import on_message
-import practice
-import chem_info
+from events import (
+    on_ready,
+    on_application_command_error,
+    on_command_error,
+    on_member_join,
+    on_message,
+    on_raw_reaction_add,
+    on_raw_reaction_remove,
+    on_thread_create,
+    on_voice_state_update,
+    auto_moderation,
+)
+from commands import (
+    role as role_command,
+    colorroles,
+    practice,
+    locks as lock_command,
+    chem_info,
+    dms,
+    gostudy,
+    hotm,
+    keywords,
+    moderation,
+    random_pyp,
+    reputation,
+)
+
 
 def insert_returns(body):
 
@@ -72,21 +114,34 @@ class EvalModal(discord.ui.Modal):
         }
         exec(compile(parsed, filename="<ast>", mode="exec"), env)
 
-        result = (await eval(f"{fn_name}()", env))
+        result = await eval(f"{fn_name}()", env)
         await interaction.send(result)
 
 
-@bot.slash_command(name="eval", description="Evaluate a piece of code.", guild_ids=[GUILD_ID])
+@bot.slash_command(
+    name="eval", description="Evaluate a piece of code.", guild_ids=[GUILD_ID]
+)
 async def _eval(interaction: discord.Interaction):
-    if not await is_moderator(interaction.user) and not await is_bot_developer(interaction.user):
+    if not await is_moderator(interaction.user) and not await is_bot_developer(
+        interaction.user
+    ):
         await interaction.send("This is not for you.", ephemeral=True)
         return
     eval_modal = EvalModal()
     await interaction.response.send_modal(eval_modal)
 
 
-@bot.slash_command(name="rrmake", description="Create reaction roles", guild_ids=[GUILD_ID])
-async def rrmake(interaction: discord.Interaction, link: str = discord.SlashOption(name="link", description="The link/id of the message to which the reaction roles will be added", required=True)):
+@bot.slash_command(
+    name="rrmake", description="Create reaction roles", guild_ids=[GUILD_ID]
+)
+async def rrmake(
+    interaction: discord.Interaction,
+    link: str = discord.SlashOption(
+        name="link",
+        description="The link/id of the message to which the reaction roles will be added",
+        required=True,
+    ),
+):
     if await is_moderator(interaction.user) or await is_bot_developer(interaction.user):
         guild = bot.get_guild(GUILD_ID)
         channel = interaction.channel
@@ -97,17 +152,26 @@ async def rrmake(interaction: discord.Interaction, link: str = discord.SlashOpti
             except discord.NotFound:
                 await interaction.send("Invalid message", ephemeral=True)
             else:
-                await interaction.send("Now, enter the reactions and their corresponding roles in the following format: `<Emoji> <@Role>`. Type 'stop' when you are done", ephemeral=True)
+                await interaction.send(
+                    "Now, enter the reactions and their corresponding roles in the following format: `<Emoji> <@Role>`. Type 'stop' when you are done",
+                    ephemeral=True,
+                )
             rrs = []
             while True:
-                rr_msg = await bot.wait_for("message", check=lambda m: m.author == interaction.user and m.channel == channel)
+                rr_msg = await bot.wait_for(
+                    "message",
+                    check=lambda m: m.author == interaction.user
+                    and m.channel == channel,
+                )
                 rr = str(rr_msg.content).lower()
                 if rr == "stop":
                     break
                 try:
                     reaction, role = rr.split()
                 except ValueError:
-                    await channel.send("You have to enter a reaction followed by a role separated by a space")
+                    await channel.send(
+                        "You have to enter a reaction followed by a role separated by a space"
+                    )
                 else:
                     try:
                         int(role[3:-1])
@@ -128,18 +192,29 @@ async def rrmake(interaction: discord.Interaction, link: str = discord.SlashOpti
         except ValueError:
             await interaction.send("Invalid input", ephemeral=True)
     else:
-        await interaction.send("You do not have the necessary permissions to perform this action", ephemeral=True)
+        await interaction.send(
+            "You do not have the necessary permissions to perform this action",
+            ephemeral=True,
+        )
         return
 
 
 @bot.slash_command(description="Create a new in-channel poll")
-async def yesnopoll(interaction: discord.Interaction, poll: str = discord.SlashOption(name="poll", description="The poll to be created", required=True)):
+async def yesnopoll(
+    interaction: discord.Interaction,
+    poll: str = discord.SlashOption(
+        name="poll", description="The poll to be created", required=True
+    ),
+):
     embed = discord.Embed(
-        title=poll, description=f"Total Votes: 0\n\n{'🟩' * 10}\n\n(from: {interaction.user})", colour=discord.Colour.purple())
+        title=poll,
+        description=f"Total Votes: 0\n\n{'🟩' * 10}\n\n(from: {interaction.user})",
+        colour=discord.Colour.purple(),
+    )
     await interaction.send("Creating Poll.", ephemeral=True)
     msg1 = await interaction.channel.send(embed=embed)
-    await msg1.add_reaction('✅')
-    await msg1.add_reaction('❌')
+    await msg1.add_reaction("✅")
+    await msg1.add_reaction("❌")
 
 
 class CancelPingBtn(discord.ui.View):
@@ -148,62 +223,92 @@ class CancelPingBtn(discord.ui.View):
         self.value = True
 
     @discord.ui.button(label="Cancel Ping", style=discord.ButtonStyle.blurple)
-    async def cancel_ping_btn(self, button: discord.ui.Button, interaction_b: discord.Interaction):
-        if (interaction_b.user != self.user) and (not await is_helper(interaction_b.user)) and (not await is_moderator(interaction_b.user)):
-            await interaction_b.send("You do not have permission to do this.", ephemeral=True)
+    async def cancel_ping_btn(
+        self, button: discord.ui.Button, interaction_b: discord.Interaction
+    ):
+        if (
+            (interaction_b.user != self.user)
+            and (not await is_helper(interaction_b.user))
+            and (not await is_moderator(interaction_b.user))
+        ):
+            await interaction_b.send(
+                "You do not have permission to do this.", ephemeral=True
+            )
             return
         button.disabled = True
         self.value = False
-        await self.message.edit(content=f"Ping cancelled by {interaction_b.user}", embed=None, view=None)
+        await self.message.edit(
+            content=f"Ping cancelled by {interaction_b.user}", embed=None, view=None
+        )
 
     async def on_timeout(self):
         await self.message.edit(view=None)
         if self.value:
             if self.message_id:
                 url = f"https://discord.com/channels/{self.guild.id}/{self.channel.id}/{self.message_id}"
-                embed = discord.Embed(
-                    description=f"[Jump to the message.]({url})")
+                embed = discord.Embed(description=f"[Jump to the message.]({url})")
             else:
                 embed = discord.Embed()
-            embed.set_author(name=str(self.user),
-                             icon_url=self.user.display_avatar.url)
+            embed.set_author(name=str(self.user), icon_url=self.user.display_avatar.url)
             await self.message.channel.send(self.helper_role.mention, embed=embed)
             await self.message.delete()
 
 
-@bot.slash_command(name="helper", description="Ping a helper in any subject channel", guild_ids=[GUILD_ID])
-async def helper(interaction: discord.Interaction, message_id: str = discord.SlashOption(name="message_id", description="The ID of the message containing the question.", required=False)):
+@bot.slash_command(
+    name="helper",
+    description="Ping a helper in any subject channel",
+    guild_ids=[GUILD_ID],
+)
+async def helper(
+    interaction: discord.Interaction,
+    message_id: str = discord.SlashOption(
+        name="message_id",
+        description="The ID of the message containing the question.",
+        required=False,
+    ),
+):
     if message_id:
         try:
             message_id = int(message_id)
         except ValueError:
-            await interaction.send("The provided message ID is invalid.", ephemeral=True)
+            await interaction.send(
+                "The provided message ID is invalid.", ephemeral=True
+            )
             return
     try:
         helper_role = discord.utils.get(
-            interaction.guild.roles, id=helper_roles[interaction.channel.id])
-    except:
-        await interaction.send("There are no helper roles specified for this channel.", ephemeral=True)
+            interaction.guild.roles, id=helper_roles[interaction.channel.id]
+        )
+    except Exception:
+        await interaction.send(
+            "There are no helper roles specified for this channel.", ephemeral=True
+        )
         return
     roles = [role.name.lower() for role in interaction.user.roles]
     if "server booster" in roles:
         if message_id:
             url = f"https://discord.com/channels/{interaction.guild.id}/{interaction.channel.id}/{message_id}"
             embed = discord.Embed(description=f"[Jump to the message.]({url})")
-            embed.set_author(name=str(interaction.user),
-                             icon_url=interaction.user.display_avatar.url)
+            embed.set_author(
+                name=str(interaction.user), icon_url=interaction.user.display_avatar.url
+            )
         else:
             embed = discord.Embed()
-            embed.set_author(name=str(interaction.user),
-                             icon_url=interaction.user.display_avatar.url)
+            embed.set_author(
+                name=str(interaction.user), icon_url=interaction.user.display_avatar.url
+            )
         allowedMentions = discord.AllowedMentions()
-        await interaction.send(content=helper_role.mention, embed=embed, allowed_mentions=allowedMentions)
+        await interaction.send(
+            content=helper_role.mention, embed=embed, allowed_mentions=allowedMentions
+        )
         return
     view = CancelPingBtn()
     embed = discord.Embed(
-        description=f"The helper role for this channel, `@{helper_role.name}`, will automatically be pinged (<t:{int(time.time() + 890)}:R>).\nIf your query has been resolved by then, please click on the `Cancel Ping` button.")
-    embed.set_author(name=str(interaction.user),
-                     icon_url=interaction.user.display_avatar.url)
+        description=f"The helper role for this channel, `@{helper_role.name}`, will automatically be pinged (<t:{int(time.time() + 890)}:R>).\nIf your query has been resolved by then, please click on the `Cancel Ping` button."
+    )
+    embed.set_author(
+        name=str(interaction.user), icon_url=interaction.user.display_avatar.url
+    )
     message = await interaction.send(embed=embed, view=view)
     view.message = message
     view.channel = interaction.channel
@@ -212,7 +317,12 @@ async def helper(interaction: discord.Interaction, message_id: str = discord.Sla
     view.helper_role = helper_role
     view.user = interaction.user
 
-@bot.command(name="refreshhelpers", description="Refresh the helper count in the description of subject channels", guild_ids=[GUILD_ID])
+
+@bot.command(
+    name="refreshhelpers",
+    description="Refresh the helper count in the description of subject channels",
+    guild_ids=[GUILD_ID],
+)
 async def refreshhelpers(ctx):
     if not await is_moderator(ctx.author) and not await is_bot_developer(ctx.author):
         return
@@ -226,29 +336,29 @@ async def refreshhelpers(ctx):
             for line in channel.topic.split("\n"):
                 if "No. of helpers" in line:
                     new_topic = channel.topic.replace(
-                        line, f"No. of helpers: {no_of_users}")
+                        line, f"No. of helpers: {no_of_users}"
+                    )
                     break
             else:
                 new_topic = f"{channel.topic}\nNo. of helpers: {no_of_users}"
             if channel.topic != new_topic:
                 await channel.edit(topic=new_topic)
                 changed.append(channel.mention)
-        except:
+        except Exception:
             continue
     if changed:
         Logging = bot.get_channel(MODLOG_CHANNEL_ID)
         timenow = int(time.time()) + 1
-        embed = discord.Embed(
-            description="Helpers Refreshed !!", color=0x51ADBB)
-        embed.set_author(name=str(ctx.author),
-                         icon_url=ctx.author.display_avatar.url)
-        embed.add_field(name="Channels", value=", ".join(
-            changed), inline=False)
+        embed = discord.Embed(description="Helpers Refreshed !!", color=0x51ADBB)
+        embed.set_author(name=str(ctx.author), icon_url=ctx.author.display_avatar.url)
+        embed.add_field(name="Channels", value=", ".join(changed), inline=False)
         embed.add_field(name="Date", value=f"<t:{timenow}:F>", inline=False)
         embed.add_field(
-            name="ID", value=f"```py\nUser = {ctx.author.id}\nBot = {bot.user.id}```", inline=False)
-        embed.set_footer(text=f"{bot.user}",
-                         icon_url=bot.user.display_avatar.url)
+            name="ID",
+            value=f"```py\nUser = {ctx.author.id}\nBot = {bot.user.id}```",
+            inline=False,
+        )
+        embed.set_footer(text=f"{bot.user}", icon_url=bot.user.display_avatar.url)
         await Logging.send(embed=embed)
         await ctx.message.reply("Done! Changed channels: " + ", ".join(changed))
     else:
@@ -261,7 +371,7 @@ async def clear(ctx, num_to_clear: int):
         return
     try:
         await ctx.channel.purge(limit=num_to_clear + 1)
-    except:
+    except Exception:
         await ctx.reply("Oops! I can only delete messages sent in the last 14 days")
 
 
@@ -271,7 +381,15 @@ async def ping(interaction: discord.Interaction):
 
 
 @bot.slash_command(name="joke", description="Get a random joke", guild_ids=[GUILD_ID])
-async def joke(interaction: discord.Interaction, category: str = discord.SlashOption(name="category", description="Joke category", required=False, choices=["Programming", "Miscellaneous", "Dark", "Pun", "Spooky", "Christmas"])):
+async def joke(
+    interaction: discord.Interaction,
+    category: str = discord.SlashOption(
+        name="category",
+        description="Joke category",
+        required=False,
+        choices=["Programming", "Miscellaneous", "Dark", "Pun", "Spooky", "Christmas"],
+    ),
+):
     await interaction.response.defer()
 
     url = f"https://v2.jokeapi.dev/joke/{'Any' if category is None else category}?blacklistFlags=nsfw,religious,political,racist,sexist,explicit"
@@ -287,12 +405,17 @@ async def joke(interaction: discord.Interaction, category: str = discord.SlashOp
         joke = data["joke"]
     else:
         joke = data["setup"] + "\n" + data["delivery"]
-    
+
     await interaction.send(joke)
 
 
 @bot.slash_command(name="meme", description="Get a random meme")
-async def meme(interaction=discord.Interaction, subreddit: str = discord.SlashOption(name="subreddit", description="From which subreddit", required=False, default="")):
+async def meme(
+    interaction=discord.Interaction,
+    subreddit: str = discord.SlashOption(
+        name="subreddit", description="From which subreddit", required=False, default=""
+    ),
+):
     if subreddit != "" and re.match(r"^([a-z0-9][_a-z0-9]{2,20})$", subreddit) is None:
         await interaction.send("Invalid subreddit.")
         return
@@ -300,83 +423,122 @@ async def meme(interaction=discord.Interaction, subreddit: str = discord.SlashOp
     await interaction.response.defer()
 
     async def get_sfw_meme():
-        response = requests.request(
-            "GET", f"https://meme-api.com/gimme/{subreddit}")
+        response = requests.request("GET", f"https://meme-api.com/gimme/{subreddit}")
 
         if not response.ok:
             await interaction.send("Error fetching meme.")
             return
-        
+
         data = json.loads(response.text)
 
         if "count" in data:
             data = data["memes"][0]
 
-        return data['url'] if not data['nsfw'] else get_sfw_meme()
+        return data["url"] if not data["nsfw"] else get_sfw_meme()
 
     image_url = await get_sfw_meme()
     await interaction.send(image_url)
 
 
-@bot.slash_command(name="search", description="Search for IGCSE past papers with subject code/question text")
-async def search(interaction: discord.Interaction, query: str = discord.SlashOption(name="query", description="Search query", required=True)):
+@bot.slash_command(
+    name="search",
+    description="Search for IGCSE past papers with subject code/question text",
+)
+async def search(
+    interaction: discord.Interaction,
+    query: str = discord.SlashOption(
+        name="query", description="Search query", required=True
+    ),
+):
     await interaction.response.defer(ephemeral=True)
     try:
         response = requests.get(
-            f"https://paper.sc/search/?as=json&query={query}").json()
-        if len(response['list']) == 0:
-            await interaction.send("No results found in past papers. Try changing your query for better results.", ephemeral=True)
+            f"https://paper.sc/search/?as=json&query={query}"
+        ).json()
+        if len(response["list"]) == 0:
+            await interaction.send(
+                "No results found in past papers. Try changing your query for better results.",
+                ephemeral=True,
+            )
         else:
-            embed = discord.Embed(title="Potential Match",
-                                  description="Your question matched a past paper question!",
-                                  colour=discord.Colour.green())
-            for n, item in enumerate(response['list'][:3]):
+            embed = discord.Embed(
+                title="Potential Match",
+                description="Your question matched a past paper question!",
+                colour=discord.Colour.green(),
+            )
+            for n, item in enumerate(response["list"][:3]):
                 # embed.add_field(name="Result No.", value=str(n+1), inline=False)
                 embed.add_field(
-                    name="Subject", value=item['doc']['subject'], inline=True)
+                    name="Subject", value=item["doc"]["subject"], inline=True
+                )
+                embed.add_field(name="Paper", value=item["doc"]["paper"], inline=True)
+                embed.add_field(name="Session", value=item["doc"]["time"], inline=True)
                 embed.add_field(
-                    name="Paper", value=item['doc']['paper'], inline=True)
+                    name="Variant", value=item["doc"]["variant"], inline=True
+                )
                 embed.add_field(
-                    name="Session", value=item['doc']['time'], inline=True)
+                    name="QP Link",
+                    value=f"https://paper.sc/doc/{item['doc']['_id']}",
+                    inline=True,
+                )
                 embed.add_field(
-                    name="Variant", value=item['doc']['variant'], inline=True)
-                embed.add_field(
-                    name="QP Link", value=f"https://paper.sc/doc/{item['doc']['_id']}", inline=True)
-                embed.add_field(
-                    name="MS Link", value=f"https://paper.sc/doc/{item['related'][0]['_id']}", inline=True)
+                    name="MS Link",
+                    value=f"https://paper.sc/doc/{item['related'][0]['_id']}",
+                    inline=True,
+                )
             await interaction.send(embed=embed, ephemeral=True)
-    except:
-        await interaction.send("No results found in past papers. Try changing your query for better results.", ephemeral=True)
+    except Exception:
+        await interaction.send(
+            "No results found in past papers. Try changing your query for better results.",
+            ephemeral=True,
+        )
 
 
 @bot.slash_command(description="Set server preferences (for mods)")
-async def set_preferences(interaction: discord.Interaction,
-                          modlog_channel: discord.abc.GuildChannel = discord.SlashOption(
-                              name="modlog_channel", description="Channel for log of timeouts, bans, etc.", required=False),
-                          rep_enabled: bool = discord.SlashOption(
-                              name="rep_enabled", description="Enable the reputation system?", required=False),
-                          suggestions_channel: discord.abc.GuildChannel = discord.SlashOption(
-                              name="suggestions_channel", description="Channel for new server suggestions to be displayed and voted upon.", required=False),
-                          warnlog_channel: discord.abc.GuildChannel = discord.SlashOption(
-                              name="warnlog_channel", description="Channel for warns to be logged.", required=False),
-                          emote_channel: discord.abc.GuildChannel = discord.SlashOption(name="emote_channel", description="Channel for emote voting to take place.", required=False)):
+async def set_preferences(
+    interaction: discord.Interaction,
+    modlog_channel: discord.abc.GuildChannel = discord.SlashOption(
+        name="modlog_channel",
+        description="Channel for log of timeouts, bans, etc.",
+        required=False,
+    ),
+    rep_enabled: bool = discord.SlashOption(
+        name="rep_enabled", description="Enable the reputation system?", required=False
+    ),
+    suggestions_channel: discord.abc.GuildChannel = discord.SlashOption(
+        name="suggestions_channel",
+        description="Channel for new server suggestions to be displayed and voted upon.",
+        required=False,
+    ),
+    warnlog_channel: discord.abc.GuildChannel = discord.SlashOption(
+        name="warnlog_channel",
+        description="Channel for warns to be logged.",
+        required=False,
+    ),
+    emote_channel: discord.abc.GuildChannel = discord.SlashOption(
+        name="emote_channel",
+        description="Channel for emote voting to take place.",
+        required=False,
+    ),
+):
 
     if not await is_moderator(interaction.user):
-        await interaction.send("You are not authorized to perform this action", ephemeral=True)
+        await interaction.send(
+            "You are not authorized to perform this action", ephemeral=True
+        )
         return
 
     await interaction.response.defer()
     if modlog_channel:
-        gpdb.set_pref('modlog_channel', modlog_channel.id,
-                      interaction.guild.id)
+        gpdb.set_pref("modlog_channel", modlog_channel.id, interaction.guild.id)
     if rep_enabled:
-        gpdb.set_pref('rep_enabled', rep_enabled, interaction.guild.id)
+        gpdb.set_pref("rep_enabled", rep_enabled, interaction.guild.id)
     if suggestions_channel:
-        gpdb.set_pref("suggestions_channel",
-                      suggestions_channel.id, interaction.guild.id)
+        gpdb.set_pref(
+            "suggestions_channel", suggestions_channel.id, interaction.guild.id
+        )
     if warnlog_channel:
-        gpdb.set_pref("warnlog_channel", warnlog_channel.id,
-                      interaction.guild.id)
+        gpdb.set_pref("warnlog_channel", warnlog_channel.id, interaction.guild.id)
     if emote_channel:
         gpdb.set_pref("emote_channel", emote_channel.id, interaction.guild.id)
     await interaction.send("Done.")
@@ -386,27 +548,43 @@ async def set_preferences(interaction: discord.Interaction,
 async def study_session(interaction: discord.Interaction):
     try:
         role = interaction.guild.get_role(study_roles[interaction.channel.id])
-    except:
-        await interaction.send("Please use this command in the subject channel of the subject you're starting a study session for.", ephemeral=True)
+    except Exception:
+        await interaction.send(
+            "Please use this command in the subject channel of the subject you're starting a study session for.",
+            ephemeral=True,
+        )
         return
     await interaction.response.defer()
     study_sesh_channel = bot.get_channel(STUDY_SESSION_CHANNEL)
     msg_history = await study_sesh_channel.history(limit=3).flatten()
     for msg in msg_history:
-        if (str(interaction.user.mention) in msg.content or str(role.mention) in msg.content) and \
-                (msg.created_at.replace(tzinfo=None) + datetime.timedelta(minutes=60) > datetime.datetime.utcnow()):
-            await interaction.send("Please wait until one hour after your previous ping or after a study session in the same subject to start a new study session.", ephemeral=True)
+        if (
+            str(interaction.user.mention) in msg.content
+            or str(role.mention) in msg.content
+        ) and (
+            msg.created_at.replace(tzinfo=None) + datetime.timedelta(minutes=60)
+            > datetime.datetime.utcnow()
+        ):
+            await interaction.send(
+                "Please wait until one hour after your previous ping or after a study session in the same subject to start a new study session.",
+                ephemeral=True,
+            )
             return
     voice_channel = interaction.user.voice
     if voice_channel is None:
-        await interaction.send("You must be in a voice channel to use this command.", ephemeral=True)
+        await interaction.send(
+            "You must be in a voice channel to use this command.", ephemeral=True
+        )
     else:
         await study_sesh_channel.send(
-            f"{role.mention} - Requested by {interaction.user.mention} - Please join {voice_channel.channel.mention}")
+            f"{role.mention} - Requested by {interaction.user.mention} - Please join {voice_channel.channel.mention}"
+        )
         await interaction.send(
-            f"Started a {role.name.lower().replace(' study ping', '').title()} study session at {voice_channel.channel.mention}.")
+            f"Started a {role.name.lower().replace(' study ping', '').title()} study session at {voice_channel.channel.mention}."
+        )
         await voice_channel.channel.edit(
-            name=f"{role.name.lower().replace(' study ping', '').title()} Study Session")
+            name=f"{role.name.lower().replace(' study ping', '').title()} Study Session"
+        )
 
 
 class Feedback(discord.ui.Modal):
@@ -417,22 +595,33 @@ class Feedback(discord.ui.Modal):
             label="Your feedback",
             style=discord.TextInputStyle.paragraph,
             placeholder="The message you would like to send as feedback",
-            required=True
+            required=True,
         )
         self.add_item(self.feedback)
 
     async def callback(self, interaction: discord.Interaction):
         feedback_channel = await bot.fetch_channel(FEEDBACK_CHANNEL_ID)
         feedback_embed = discord.Embed(
-            title=f"{FEEDBACK_NAME} Received", description=self.feedback.value, colour=discord.Colour.blue())
+            title=f"{FEEDBACK_NAME} Received",
+            description=self.feedback.value,
+            colour=discord.Colour.blue(),
+        )
         feedback_embed.set_author(
-            name=str(interaction.user), icon_url=interaction.user.display_avatar.url)
+            name=str(interaction.user), icon_url=interaction.user.display_avatar.url
+        )
         await feedback_channel.send(embed=feedback_embed)
         await interaction.send("Feedback sent!", ephemeral=True)
 
 
 @bot.slash_command(name="feedback", description="Submit some feedback to the mods!")
-async def feedback(interaction: discord.Interaction, target=discord.SlashOption(name="target", choices=["Moderators", "Bot Developers", "Resource Repository Team"], required=True)):
+async def feedback(
+    interaction: discord.Interaction,
+    target=discord.SlashOption(
+        name="target",
+        choices=["Moderators", "Bot Developers", "Resource Repository Team"],
+        required=True,
+    ),
+):
     await interaction.response.send_modal(modal=Feedback())
     global FEEDBACK_CHANNEL_ID
     global FEEDBACK_NAME
@@ -447,12 +636,12 @@ async def feedback(interaction: discord.Interaction, target=discord.SlashOption(
         FEEDBACK_NAME = "Repository Feedback"
 
 
-@bot.command(name='sync_commands')
+@bot.command(name="sync_commands")
 async def sync_commands(ctx):
     if not await is_moderator(ctx.author) and not await is_bot_developer(ctx.author):
         return
     await ctx.guild.sync_application_commands()
-    await ctx.message.reply('Slash Commands Synchronized !!')
+    await ctx.message.reply("Slash Commands Synchronized !!")
 
 
 @bot.slash_command(description="Get a random fun fact")
@@ -461,99 +650,156 @@ async def funfact(interaction: discord.Interaction):
     url = "https://uselessfacts.jsph.pl/random.json?language=en"
     response = requests.request("GET", url)
     data = json.loads(response.text)
-    useless_fact = data['text']
+    useless_fact = data["text"]
     await interaction.send(useless_fact)
 
 
-@bot.slash_command(name="instant_lockdown", description="Instantly locks/unlocks a channel/thread (for mods)")
-async def Instantlockcommand(interaction: discord.Interaction,
-                             action_type: str = discord.SlashOption(name="action_type", description="FORUM THREAD OR CHANNEL?", choices=[
-                                                                    "Channel Lock", "Forum Lock"], required=True),
-                             channelinput: discord.TextChannel = discord.SlashOption(
-                                 name="channel_name", description="Which channel do you want to perform the action on? (for channel lock)", required=False),
-                             threadinput: discord.Thread = discord.SlashOption(name="thread_name", description="Which thread do you want to perform the action on? (for forum lock)", required=False)):
+@bot.slash_command(
+    name="instant_lockdown",
+    description="Instantly locks/unlocks a channel/thread (for mods)",
+)
+async def Instantlockcommand(
+    interaction: discord.Interaction,
+    action_type: str = discord.SlashOption(
+        name="action_type",
+        description="FORUM THREAD OR CHANNEL?",
+        choices=["Channel Lock", "Forum Lock"],
+        required=True,
+    ),
+    channelinput: discord.TextChannel = discord.SlashOption(
+        name="channel_name",
+        description="Which channel do you want to perform the action on? (for channel lock)",
+        required=False,
+    ),
+    threadinput: discord.Thread = discord.SlashOption(
+        name="thread_name",
+        description="Which thread do you want to perform the action on? (for forum lock)",
+        required=False,
+    ),
+):
     await interaction.response.defer(ephemeral=True)
-    if not await is_moderator(interaction.user) and not await is_bot_developer(interaction.user):
-        await interaction.send(f"Sorry {interaction.user.mention}," " you don't have the permission to perform this action.", ephemeral=True)
+    if not await is_moderator(interaction.user) and not await is_bot_developer(
+        interaction.user
+    ):
+        await interaction.send(
+            f"Sorry {interaction.user.mention},"
+            " you don't have the permission to perform this action.",
+            ephemeral=True,
+        )
         return
     Logging = bot.get_channel(MODLOG_CHANNEL_ID)
     timenow = int(time.time()) + 1
     if action_type == "Forum Lock":
-        if threadinput == None:
-            await interaction.send(f"Please mention the forum post in the `thread_name` field.", ephemeral=True)
+        if threadinput is None:
+            await interaction.send(
+                "Please mention the forum post in the `thread_name` field.",
+                ephemeral=True,
+            )
         else:
             thread_id = bot.get_channel(threadinput.id)
-            if thread_id.locked == False:
+            if not thread_id.locked:
                 thread = await thread_id.edit(locked=True)
                 embed = discord.Embed(
-                    description="Instant Forum Lockdown", colour=discord.Colour.red())
-                embed.set_author(name=str(interaction.user),
-                                 icon_url=interaction.user.display_avatar.url)
-                embed.add_field(name="Locked Thread",
-                                value=f"<#{threadinput.id}>", inline=False)
+                    description="Instant Forum Lockdown", colour=discord.Colour.red()
+                )
+                embed.set_author(
+                    name=str(interaction.user),
+                    icon_url=interaction.user.display_avatar.url,
+                )
                 embed.add_field(
-                    name="Date", value=f"<t:{timenow}:F>", inline=False)
+                    name="Locked Thread", value=f"<#{threadinput.id}>", inline=False
+                )
+                embed.add_field(name="Date", value=f"<t:{timenow}:F>", inline=False)
                 embed.add_field(
-                    name="ID", value=f"```py\nUser = {interaction.user.id}\nThread = {threadinput.id}```", inline=False)
-                embed.set_footer(text=f"{bot.user}",
-                                 icon_url=bot.user.display_avatar.url)
+                    name="ID",
+                    value=f"```py\nUser = {interaction.user.id}\nThread = {threadinput.id}```",
+                    inline=False,
+                )
+                embed.set_footer(
+                    text=f"{bot.user}", icon_url=bot.user.display_avatar.url
+                )
                 await Logging.send(embed=embed)
-                await interaction.send(f"<#{threadinput.id}> has been locked", ephemeral=True)
-                await thread.send(f"This thread has been locked.")
+                await interaction.send(
+                    f"<#{threadinput.id}> has been locked", ephemeral=True
+                )
+                await thread.send("This thread has been locked.")
             else:
                 client = pymongo.MongoClient(LINK)
                 db = client.IGCSEBot
                 locks = db["forumlock"]
                 embed = discord.Embed(
-                    description="Instant Forum Lockdown", colour=discord.Colour.green())
-                embed.set_author(name=str(interaction.user),
-                                 icon_url=interaction.user.display_avatar.url)
-                embed.add_field(name="Unlocked Thread",
-                                value=f"<#{threadinput.id}>", inline=False)
+                    description="Instant Forum Lockdown", colour=discord.Colour.green()
+                )
+                embed.set_author(
+                    name=str(interaction.user),
+                    icon_url=interaction.user.display_avatar.url,
+                )
                 embed.add_field(
-                    name="Date", value=f"<t:{timenow}:F>", inline=False)
+                    name="Unlocked Thread", value=f"<#{threadinput.id}>", inline=False
+                )
+                embed.add_field(name="Date", value=f"<t:{timenow}:F>", inline=False)
                 embed.add_field(
-                    name="ID", value=f"```py\nUser = {interaction.user.id}\nThread = {threadinput.id}```", inline=False)
-                embed.set_footer(text=f"{bot.user}",
-                                 icon_url=bot.user.display_avatar.url)
+                    name="ID",
+                    value=f"```py\nUser = {interaction.user.id}\nThread = {threadinput.id}```",
+                    inline=False,
+                )
+                embed.set_footer(
+                    text=f"{bot.user}", icon_url=bot.user.display_avatar.url
+                )
                 await Logging.send(embed=embed)
                 thread = await thread_id.edit(locked=False)
-                await interaction.send(f"<#{threadinput.id}> has been unlocked", ephemeral=True)
-                await thread.send(f"This thread has been unlocked.")
-                results = locks.find(
-                    {"thread_id": threadinput.id, "resolved": False})
+                await interaction.send(
+                    f"<#{threadinput.id}> has been unlocked", ephemeral=True
+                )
+                await thread.send("This thread has been unlocked.")
+                results = locks.find({"thread_id": threadinput.id, "resolved": False})
                 for result in results:
                     try:
-                        locks.update_one({"_id": result["_id"]}, {
-                                         "$set": {"resolved": True}})
+                        locks.update_one(
+                            {"_id": result["_id"]}, {"$set": {"resolved": True}}
+                        )
                     except Exception:
                         print(traceback.format_exc())
 
     if action_type == "Channel Lock":
-        if channelinput == None:
-            await interaction.send(f"Please mention the channel in the `channel_name` field.", ephemeral=True)
+        if channelinput is None:
+            await interaction.send(
+                "Please mention the channel in the `channel_name` field.",
+                ephemeral=True,
+            )
         else:
             channel = bot.get_channel(channelinput.id)
             overwrite = channel.overwrites_for(interaction.guild.default_role)
-            if overwrite.send_messages == True and overwrite.send_messages_in_threads == True:
+            if overwrite.send_messages and overwrite.send_messages_in_threads:
                 overwrite.send_messages = False
                 overwrite.send_messages_in_threads = False
                 embed = discord.Embed(
-                    description="Instant Channel Lockdown", colour=discord.Colour.red())
-                embed.set_author(name=str(interaction.user),
-                                 icon_url=interaction.user.display_avatar.url)
-                embed.add_field(name="Locked Channel",
-                                value=f"<#{channelinput.id}>", inline=False)
+                    description="Instant Channel Lockdown", colour=discord.Colour.red()
+                )
+                embed.set_author(
+                    name=str(interaction.user),
+                    icon_url=interaction.user.display_avatar.url,
+                )
                 embed.add_field(
-                    name="Date", value=f"<t:{timenow}:F>", inline=False)
+                    name="Locked Channel", value=f"<#{channelinput.id}>", inline=False
+                )
+                embed.add_field(name="Date", value=f"<t:{timenow}:F>", inline=False)
                 embed.add_field(
-                    name="ID", value=f"```py\nUser = {interaction.user.id}\nChannel = {channelinput.id}```", inline=False)
-                embed.set_footer(text=f"{bot.user}",
-                                 icon_url=bot.user.display_avatar.url)
+                    name="ID",
+                    value=f"```py\nUser = {interaction.user.id}\nChannel = {channelinput.id}```",
+                    inline=False,
+                )
+                embed.set_footer(
+                    text=f"{bot.user}", icon_url=bot.user.display_avatar.url
+                )
                 await Logging.send(embed=embed)
-                await channel.set_permissions(interaction.guild.default_role, overwrite=overwrite)
-                await interaction.send(f"<#{channelinput.id}> has been locked", ephemeral=True)
-                await channel.send(f"This channel has been locked.")
+                await channel.set_permissions(
+                    interaction.guild.default_role, overwrite=overwrite
+                )
+                await interaction.send(
+                    f"<#{channelinput.id}> has been locked", ephemeral=True
+                )
+                await channel.send("This channel has been locked.")
             else:
                 client = pymongo.MongoClient(LINK)
                 db = client.IGCSEBot
@@ -561,27 +807,39 @@ async def Instantlockcommand(interaction: discord.Interaction,
                 overwrite.send_messages = True
                 overwrite.send_messages_in_threads = True
                 embed = discord.Embed(
-                    description="Instant Channel Lockdown", colour=discord.Colour.green())
-                embed.set_author(name=str(interaction.user),
-                                 icon_url=interaction.user.display_avatar.url)
-                embed.add_field(name="Unlocked Channel",
-                                value=f"<#{channelinput.id}>", inline=False)
+                    description="Instant Channel Lockdown",
+                    colour=discord.Colour.green(),
+                )
+                embed.set_author(
+                    name=str(interaction.user),
+                    icon_url=interaction.user.display_avatar.url,
+                )
                 embed.add_field(
-                    name="Date", value=f"<t:{timenow}:F>", inline=False)
+                    name="Unlocked Channel", value=f"<#{channelinput.id}>", inline=False
+                )
+                embed.add_field(name="Date", value=f"<t:{timenow}:F>", inline=False)
                 embed.add_field(
-                    name="ID", value=f"```py\nUser = {interaction.user.id}\nChannel = {channelinput.id}```", inline=False)
-                embed.set_footer(text=f"{bot.user}",
-                                 icon_url=bot.user.display_avatar.url)
+                    name="ID",
+                    value=f"```py\nUser = {interaction.user.id}\nChannel = {channelinput.id}```",
+                    inline=False,
+                )
+                embed.set_footer(
+                    text=f"{bot.user}", icon_url=bot.user.display_avatar.url
+                )
                 await Logging.send(embed=embed)
-                await channel.set_permissions(interaction.guild.default_role, overwrite=overwrite)
-                await interaction.send(f"<#{channelinput.id}> has been unlocked", ephemeral=True)
-                await channel.send(f"This channel has been unlocked.")
-                results = locks.find(
-                    {"channel_id": channelinput.id, "resolved": False})
+                await channel.set_permissions(
+                    interaction.guild.default_role, overwrite=overwrite
+                )
+                await interaction.send(
+                    f"<#{channelinput.id}> has been unlocked", ephemeral=True
+                )
+                await channel.send("This channel has been unlocked.")
+                results = locks.find({"channel_id": channelinput.id, "resolved": False})
                 for result in results:
                     try:
-                        locks.update_one({"_id": result["_id"]}, {
-                                         "$set": {"resolved": True}})
+                        locks.update_one(
+                            {"_id": result["_id"]}, {"$set": {"resolved": True}}
+                        )
                     except Exception:
                         print(traceback.format_exc())
 
@@ -594,7 +852,7 @@ class ChatModerator(discord.ui.Modal):
             label="Timezone",
             style=discord.TextInputStyle.short,
             placeholder="Please specify your timezone in UTC/GMT time",
-            required=True
+            required=True,
         )
         self.add_item(self.timezone)
 
@@ -602,23 +860,34 @@ class ChatModerator(discord.ui.Modal):
         channel = bot.get_channel(CHATMOD_APP_CHANNEL)
 
         application_embed = discord.Embed(
-            title="New application received", color=0xE3FB6D)
+            title="New application received", color=0xE3FB6D
+        )
         application_embed.add_field(name="User", value=interaction.user)
         application_embed.add_field(name="Position", value="Chat Moderator")
         application_embed.add_field(name="Timezone", value=self.timezone.value)
 
         await channel.send(embed=application_embed)
-        await interaction.send("Thank you for applying. If you are selected as a Chat Moderator, we will send you a modmail with more information. Good luck!", ephemeral=True)
+        await interaction.send(
+            "Thank you for applying. If you are selected as a Chat Moderator, we will send you a modmail with more information. Good luck!",
+            ephemeral=True,
+        )
 
 
 class ApplyDropdown(discord.ui.Select):
     def __init__(self):
         options = [
             discord.SelectOption(
-                label="Chat Moderator", description="Apply for the chat moderator position", emoji="💬")
+                label="Chat Moderator",
+                description="Apply for the chat moderator position",
+                emoji="💬",
+            )
         ]
-        super().__init__(placeholder="Select the application type",
-                         min_values=1, max_values=1, options=options)
+        super().__init__(
+            placeholder="Select the application type",
+            min_values=1,
+            max_values=1,
+            options=options,
+        )
 
     async def callback(self, interaction: discord.Interaction):
         if self.values[0] == "Chat Moderator":
@@ -626,7 +895,9 @@ class ApplyDropdown(discord.ui.Select):
             await interaction.response.send_modal(modal=chat_modal)
 
 
-@bot.slash_command(name="apply", description="Apply for positions in the Discord server")
+@bot.slash_command(
+    name="apply", description="Apply for positions in the Discord server"
+)
 async def apply(interaction: discord.Interaction):
     view = discord.ui.View()
     view.add_item(ApplyDropdown())
@@ -634,7 +905,13 @@ async def apply(interaction: discord.Interaction):
 
 
 class NewEmbed(discord.ui.Modal):
-    def __init__(self, embed: discord.Embed, embed_msg: discord.Message = None, content: str = None, channel: discord.TextChannel = None):
+    def __init__(
+        self,
+        embed: discord.Embed,
+        embed_msg: discord.Message = None,
+        content: str = None,
+        channel: discord.TextChannel = None,
+    ):
         self.embed = embed
         self.msg = embed_msg
         self.content = content
@@ -646,7 +923,7 @@ class NewEmbed(discord.ui.Modal):
             label="Title of the embed",
             style=discord.TextInputStyle.short,
             placeholder="This will be the title of the embed",
-            required=True
+            required=True,
         )
         self.add_item(self.name)
 
@@ -654,7 +931,7 @@ class NewEmbed(discord.ui.Modal):
             label="Description of the embed",
             style=discord.TextInputStyle.paragraph,
             placeholder="This will be the description of the embed",
-            required=True
+            required=True,
         )
         self.add_item(self.description)
 
@@ -669,17 +946,36 @@ class NewEmbed(discord.ui.Modal):
 
 
 @bot.slash_command(description="send and edit embeds (for mods)")
-async def embed(interaction: discord.Interaction,
-                channel: discord.abc.GuildChannel = discord.SlashOption(
-                    name="channel", description="Default is the channel you use the command in", channel_types=[discord.ChannelType.text], required=False),
-                content: str = discord.SlashOption(
-                    name="content", description="The content of the embed", required=False),
-                colour: str = discord.SlashOption(
-                    name="colour", description="The hexadecimal colour code for the embed (Default is green)", required=False),
-                message_id: str = discord.SlashOption(name='message_id', description='The id of the message embed you want to edit', required=False)):
+async def embed(
+    interaction: discord.Interaction,
+    channel: discord.abc.GuildChannel = discord.SlashOption(
+        name="channel",
+        description="Default is the channel you use the command in",
+        channel_types=[discord.ChannelType.text],
+        required=False,
+    ),
+    content: str = discord.SlashOption(
+        name="content", description="The content of the embed", required=False
+    ),
+    colour: str = discord.SlashOption(
+        name="colour",
+        description="The hexadecimal colour code for the embed (Default is green)",
+        required=False,
+    ),
+    message_id: str = discord.SlashOption(
+        name="message_id",
+        description="The id of the message embed you want to edit",
+        required=False,
+    ),
+):
 
-    if not await is_moderator(interaction.user) and not await is_bot_developer(interaction.user):
-        await interaction.send("You do not have the necessary permissions to perform this action", ephemeral=True)
+    if not await is_moderator(interaction.user) and not await is_bot_developer(
+        interaction.user
+    ):
+        await interaction.send(
+            "You do not have the necessary permissions to perform this action",
+            ephemeral=True,
+        )
         return
     if channel:
         embed_channel = channel
@@ -688,16 +984,19 @@ async def embed(interaction: discord.Interaction,
     if message_id:
         embed_message = await embed_channel.fetch_message(int(message_id))
         previous_embed = embed_message.embeds[0]
-        embed = discord.Embed(colour=previous_embed.colour,
-                              title=previous_embed.title, description=previous_embed.description)
+        embed = discord.Embed(
+            colour=previous_embed.colour,
+            title=previous_embed.title,
+            description=previous_embed.description,
+        )
     else:
         embed = discord.Embed()
         embed_message = None
     if colour:
         try:
             embed.colour = int(colour[1:], 16)
-        except:
-            await interaction.send('Invalid Hex code', ephemeral=True)
+        except Exception:
+            await interaction.send("Invalid Hex code", ephemeral=True)
             return
     else:
         embed.colour = discord.Colour.green()
@@ -706,8 +1005,14 @@ async def embed(interaction: discord.Interaction,
 
 
 @bot.slash_command(description="Make an anonymous confession.")
-async def confess(interaction: discord.Interaction,
-                  confession: str = discord.SlashOption(name="confession", description="Write your confession and it will be sent anonymously", required=True)):
+async def confess(
+    interaction: discord.Interaction,
+    confession: str = discord.SlashOption(
+        name="confession",
+        description="Write your confession and it will be sent anonymously",
+        required=True,
+    ),
+):
 
     if interaction.guild.id != GUILD_ID:
         await interaction.send("This command is not available on this server.")
@@ -717,36 +1022,39 @@ async def confess(interaction: discord.Interaction,
     confession_channel = interaction.guild.get_channel(CONFESSION_CHANNEL)
 
     view = discord.ui.View(timeout=None)
-    approveBTN = discord.ui.Button(
-        label="Approve", style=discord.ButtonStyle.blurple)
-    rejectBTN = discord.ui.Button(
-        label="Reject", style=discord.ButtonStyle.red)
+    approveBTN = discord.ui.Button(label="Approve", style=discord.ButtonStyle.blurple)
+    rejectBTN = discord.ui.Button(label="Reject", style=discord.ButtonStyle.red)
 
     async def ApproveCallBack(interaction):
-        embed = discord.Embed(
-            colour=discord.Colour.green(), description=confession)
+        embed = discord.Embed(colour=discord.Colour.green(), description=confession)
         embed.set_author(
-            name=f"Approved by {interaction.user}", icon_url=interaction.user.display_avatar.url)
+            name=f"Approved by {interaction.user}",
+            icon_url=interaction.user.display_avatar.url,
+        )
         await interaction.edit(embed=embed, view=None)
-        embed = discord.Embed(
-            colour=discord.Colour.random(), description=confession)
+        embed = discord.Embed(colour=discord.Colour.random(), description=confession)
         await confession_channel.send(content="New Anonymous Confession", embed=embed)
+
     approveBTN.callback = ApproveCallBack
 
     async def RejectCallBack(interaction):
-        embed = discord.Embed(colour=discord.Colour.red(),
-                              description=confession)
+        embed = discord.Embed(colour=discord.Colour.red(), description=confession)
         embed.set_author(
-            name=f"Rejected by {interaction.user}", icon_url=interaction.user.display_avatar.url)
+            name=f"Rejected by {interaction.user}",
+            icon_url=interaction.user.display_avatar.url,
+        )
         await interaction.edit(embed=embed, view=None)
+
     rejectBTN.callback = RejectCallBack
 
     view.add_item(approveBTN)
     view.add_item(rejectBTN)
-    embed = discord.Embed(colour=discord.Colour.random(),
-                          description=confession)
-    anon_approve_mgs = await mods_channel.send(embed=embed, view=view)
-    await interaction.send("Your confession has been sent to the moderators.\nYou have to wait for their approval.", ephemeral=True)
+    embed = discord.Embed(colour=discord.Colour.random(), description=confession)
+    await mods_channel.send(embed=embed, view=view)
+    await interaction.send(
+        "Your confession has been sent to the moderators.\nYou have to wait for their approval.",
+        ephemeral=True,
+    )
 
 
 class Level(discord.ui.Select):
@@ -786,8 +1094,9 @@ class Groups(discord.ui.Select):
         for subject in subreddits[self.level][group].keys():
             view.add_item(
                 discord.ui.Button(
-                    label=subject, style=discord.ButtonStyle.url, url=subreddits[
-                        self.level][group][subject]
+                    label=subject,
+                    style=discord.ButtonStyle.url,
+                    url=subreddits[self.level][group][subject],
                 )
             )
         await interaction.response.edit_message(view=view)
@@ -805,26 +1114,32 @@ async def resources(interaction: discord.Interaction):
 
 
 @bot.slash_command(description="Suggest an emote for the server!")
-async def submit_emote(interaction: discord.Interaction,
-                       name: str = discord.SlashOption(
-                           name="name", description="Name for emote", required=True),
-                       img: discord.Attachment = discord.SlashOption(name="image",
-                                                                     description="Image to create emote from",
-                                                                     required=True)):
+async def submit_emote(
+    interaction: discord.Interaction,
+    name: str = discord.SlashOption(
+        name="name", description="Name for emote", required=True
+    ),
+    img: discord.Attachment = discord.SlashOption(
+        name="image", description="Image to create emote from", required=True
+    ),
+):
     if "image" in img.content_type:
         await interaction.response.defer(ephemeral=True)
-        channel_id = gpdb.get_pref('emote_channel', interaction.guild.id)
+        channel_id = gpdb.get_pref("emote_channel", interaction.guild.id)
 
         if channel_id:
             channel = interaction.guild.get_channel(channel_id)
             if " " in name:
-                await interaction.send("Spaces are not allowed in emoji names!", ephemeral=True)
+                await interaction.send(
+                    "Spaces are not allowed in emoji names!", ephemeral=True
+                )
                 return
             if not (name[0] == ":" and name[-1] == ":"):
                 name = f":{name}:"
             msg = await channel.send(
                 f"New emote suggestion by {interaction.user.mention} `{name}`",
-                file=await img.to_file())
+                file=await img.to_file(),
+            )
             await msg.add_reaction("👍")
             await msg.add_reaction("🔒")
             await msg.add_reaction("👎")
@@ -832,7 +1147,8 @@ async def submit_emote(interaction: discord.Interaction,
         else:
             await interaction.send(
                 "Emote voting is not set up on this server. Please ask a moderator/admin to set it up using `/set_preferences`!",
-                ephemeral=True)
+                ephemeral=True,
+            )
     else:
         await interaction.send("Invalid input!", ephemeral=True)
 
@@ -846,7 +1162,7 @@ class EditMessage(discord.ui.Modal):
             label="Message ID",
             style=discord.TextInputStyle.short,
             placeholder="ID of the message you want to edit",
-            required=True
+            required=True,
         )
         self.add_item(self.message_id)
 
@@ -854,7 +1170,7 @@ class EditMessage(discord.ui.Modal):
             label="Content",
             style=discord.TextInputStyle.paragraph,
             placeholder="The main body of the message you wish to send",
-            required=True
+            required=True,
         )
         self.add_item(self.message_content)
 
@@ -863,8 +1179,11 @@ class EditMessage(discord.ui.Modal):
             message = await self.channel.fetch_message(int(self.message_id.value))
             await message.edit(self.message_content.value)
             await interaction.send("Message edited!", ephemeral=True)
-        except:
-            await interaction.send("Message ID has to be an integer and has to be in the channel chosen!", ephemeral=True)
+        except Exception:
+            await interaction.send(
+                "Message ID has to be an integer and has to be in the channel chosen!",
+                ephemeral=True,
+            )
 
 
 class SendMessage(discord.ui.Modal):
@@ -876,7 +1195,7 @@ class SendMessage(discord.ui.Modal):
             label="Message ID",
             style=discord.TextInputStyle.short,
             placeholder="ID of the message you want to reply to",
-            required=False
+            required=False,
         )
         self.add_item(self.message_id)
 
@@ -884,7 +1203,7 @@ class SendMessage(discord.ui.Modal):
             label="Content",
             style=discord.TextInputStyle.paragraph,
             placeholder="The body of the message you wish to send",
-            required=True
+            required=True,
         )
         self.add_item(self.message_content)
 
@@ -894,25 +1213,41 @@ class SendMessage(discord.ui.Modal):
                 message = await self.channel.fetch_message(int(self.message_id.value))
                 await message.reply(self.message_content.value)
                 await interaction.send("Message sent!", ephemeral=True)
-            except:
-                await interaction.send("Message ID has to be an integer and has to be in the channel chosen!", ephemeral=True)
+            except Exception:
+                await interaction.send(
+                    "Message ID has to be an integer and has to be in the channel chosen!",
+                    ephemeral=True,
+                )
         else:
             await self.channel.send(self.message_content.value)
             await interaction.send("Message sent!", ephemeral=True)
 
 
 @bot.slash_command(name="message", description="Sends or Edits a Message (for mods)")
-async def send_editcommand(interaction: discord.Interaction,
-                           action_type: str = discord.SlashOption(name="action_type", description="SEND or EDIT?", choices=[
-                                                                  "Send Message", "Edit Message"], required=True),
-                           channel: discord.TextChannel = discord.SlashOption(name="channel", description="The channel to send the message to or where the message is located", required=True)):
+async def send_editcommand(
+    interaction: discord.Interaction,
+    action_type: str = discord.SlashOption(
+        name="action_type",
+        description="SEND or EDIT?",
+        choices=["Send Message", "Edit Message"],
+        required=True,
+    ),
+    channel: discord.TextChannel = discord.SlashOption(
+        name="channel",
+        description="The channel to send the message to or where the message is located",
+        required=True,
+    ),
+):
 
-    if not await is_moderator(interaction.user) and not await is_bot_developer(interaction.user):
+    if not await is_moderator(interaction.user) and not await is_bot_developer(
+        interaction.user
+    ):
         await interaction.send("You are not authorized to perform this action.")
         return
     if action_type == "Send Message":
         await interaction.response.send_modal(modal=SendMessage(channel))
     if action_type == "Edit Message":
         await interaction.response.send_modal(modal=EditMessage(channel))
+
 
 bot.run(TOKEN)

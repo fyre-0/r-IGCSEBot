@@ -9,12 +9,15 @@ import ast
 import json
 import random
 import pyshorteners
-import ast
 
 from nextcord.ext import tasks, commands
-from constants import GUILD_ID
+from utils.constants import GUILD_ID
 
 intents = discord.Intents().all()
-bot = commands.Bot(command_prefix=".", intents=intents, allowed_mentions=discord.AllowedMentions(everyone=False))
+bot = commands.Bot(
+    command_prefix=".",
+    intents=intents,
+    allowed_mentions=discord.AllowedMentions(everyone=False),
+)
 guild = bot.get_guild(GUILD_ID)
 keywords = {}

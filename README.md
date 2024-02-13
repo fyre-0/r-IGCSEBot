@@ -91,4 +91,4 @@ The `v1.0` version of this bot rolled into use on July 5, 2021 and has come a lo
 4. [Create a MongoDB database named `IGCSEBot`](https://www.mongodb.com/basics/create-database).
 5. [Setup redis and get your REDIS_OM_URL](https://github.com/redis/redis-om-python/blob/main/docs/getting_started.md)
 6. Rename `.env.example` to `.env` and fill it in with the above
-7. Run the bot using the command `python src/app.py` (`python3 src/app.py` for Linux)
+7. Run the bot using the command `python src/app.py` (`python3 src/app.py` for Linux) or run the npm `start` script
