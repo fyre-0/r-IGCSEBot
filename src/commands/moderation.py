@@ -57,12 +57,15 @@ async def history(
 
         reason = f" for {result['reason']}" if result["reason"] else ""
 
-        if "#" not in result["action_by"] and result["action_by"].isnumeric():
-            moderator = interaction.guild.get_member(
-                int(result["action_by"])
-            ) or await interaction.guild.fetch_member(int(result["action_by"]))
-            moderator = moderator.name
-        else:
+        try:
+            if "#" not in result["action_by"] and result["action_by"].isnumeric():
+                moderator = interaction.guild.get_member(
+                    int(result["action_by"])
+                ) or await interaction.guild.fetch_member(int(result["action_by"]))
+                moderator = moderator.name
+            else:
+                moderator = result["action_by"].strip()
+        except discord.errors.NotFound:
             moderator = result["action_by"].strip()
 
         final_string = f"[{date_of_event}] {result['action']}{duration_as_text}{reason} by {moderator.strip()}"
