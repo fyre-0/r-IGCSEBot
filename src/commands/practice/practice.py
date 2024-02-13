@@ -1,7 +1,7 @@
 from bot import bot, discord
 from redis_om import NotFoundError, Migrator
 from schemas.redis import Session, User, TempSessionData, ExtendedModel, Question, View
-from ui import (
+from .ui import (
     GetUserInput,
     SelectMenuSubject,
     SelectMenuTopic,
@@ -10,7 +10,7 @@ from ui import (
     JoinSessionListView,
     AddRemoveUserView,
 )
-from mongodb import questionsdb
+from utils.mongodb import questionsdb
 from utils.data import practice_subjects
 import uuid
 import time

@@ -1,5 +1,5 @@
 from bot import bot, discord
-from constants import (
+from utils.constants import (
     GUILD_ID,
     BOTLOG_CHANNEL_ID,
     BETA,
@@ -19,7 +19,7 @@ from monitor_tasks import (
     expire_sessions,
 )
 from schemas.redis import View
-from ui import MCQButtonsView
+from commands.practice.ui import MCQButtonsView
 
 loops = [
     checklock,

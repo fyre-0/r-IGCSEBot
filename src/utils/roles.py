@@ -1,5 +1,10 @@
 from bot import discord, bot
-from constants import GUILD_ID, MODERATOR_ROLES, CHAT_MODERATOR_ROLE, BOT_DEVELOPER_ROLE
+from .constants import (
+    GUILD_ID,
+    MODERATOR_ROLES,
+    CHAT_MODERATOR_ROLE,
+    BOT_DEVELOPER_ROLE,
+)
 
 
 async def has_role(member: discord.Member, role_name: str):

@@ -1,5 +1,5 @@
 from bot import discord, bot, pymongo
-from constants import GUILD_ID, LINK, HOTM_VOTING_CHANNEL
+from utils.constants import GUILD_ID, LINK, HOTM_VOTING_CHANNEL
 from utils.roles import is_helper, is_moderator
 
 

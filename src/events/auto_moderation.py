@@ -1,5 +1,5 @@
 from bot import bot, time
-from mongodb import gpdb, punishdb
+from utils.mongodb import gpdb, punishdb
 from commands.moderation import convert_time
 
 SECONDS_PER_MINUTE = 60

@@ -1,6 +1,6 @@
 # Importing Variables
 from bot import bot, datetime, discord, json, pymongo, requests, time, ast, traceback
-from constants import (
+from utils.constants import (
     FEEDBACK_CHANNEL_ID,
     FEEDBACK_NAME,
     GUILD_ID,
@@ -39,7 +39,7 @@ from utils.roles import (
     is_bot_developer,
     is_chat_moderator,
 )
-from mongodb import gpdb, repdb, rrdb, smdb, kwdb
+from utils.mongodb import gpdb, repdb, rrdb, smdb, kwdb
 import re
 
 # Importing Files

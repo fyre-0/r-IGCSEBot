@@ -1,5 +1,5 @@
 from bot import bot, discord
-from constants import GUILD_ID
+from utils.constants import GUILD_ID
 from utils.roles import is_moderator, is_server_booster, has_role
 from utils.data import reactionroles_data
 

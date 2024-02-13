@@ -1,7 +1,7 @@
 from bot import bot, discord, commands
-from mongodb import dmsdb
+from utils.mongodb import dmsdb
 from utils.roles import is_chat_moderator, is_moderator
-from constants import GUILD_ID, DMS_CLOSED_CHANNEL_ID
+from utils.constants import GUILD_ID, DMS_CLOSED_CHANNEL_ID
 
 
 async def send_dm(member: discord.Member, **kwargs):

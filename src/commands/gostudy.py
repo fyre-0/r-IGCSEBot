@@ -1,5 +1,5 @@
 from bot import bot, discord, time, pymongo
-from constants import GUILD_ID, LINK, FORCED_MUTE_ROLE, MODLOG_CHANNEL_ID
+from utils.constants import GUILD_ID, LINK, FORCED_MUTE_ROLE, MODLOG_CHANNEL_ID
 from utils.roles import (
     has_role,
     get_role,

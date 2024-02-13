@@ -11,7 +11,7 @@ import random
 import pyshorteners
 
 from nextcord.ext import tasks, commands
-from constants import GUILD_ID
+from utils.constants import GUILD_ID
 
 intents = discord.Intents().all()
 bot = commands.Bot(

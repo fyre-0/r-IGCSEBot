@@ -1,5 +1,5 @@
 from bot import bot, discord
-from constants import GUILD_ID
+from utils.constants import GUILD_ID
 from utils.data import reactionroles_data
 
 

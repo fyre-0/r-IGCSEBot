@@ -1,5 +1,5 @@
 from bot import bot
-from constants import GUILD_ID
+from utils.constants import GUILD_ID
 
 
 @bot.event

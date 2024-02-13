@@ -1,6 +1,5 @@
-from bot import bot, discord, pymongo
-from constants import LINK, DMS_CLOSED_CHANNEL_ID
-from datetime import datetime
+from bot import bot, discord, pymongo, datetime
+from utils.constants import LINK, DMS_CLOSED_CHANNEL_ID
 
 client = pymongo.MongoClient(LINK, server_api=pymongo.server_api.ServerApi("1"))
 

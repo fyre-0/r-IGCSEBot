@@ -1,7 +1,7 @@
 from bot import bot, discord, time
-from mongodb import repdb
+from utils.mongodb import repdb
 from utils.roles import is_moderator, is_bot_developer
-from constants import MODLOG_CHANNEL_ID
+from utils.constants import MODLOG_CHANNEL_ID
 
 
 @bot.slash_command(name="rep", description="View someone's current rep")

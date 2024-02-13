@@ -1,6 +1,6 @@
 from bot import bot, discord
-from constants import GUILD_ID
-from mongodb import rrdb
+from utils.constants import GUILD_ID
+from utils.mongodb import rrdb
 
 
 @bot.event

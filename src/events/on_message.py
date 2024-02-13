@@ -1,4 +1,4 @@
-from constants import (
+from utils.constants import (
     BETA,
     GUILD_ID,
     SHOULD_LOG_ALL,
@@ -11,7 +11,7 @@ from constants import (
 from utils.data import REP_DISABLE_CHANNELS
 from bot import discord, bot, keywords
 import sys
-from mongodb import gpdb, smdb, repdb, kwdb
+from utils.mongodb import gpdb, smdb, repdb, kwdb
 from utils.roles import is_moderator, is_helper, is_chat_moderator, is_bot_developer
 
 

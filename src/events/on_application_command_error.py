@@ -1,5 +1,5 @@
 from bot import bot, discord, traceback
-from constants import GUILD_ID, BOTLOG_CHANNEL_ID
+from utils.constants import GUILD_ID, BOTLOG_CHANNEL_ID
 
 
 @bot.event
