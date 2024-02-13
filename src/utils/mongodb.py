@@ -1,5 +1,6 @@
-from bot import bot, discord, pymongo, datetime
+from bot import bot, discord, pymongo
 from utils.constants import LINK, DMS_CLOSED_CHANNEL_ID
+from datetime import datetime, UTC
 
 client = pymongo.MongoClient(LINK, server_api=pymongo.server_api.ServerApi("1"))
 
@@ -275,7 +276,7 @@ class PunishmentsDB:
                 "reason": reason,
                 "action": action,
                 "duration": duration,
-                "when": when or datetime.utcnow(),
+                "when": when or datetime.now(UTC),
             }
         )
 
