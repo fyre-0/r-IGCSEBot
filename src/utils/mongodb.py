@@ -2,7 +2,7 @@ from bot import bot, discord, pymongo
 from utils.constants import LINK, DMS_CLOSED_CHANNEL_ID
 from datetime import datetime, UTC
 
-client = pymongo.MongoClient(LINK, server_api=pymongo.server_api.ServerApi("1"))
+client = pymongo.MongoClient(LINK, server_api=pymongo.server_api.ServerApi("1"), minPoolSize=1)
 
 
 class ReactionRolesDB:
