@@ -15,7 +15,7 @@ from constants import (
     CONFESSION_CHANNEL,
     STUDY_SESSION_CHANNEL,
 )
-from data import (
+from utils.data import (
     helper_roles,
     reactionroles_data,
     study_roles,
@@ -30,7 +30,7 @@ from data import (
     SUBJECT_ROLES,
     REP_DISABLE_CHANNELS,
 )
-from roles import (
+from utils.roles import (
     is_moderator,
     is_server_booster,
     is_helper,
@@ -53,19 +53,22 @@ from events import (
     on_raw_reaction_remove,
     on_thread_create,
     on_voice_state_update,
+    auto_moderation,
 )
-import moderation
-import auto_moderation
-import random_pyp
-import gostudy
-import role_command
-import colorroles
-import reputation
-import hotm
-import locks
-import keywords
-import practice
-import chem_info
+from commands import (
+    role as role_command,
+    colorroles,
+    practice,
+    locks as lock_command,
+    chem_info,
+    dms,
+    gostudy,
+    hotm,
+    keywords,
+    moderation,
+    random_pyp,
+    reputation,
+)
 
 
 def insert_returns(body):
