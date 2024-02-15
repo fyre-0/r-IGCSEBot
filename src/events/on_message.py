@@ -200,11 +200,6 @@ async def on_message(message: discord.Message):
         await get_thread(message, False)
 
     if not message.guild:
-        if message.content[0] == "/":
-            await message.reply(
-                "Uh-oh. We think you're trying to use a Slash Command. These can only be used within a Discord Server and not within DMs."
-            )
-        else:
             thread = await get_thread(message, True)
             embed = discord.Embed(
                 title="Message Received",
