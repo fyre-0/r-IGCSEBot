@@ -209,9 +209,9 @@ async def on_message(message: discord.Message):
             embed.set_author(
                 name=str(message.author), icon_url=message.author.display_avatar.url
             )
-            await thread.send(embed=embed)
-            for attachment in message.attachments:
-                await thread.send(file=await attachment.to_file())
+            for attachment in message.attachments:          
+                embed.set_image(url=attachment.url)
+            await thread.send(embed=embed)         
             await message.add_reaction("✅")
             return
 
@@ -231,9 +231,9 @@ async def on_message(message: discord.Message):
                 name=str(message.author), icon_url=message.author.display_avatar.url
             )
             try:
-                await channel.send(embed=embed)
                 for attachment in message.attachments:
-                    await channel.send(file=await attachment.to_file())
+                        embed.set_image(url=attachment.url)
+                await channel.send(embed=embed)
                 await message.channel.send(embed=embed)
             except Exception:
                 perms = message.channel.overwrites_for(member)
