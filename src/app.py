@@ -262,8 +262,10 @@ class CancelPingBtn(discord.ui.View):
 async def helper_old(
     interaction: discord.Interaction,
 ):
-        content = "This command is now outdated, instead you can long-press/right-click on the message you want help with, go to 'Apps' then choose helper"
-        await interaction.response.send_message(content=content, ephemeral=True)
+        embed = discord.Embed(description="This command is now outdated, instead you can long-press/right-click on the message you want help with, go to 'Apps' then choose helper")
+        embed.set_image(url="https://raw.githubusercontent.com/fyre-0/r-IGCSEBot/assets/helper_ping.png")
+        
+        interaction.send(embed=embed)
 
 
 @bot.message_command(
