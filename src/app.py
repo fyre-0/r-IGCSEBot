@@ -219,7 +219,7 @@ async def yesnopoll(
 
 class CancelPingBtn(discord.ui.View):
     def __init__(self):
-        super().__init__(timeout=890)
+        super().__init__(timeout=20)
         self.value = True
 
     @discord.ui.button(label="Cancel Ping", style=discord.ButtonStyle.blurple)
