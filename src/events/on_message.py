@@ -228,6 +228,7 @@ async def on_message(message: discord.Message):
                 embed = discord.Embed(title="Error Encountered", description="I don't have permission to send direct messages to that user as they either left the server or has been banned/kicked.", colour=discord.Colour.red())
                 embed.set_footer(text="DM Closed")
                 await message.channel.send(embed=embed)            
+                return
             channel = await member.create_dm()
             embed = discord.Embed(
                 title="Message from r/IGCSE Moderators",
