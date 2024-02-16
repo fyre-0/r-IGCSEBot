@@ -39,7 +39,7 @@ from utils.roles import (
     is_bot_developer,
     is_chat_moderator,
 )
-from utils.mongodb import gpdb, repdb, rrdb, smdb, kwdb
+from utils.mongodb import gpdb, repdb, rrdb, smdb, kwdb, asmdb
 import re
 
 # Importing Files
@@ -68,6 +68,7 @@ from commands import (
     moderation,
     random_pyp,
     reputation,
+    advstick,
 )
 
 
@@ -262,19 +263,21 @@ class CancelPingBtn(discord.ui.View):
 async def helper_old(
     interaction: discord.Interaction,
 ):
-        embed = discord.Embed(description="This command is now outdated, instead you can long-press/right-click on the message you want help with, go to 'Apps' then choose helper")
-        embed.set_image(url="https://raw.githubusercontent.com/fyre-0/r-IGCSEBot/assets/helper_ping.png")
-        
-        await interaction.send(embed=embed, ephemeral=True)
+    embed = discord.Embed(
+        description="This command is now outdated, instead you can long-press/right-click on the message you want help with, go to 'Apps' then choose helper"
+    )
+    embed.set_image(
+        url="https://raw.githubusercontent.com/fyre-0/r-IGCSEBot/assets/helper_ping.png"
+    )
+
+    await interaction.send(embed=embed, ephemeral=True)
 
 
 @bot.message_command(
     name="helper",
     guild_ids=[GUILD_ID],
 )
-async def helper(
-    interaction: discord.Interaction, message: discord.Message
-):
+async def helper(interaction: discord.Interaction, message: discord.Message):
     message_id = message.id
     try:
         helper_role = discord.utils.get(
