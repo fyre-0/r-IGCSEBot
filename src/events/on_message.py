@@ -201,14 +201,20 @@ async def on_message(message: discord.Message):
 
     if not message.guild:
             thread = await get_thread(message, True)
-            embed = discord.Embed(
-                title="Message Received",
-                description=message.clean_content,
-                colour=discord.Colour.green(),
-            )
-            embed.set_author(
-                name=str(message.author), icon_url=message.author.display_avatar.url
-            )
+            if message.stickers:
+                  for sticker in message.stickers:
+                        sticker_name = sticker.name
+                        embed = discord.Embed(title="Message Received", 
+                                              description=f"{sticker_name} Sticker Recieved", 
+                                              colour=discord.Colour.green())
+                        embed.set_author(name=str(message.author), 
+                                         icon_url=message.author.display_avatar.url) 
+            else:                  
+                  embed = discord.Embed(title="Message Received", 
+                                        description=message.clean_content, 
+                                        colour=discord.Colour.green())
+                  embed.set_author(name=str(message.author), 
+                                   icon_url=message.author.display_avatar.url)  
             for attachment in message.attachments:          
                   if attachment.content_type == "image/png":
                         embed.set_image(url=attachment.url)
@@ -230,14 +236,20 @@ async def on_message(message: discord.Message):
                 await message.channel.send(embed=embed)            
                 return
             channel = await member.create_dm()
-            embed = discord.Embed(
-                title="Message from r/IGCSE Moderators",
-                description=message.clean_content,
-                colour=discord.Colour.green(),
-            )
-            embed.set_author(
-                name=str(message.author), icon_url=message.author.display_avatar.url
-            )
+            if message.stickers:
+                for sticker in message.stickers:
+                    sticker_name = sticker.name
+                    embed = discord.Embed(title="Message from r/IGCSE Moderators", 
+                                          description=f"{sticker_name} Sticker", 
+                                          colour=discord.Colour.green())
+                    embed.set_author(name=str(message.author), 
+                                     icon_url=message.author.display_avatar.url) 
+            else:                  
+                    embed = discord.Embed(title="Message from r/IGCSE Moderators", 
+                                          description=message.clean_content, 
+                                          colour=discord.Colour.green())
+                    embed.set_author(name=str(message.author), 
+                                     icon_url=message.author.display_avatar.url)  
             try:
                 for attachment in message.attachments:
                       if attachment.content_type == "image/png":
