@@ -11,7 +11,7 @@ from utils.constants import (
 from utils.data import REP_DISABLE_CHANNELS
 from bot import discord, bot, keywords
 import sys
-from utils.mongodb import gpdb, smdb, repdb, kwdb
+from utils.mongodb import gpdb, smdb, repdb, kwdb, asmdb
 from utils.roles import is_moderator, is_helper, is_chat_moderator, is_bot_developer
 
 
@@ -200,29 +200,35 @@ async def on_message(message: discord.Message):
         await get_thread(message, False)
 
     if not message.guild:
-            thread = await get_thread(message, True)
-            if message.stickers:
-                  for sticker in message.stickers:
-                        sticker_name = sticker.name
-                        embed = discord.Embed(title="Message Received", 
-                                              description=f"{sticker_name} Sticker Recieved", 
-                                              colour=discord.Colour.green())
-                        embed.set_author(name=str(message.author), 
-                                         icon_url=message.author.display_avatar.url) 
-            else:                  
-                  embed = discord.Embed(title="Message Received", 
-                                        description=message.clean_content, 
-                                        colour=discord.Colour.green())
-                  embed.set_author(name=str(message.author), 
-                                   icon_url=message.author.display_avatar.url)  
-            for attachment in message.attachments:          
-                  if attachment.content_type == "image/png":
-                        embed.set_image(url=attachment.url)
-                  else:
-                        embed.add_field(name=f"Attachments Added", value=f"{attachment.url}")
-            await thread.send(embed=embed)         
-            await message.add_reaction("✅")
-            return
+        thread = await get_thread(message, True)
+        if message.stickers:
+            for sticker in message.stickers:
+                sticker_name = sticker.name
+                embed = discord.Embed(
+                    title="Message Received",
+                    description=f"{sticker_name} Sticker Recieved",
+                    colour=discord.Colour.green(),
+                )
+                embed.set_author(
+                    name=str(message.author), icon_url=message.author.display_avatar.url
+                )
+        else:
+            embed = discord.Embed(
+                title="Message Received",
+                description=message.clean_content,
+                colour=discord.Colour.green(),
+            )
+            embed.set_author(
+                name=str(message.author), icon_url=message.author.display_avatar.url
+            )
+        for attachment in message.attachments:
+            if attachment.content_type == "image/png":
+                embed.set_image(url=attachment.url)
+            else:
+                embed.add_field(name="Attachments Added", value=f"{attachment.url}")
+        await thread.send(embed=embed)
+        await message.add_reaction("✅")
+        return
 
     if message.guild.id == GUILD_ID:
         if (
@@ -230,32 +236,45 @@ async def on_message(message: discord.Message):
             and message.channel.parent_id == FORUMTHREAD_ID
         ):
             member = message.guild.get_member(int(message.channel.name))
-            if member == None:
-                embed = discord.Embed(title="Error Encountered", description="I don't have permission to send direct messages to that user as they either left the server or has been banned/kicked.", colour=discord.Colour.red())
+            if member is None:
+                embed = discord.Embed(
+                    title="Error Encountered",
+                    description="I don't have permission to send direct messages to that user as they either left the server or has been banned/kicked.",
+                    colour=discord.Colour.red(),
+                )
                 embed.set_footer(text="DM Closed")
-                await message.channel.send(embed=embed)            
+                await message.channel.send(embed=embed)
                 return
             channel = await member.create_dm()
             if message.stickers:
                 for sticker in message.stickers:
                     sticker_name = sticker.name
-                    embed = discord.Embed(title="Message from r/IGCSE Moderators", 
-                                          description=f"{sticker_name} Sticker", 
-                                          colour=discord.Colour.green())
-                    embed.set_author(name=str(message.author), 
-                                     icon_url=message.author.display_avatar.url) 
-            else:                  
-                    embed = discord.Embed(title="Message from r/IGCSE Moderators", 
-                                          description=message.clean_content, 
-                                          colour=discord.Colour.green())
-                    embed.set_author(name=str(message.author), 
-                                     icon_url=message.author.display_avatar.url)  
+                    embed = discord.Embed(
+                        title="Message from r/IGCSE Moderators",
+                        description=f"{sticker_name} Sticker",
+                        colour=discord.Colour.green(),
+                    )
+                    embed.set_author(
+                        name=str(message.author),
+                        icon_url=message.author.display_avatar.url,
+                    )
+            else:
+                embed = discord.Embed(
+                    title="Message from r/IGCSE Moderators",
+                    description=message.clean_content,
+                    colour=discord.Colour.green(),
+                )
+                embed.set_author(
+                    name=str(message.author), icon_url=message.author.display_avatar.url
+                )
             try:
                 for attachment in message.attachments:
-                      if attachment.content_type == "image/png":
-                            embed.set_image(url=attachment.url)
-                      else:
-                            embed.add_field(name=f"Attachments Added", value=f"{attachment.url}")
+                    if attachment.content_type == "image/png":
+                        embed.set_image(url=attachment.url)
+                    else:
+                        embed.add_field(
+                            name="Attachments Added", value=f"{attachment.url}"
+                        )
                 await channel.send(embed=embed)
                 await message.channel.send(embed=embed)
             except Exception:
@@ -283,6 +302,7 @@ async def on_message(message: discord.Message):
         await counting(message)
     if message.guild.id == GUILD_ID:
         await smdb.check_stick_msg(message)
+        await asmdb.check_stick_msg()
 
     if message.content.lower() == "pin":
         if (

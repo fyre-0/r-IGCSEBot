@@ -1,8 +1,11 @@
 from bot import bot, discord, pymongo
 from utils.constants import LINK, DMS_CLOSED_CHANNEL_ID
 from datetime import datetime, UTC
+import time
 
-client = pymongo.MongoClient(LINK, server_api=pymongo.server_api.ServerApi("1"), minPoolSize=1)
+client = pymongo.MongoClient(
+    LINK, server_api=pymongo.server_api.ServerApi("1"), minPoolSize=1
+)
 
 
 class ReactionRolesDB:
@@ -223,6 +226,92 @@ class StickyMessageDB:
 
 
 smdb = StickyMessageDB(client)
+
+
+class AdvStickyMessageDB:
+    def __init__(self, client: pymongo.MongoClient):
+        self.client = client
+        self.db = self.client.IGCSEBot
+        self.advstickies = self.db.advstickies
+
+    async def check_stick_msg(self):
+        current_time = time.time()
+        for stick_entry in self.advstickies.find({}):
+            if float(stick_entry["stick_time"]) > current_time:
+                continue
+            if float(stick_entry["unstick_time"]) < current_time:
+                self.advstickies.delete_one({"_id": stick_entry["_id"]})
+                continue
+
+            if not stick_entry["sticking"]:
+                message_channel = await bot.fetch_channel(
+                    int(stick_entry["channel_id"])
+                )
+                identifier = {"_id": stick_entry["_id"]}
+
+                self.advstickies.update_one(identifier, {"$set": {"sticking": True}})
+                if len(stick_entry["message_id"]) == 0:
+                    embed = discord.Embed(
+                        title=stick_entry["embed_title"],
+                        description=stick_entry["embed_description"],
+                        color=discord.Color.green(),
+                    )
+                    stick_message = await message_channel.send(embed=embed)
+                    self.advstickies.update_one(
+                        identifier, {"$set": {"message_id": str(stick_message.id)}}
+                    )
+                    stick_entry["message_id"] = str(stick_message.id)
+                else:
+                    stick_message = await message_channel.fetch_message(
+                        int(stick_entry["message_id"])
+                    )
+                is_present_history = False
+
+                async for message in message_channel.history(limit=3):
+                    if message.id == int(stick_entry["message_id"]):
+                        is_present_history = True
+                        self.advstickies.update_one(
+                            identifier, {"$set": {"sticking": False}}
+                        )
+
+                if not is_present_history:
+                    stick_embed = stick_message.embeds
+
+                    self.advstickies.delete_one(identifier)
+                    await stick_message.delete()
+
+                    new_embed = await message_channel.send(embeds=stick_embed)
+                    self.advstickies.insert_one(
+                        {
+                            "channel_id": str(message_channel.id),
+                            "message_id": str(new_embed.id),
+                            "embed_title": stick_entry["embed_title"],
+                            "embed_description": stick_entry["embed_description"],
+                            "stick_time": stick_entry["stick_time"],
+                            "unstick_time": stick_entry["unstick_time"],
+                            "sticking": False,
+                        }
+                    )
+
+    async def stick(
+        self, channel_id, embed_title, embed_description, stick_time, unstick_time
+    ):
+        self.advstickies.insert_one(
+            {
+                "channel_id": channel_id,
+                "message_id": "",
+                "embed_title": embed_title,
+                "embed_description": embed_description,
+                "stick_time": stick_time,
+                "unstick_time": unstick_time,
+                "sticking": False,
+            }
+        )
+        await self.check_stick_msg()
+        return True
+
+
+asmdb = AdvStickyMessageDB(client)
 
 
 class KeywordsDB:
