@@ -210,7 +210,10 @@ async def on_message(message: discord.Message):
                 name=str(message.author), icon_url=message.author.display_avatar.url
             )
             for attachment in message.attachments:          
-                embed.set_image(url=attachment.url)
+                  if attachment.content_type == "image/png":
+                        embed.set_image(url=attachment.url)
+                  else:
+                        embed.add_field(name=f"Attachments Added", value=f"{attachment.url}")
             await thread.send(embed=embed)         
             await message.add_reaction("✅")
             return
@@ -221,6 +224,10 @@ async def on_message(message: discord.Message):
             and message.channel.parent_id == FORUMTHREAD_ID
         ):
             member = message.guild.get_member(int(message.channel.name))
+            if member == None:
+                embed = discord.Embed(title="Error Encountered", description="I don't have permission to send direct messages to that user as they either left the server or has been banned/kicked.", colour=discord.Colour.red())
+                embed.set_footer(text="DM Closed")
+                await message.channel.send(embed=embed)            
             channel = await member.create_dm()
             embed = discord.Embed(
                 title="Message from r/IGCSE Moderators",
@@ -232,7 +239,10 @@ async def on_message(message: discord.Message):
             )
             try:
                 for attachment in message.attachments:
-                        embed.set_image(url=attachment.url)
+                      if attachment.content_type == "image/png":
+                            embed.set_image(url=attachment.url)
+                      else:
+                            embed.add_field(name=f"Attachments Added", value=f"{attachment.url}")
                 await channel.send(embed=embed)
                 await message.channel.send(embed=embed)
             except Exception:
