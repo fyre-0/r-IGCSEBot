@@ -37,6 +37,12 @@ class SelectMenuSubject(discord.ui.View):
         )
 
         async def continue_callback(interaction: discord.Interaction):
+            tempdata = TempSessionData.get(str(interaction.user.id))
+            if not tempdata["subject"]:
+                await interaction.edit(
+                    content="Oops! you must choose a subject to continue."
+                )
+                return
             self.stop()
 
         self.cancel_button = discord.ui.Button(
