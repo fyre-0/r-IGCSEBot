@@ -7,4 +7,3 @@ pubchempy
 pyquery
 python-dotenv
 redis-om
-bson
