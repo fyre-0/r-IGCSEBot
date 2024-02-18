@@ -382,6 +382,9 @@ async def ban(
     if await is_banned(user, interaction.guild):
         await interaction.send("User is banned from the server!", ephemeral=True)
         return
+    if user.id == interaction.user.id:
+        await interaction.send("Well, why do you wanna ban yourself? Just leave!", ephemeral=True)
+        return
     await interaction.response.defer()
     try:
         if interaction.guild.id == GUILD_ID:
