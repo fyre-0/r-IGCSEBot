@@ -5,3 +5,5 @@ from .User import User
 from .Question import Question
 from .View import View
 from .StickyMessage import StickyMessage
+from .DeletedMessage import DeletedMessage
+from .EditedMessage import EditedMessage
