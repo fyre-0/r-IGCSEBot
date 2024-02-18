@@ -4,6 +4,7 @@ from datetime import datetime, UTC
 import time
 from schemas.redis import StickyMessage
 import global_vars
+from bson import ObjectId
 
 client = pymongo.MongoClient(
     LINK, server_api=pymongo.server_api.ServerApi("1"), minPoolSize=1
@@ -219,7 +220,7 @@ class StickyMessageDB:
         StickyMessage.delete(identifier)
         
         self.sticky_messages.delete_one({
-            "_id": identifier
+            "_id": ObjectId(identifier)
         })
 
         return True
