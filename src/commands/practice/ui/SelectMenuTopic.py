@@ -217,6 +217,10 @@ class SelectMenuTopic(discord.ui.View):
         )
 
         async def continue_callback(interaction: discord.Interaction):
+            tempdata = TempSessionData.get(str(interaction.user.id))
+            if not tempdata["topics"]:
+                tempdata["topics"] = topics_for_practice[tempdata["subject"]]
+                tempdata.save()
             self.stop()
 
         self.cancel_button = discord.ui.Button(
