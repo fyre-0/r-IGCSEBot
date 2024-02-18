@@ -93,7 +93,7 @@ gpdb = GuildPreferencesDB(client)
 
 
 class ReputationDB:
-    def __init__(self, client):
+    def __init__(self, client: pymongo.MongoClient):
         self.client = client
         self.db = self.client.IGCSEBot
         self.reputation = self.db.reputation
@@ -115,9 +115,15 @@ class ReputationDB:
             return result["rep"]
 
     def change_rep(self, user_id, new_rep, guild_id):
-        self.reputation.update_one(
+        result = self.reputation.update_one(
             {"user_id": user_id, "guild_id": guild_id}, {"$set": {"rep": new_rep}}
         )
+
+        if result.matched_count == 0:
+            self.reputation.insert_one(
+                {"user_id": user_id, "guild_id": guild_id, "rep": new_rep}
+            )
+
         return new_rep
 
     def delete_user(self, user_id: int, guild_id: int):
