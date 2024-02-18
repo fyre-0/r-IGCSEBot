@@ -7,6 +7,7 @@ from schemas.redis import Session, Question, View
 from commands.practice.ui import MCQButtonsView
 from commands.practice import close_session
 import datetime
+from utils.mongodb import smdb
 
 
 async def togglechannellock(channel_id, unlock, *, unlocktime=0):
@@ -369,3 +370,7 @@ async def expire_sessions():
             await thread.send(
                 f"This session will expire in <t:{session['expire_time']}:R>."
             )
+
+@tasks.loop(minutes=1)
+async def populate_cache():
+    await smdb.populate_cache()

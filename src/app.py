@@ -39,7 +39,7 @@ from utils.roles import (
     is_bot_developer,
     is_chat_moderator,
 )
-from utils.mongodb import gpdb, repdb, rrdb, smdb, kwdb, asmdb
+from utils.mongodb import gpdb, repdb, rrdb, smdb, kwdb
 import re
 
 # Importing Files

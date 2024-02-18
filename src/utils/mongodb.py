@@ -2,6 +2,8 @@ from bot import bot, discord, pymongo
 from utils.constants import LINK, DMS_CLOSED_CHANNEL_ID
 from datetime import datetime, UTC
 import time
+from schemas.redis import StickyMessage
+import global_vars
 
 client = pymongo.MongoClient(
     LINK, server_api=pymongo.server_api.ServerApi("1"), minPoolSize=1
@@ -149,170 +151,128 @@ class StickyMessageDB:
     def __init__(self, client):
         self.client = client
         self.db = self.client.IGCSEBot
-        self.stickies = self.db.stickies
+        self.sticky_messages = self.db.sticky_messages
+        
+    async def get_sticky_messages(self, channel_id: int):
+        sticky_messages = StickyMessage.find(StickyMessage.channel_id == str(channel_id)).all()
+        return list(sticky_messages)
 
-    def get_length_stickies(self, criteria={}):
-        return len(list(self.stickies.find(criteria)))
-
-    async def check_stick_msg(self, reference_msg):
+    async def check_stick_msg(self, reference_msg: discord.Message):
         message_channel = reference_msg.channel
-        if self.get_length_stickies() > 0:
-            for stick_entry in self.stickies.find({"channel_id": message_channel.id}):
-                if not stick_entry["sticking"]:
-                    prev_stick = {"message_id": stick_entry["message_id"]}
-
-                    self.stickies.update_one(prev_stick, {"$set": {"sticking": True}})
-                    stick_message = await message_channel.fetch_message(
-                        stick_entry["message_id"]
-                    )
-                    is_present_history = False
-
-                    async for message in message_channel.history(limit=3):
-                        if message.id == stick_entry["message_id"]:
-                            is_present_history = True
-                            self.stickies.update_one(
-                                prev_stick, {"$set": {"sticking": False}}
-                            )
-
-                    if not is_present_history:
-                        stick_embed = stick_message.embeds
-
-                        self.stickies.delete_one(prev_stick)
-                        await stick_message.delete()
-
-                        new_embed = await message_channel.send(embeds=stick_embed)
-                        self.stickies.insert_one(
-                            {
-                                "channel_id": message_channel.id,
-                                "message_id": new_embed.id,
-                                "sticking": True,
-                            }
-                        )
-
-                        self.stickies.update_one(
-                            {"message_id": new_embed.id}, {"$set": {"sticking": False}}
-                        )
+        sticky_messages = await self.get_sticky_messages(message_channel.id)
+        for sticky_message in sticky_messages:
+            try:
+                message = message_channel.get_partial_message(int(sticky_message.message_id))
+                await message.delete()
+            except discord.NotFound:
+                pass
+            
+            embeds = []
+            for embed in sticky_message.content:
+                embeds.append(discord.Embed.from_dict(embed))
+                
+            new_message = await message_channel.send(embeds=embeds)
+            
+            sticky_message.message_id = str(new_message.id)
+            sticky_message.save()
 
     async def stick(self, reference_msg):
         embeds = reference_msg.embeds
-        if (
-            embeds == []
-            or self.get_length_stickies({"message_id": reference_msg.id}) > 0
-        ):
+        if len(embeds) < 1:
             return
-        await reference_msg.edit(embed=embeds[0].set_footer(text="Stuck"))
-
-        self.stickies.insert_one(
+        
+        mongo_sticky = self.sticky_messages.insert_one(
             {
-                "channel_id": reference_msg.channel.id,
-                "message_id": reference_msg.id,
-                "sticking": False,
+                "channel_id": str(reference_msg.channel.id),
+                "message_id": str(reference_msg.id),
+                "content": [embed.to_dict() for embed in embeds],
+                "enabled": True
             }
         )
+        
+        sticky = StickyMessage(
+            channel_id=str(reference_msg.channel.id),
+            message_id=str(reference_msg.id),
+            content=[embed.to_dict() for embed in embeds],
+            enabled=True,
+            identifier=str(mongo_sticky.inserted_id)
+        )
+        sticky.save()
+        
         await self.check_stick_msg(reference_msg)
 
         return True
 
     async def unstick(self, reference_msg):
         embeds = reference_msg.embeds
-        if embeds == []:
+        if len(embeds) < 1:
             return
-        await reference_msg.edit(embed=embeds[0].remove_footer())
-        for stick_entry in self.stickies.find({"channel_id": reference_msg.channel.id}):
-            if stick_entry["message_id"] == reference_msg.id:
-                self.stickies.delete_one({"message_id": reference_msg.id})
+        
+        message = StickyMessage.find(StickyMessage.message_id == str(reference_msg.id)).all()
+        identifier = message[0].identifier
+        StickyMessage.delete(identifier)
+        
+        self.sticky_messages.delete_one({
+            "_id": identifier
+        })
 
         return True
-
-
-smdb = StickyMessageDB(client)
-
-
-class AdvStickyMessageDB:
-    def __init__(self, client: pymongo.MongoClient):
-        self.client = client
-        self.db = self.client.IGCSEBot
-        self.advstickies = self.db.advstickies
-
-    async def check_stick_msg(self):
+    
+    async def set_sticky_channels(self):
+        global_vars.sticky_channels = list(self.sticky_messages.distinct("channel_id"))
+    
+    async def populate_cache(self):
+        await self.set_sticky_channels()
+        message_ids = {}
+        
+        for x in StickyMessage.find().all():
+            message_ids[x.identifier] = x.message_id
+            StickyMessage.delete(x.identifier)
+            
+        sticky_messages = self.sticky_messages.find({})
+        for sticky_message in sticky_messages:
+            
+            enabled = sticky_message["enabled"]
+            
+            if sticky_message.get("unstick_time", None) and sticky_message.get("stick_time", None):
+                enabled = False
+                if sticky_message["unstick_time"] < time.time():
+                    self.sticky_messages.delete_one({
+                        "_id": sticky_message["_id"]
+                    })
+                    continue
+                elif sticky_message["stick_time"] > time.time():
+                    enabled = True
+            
+            message_id = message_ids.get(str(sticky_message["_id"]), sticky_message["message_id"])
+            
+            save_in_redis = StickyMessage(
+                channel_id=str(sticky_message["channel_id"]),
+                message_id=str(message_id),
+                content=sticky_message["content"],
+                enabled=enabled,
+                identifier=str(sticky_message["_id"])
+            )
+            save_in_redis.save()
+            
+    async def timed_sticky(self, channel, message, stick_time, unstick_time):
         current_time = time.time()
-        for stick_entry in self.advstickies.find({}):
-            if float(stick_entry["stick_time"]) > current_time:
-                continue
-            if float(stick_entry["unstick_time"]) < current_time:
-                self.advstickies.delete_one({"_id": stick_entry["_id"]})
-                continue
-
-            if not stick_entry["sticking"]:
-                message_channel = await bot.fetch_channel(
-                    int(stick_entry["channel_id"])
-                )
-                identifier = {"_id": stick_entry["_id"]}
-
-                self.advstickies.update_one(identifier, {"$set": {"sticking": True}})
-                if len(stick_entry["message_id"]) == 0:
-                    embed = discord.Embed(
-                        title=stick_entry["embed_title"],
-                        description=stick_entry["embed_description"],
-                        color=discord.Color.green(),
-                    )
-                    stick_message = await message_channel.send(embed=embed)
-                    self.advstickies.update_one(
-                        identifier, {"$set": {"message_id": str(stick_message.id)}}
-                    )
-                    stick_entry["message_id"] = str(stick_message.id)
-                else:
-                    stick_message = await message_channel.fetch_message(
-                        int(stick_entry["message_id"])
-                    )
-                is_present_history = False
-
-                async for message in message_channel.history(limit=3):
-                    if message.id == int(stick_entry["message_id"]):
-                        is_present_history = True
-                        self.advstickies.update_one(
-                            identifier, {"$set": {"sticking": False}}
-                        )
-
-                if not is_present_history:
-                    stick_embed = stick_message.embeds
-
-                    self.advstickies.delete_one(identifier)
-                    await stick_message.delete()
-
-                    new_embed = await message_channel.send(embeds=stick_embed)
-                    self.advstickies.insert_one(
-                        {
-                            "channel_id": str(message_channel.id),
-                            "message_id": str(new_embed.id),
-                            "embed_title": stick_entry["embed_title"],
-                            "embed_description": stick_entry["embed_description"],
-                            "stick_time": stick_entry["stick_time"],
-                            "unstick_time": stick_entry["unstick_time"],
-                            "sticking": False,
-                        }
-                    )
-
-    async def stick(
-        self, channel_id, embed_title, embed_description, stick_time, unstick_time
-    ):
-        self.advstickies.insert_one(
+        embeds = message.embeds
+        if len(embeds) < 1:
+            return
+        
+        self.sticky_messages.insert_one(
             {
-                "channel_id": channel_id,
-                "message_id": "",
-                "embed_title": embed_title,
-                "embed_description": embed_description,
-                "stick_time": stick_time,
+                "channel_id": str(channel.id),
+                "message_id": str(message.id),
+                "content": [embed.to_dict() for embed in embeds],
+                "enabled": stick_time <= current_time,
                 "unstick_time": unstick_time,
-                "sticking": False,
+                "stick_time": stick_time
             }
         )
-        await self.check_stick_msg()
-        return True
 
-
-asmdb = AdvStickyMessageDB(client)
-
+smdb = StickyMessageDB(client)
 
 class KeywordsDB:
     def __init__(self, client):

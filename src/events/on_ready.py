@@ -17,9 +17,11 @@ from monitor_tasks import (
     autorefreshhelpers,
     send_questions,
     expire_sessions,
+    populate_cache
 )
 from schemas.redis import View
 from commands.practice.ui import MCQButtonsView
+from utils.mongodb import smdb
 
 loops = [
     checklock,
@@ -28,8 +30,8 @@ loops = [
     handle_slowmode,
     send_questions,
     expire_sessions,
+    populate_cache
 ]
-
 
 @bot.event
 async def on_ready():
@@ -37,7 +39,7 @@ async def on_ready():
     await bot.change_presence(
         activity=discord.Activity(type=discord.ActivityType.watching, name="r/IGCSE")
     )
-
+    await smdb.populate_cache()
     for loop in loops:
         if loop and not loop.is_running():
             loop.start()
