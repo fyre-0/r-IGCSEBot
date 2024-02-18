@@ -4,3 +4,4 @@ from .TempSessionData import TempSessionData
 from .User import User
 from .Question import Question
 from .View import View
+from .StickyMessage import StickyMessage

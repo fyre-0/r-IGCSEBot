@@ -11,9 +11,11 @@ from utils.constants import (
 from utils.data import REP_DISABLE_CHANNELS
 from bot import discord, bot, keywords
 import sys
-from utils.mongodb import gpdb, smdb, repdb, kwdb, asmdb
+from utils.mongodb import gpdb, smdb, repdb, kwdb
 from utils.roles import is_moderator, is_helper, is_chat_moderator, is_bot_developer
+import global_vars
 
+sticky_counter = {}
 
 async def get_thread(message: discord.Message, is_dm: bool):
     member_id: int = 0
@@ -300,9 +302,12 @@ async def on_message(message: discord.Message):
         await handle_rep(message)
     if message.channel.name == "counting":
         await counting(message)
-    if message.guild.id == GUILD_ID:
-        await smdb.check_stick_msg(message)
-        await asmdb.check_stick_msg()
+        
+    if message.guild.id == GUILD_ID and str(message.channel.id) in global_vars.sticky_channels:
+        sticky_counter[message.channel.id] = sticky_counter.get(message.channel.id, 0) + 1
+        if sticky_counter[message.channel.id] >= 4:
+            sticky_counter[message.channel.id] = 0
+            await smdb.check_stick_msg(message)
 
     if message.content.lower() == "pin":
         if (
