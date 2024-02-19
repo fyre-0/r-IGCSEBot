@@ -17,7 +17,7 @@ from monitor_tasks import (
     autorefreshhelpers,
     send_questions,
     expire_sessions,
-    populate_cache
+    populate_cache,
 )
 from schemas.redis import View
 from commands.practice.ui import MCQButtonsView
@@ -30,8 +30,9 @@ loops = [
     handle_slowmode,
     send_questions,
     expire_sessions,
-    populate_cache
+    populate_cache,
 ]
+
 
 @bot.event
 async def on_ready():

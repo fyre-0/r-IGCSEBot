@@ -371,6 +371,7 @@ async def expire_sessions():
                 f"This session will expire in <t:{session['expire_time']}:R>."
             )
 
+
 @tasks.loop(minutes=1)
 async def populate_cache():
     await smdb.populate_cache()

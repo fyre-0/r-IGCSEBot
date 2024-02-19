@@ -4,6 +4,7 @@ from .constants import (
     MODERATOR_ROLES,
     CHAT_MODERATOR_ROLE,
     BOT_DEVELOPER_ROLE,
+    ADMIN_ROLE,
 )
 
 
@@ -20,6 +21,10 @@ async def is_moderator(member: discord.Member):
         any(role in [role.id for role in member.roles] for role in MODERATOR_ROLES)
         or member.guild_permissions.administrator
     )
+
+
+async def is_admin(member: discord.Member):
+    return ADMIN_ROLE in [role.id for role in member.roles]
 
 
 async def is_chat_moderator(member: discord.Member):

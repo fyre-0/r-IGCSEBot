@@ -17,6 +17,7 @@ import global_vars
 
 sticky_counter = {}
 
+
 async def get_thread(message: discord.Message, is_dm: bool):
     member_id: int = 0
     if is_dm:
@@ -302,9 +303,14 @@ async def on_message(message: discord.Message):
         await handle_rep(message)
     if message.channel.name == "counting":
         await counting(message)
-        
-    if message.guild.id == GUILD_ID and str(message.channel.id) in global_vars.sticky_channels:
-        sticky_counter[message.channel.id] = sticky_counter.get(message.channel.id, 0) + 1
+
+    if (
+        message.guild.id == GUILD_ID
+        and str(message.channel.id) in global_vars.sticky_channels
+    ):
+        sticky_counter[message.channel.id] = (
+            sticky_counter.get(message.channel.id, 0) + 1
+        )
         if sticky_counter[message.channel.id] >= 4:
             sticky_counter[message.channel.id] = 0
             await smdb.check_stick_msg(message)
