@@ -18,14 +18,16 @@ class InfractionPointsDB:
         self.db = self.client.IGCSEBot
         self.infraction_points = self.db.infraction_points
 
-    def set(self, user_id: int, points: Callable[[int], int]):
-        result = self.infraction_points.find_one({"user_id": user_id})
+    def set(self, user_id: int, guild_id: int, points: Callable[[int], int]):
+        result = self.infraction_points.find_one(
+            {"user_id": user_id, "guild_id": guild_id}
+        )
 
         new_points = points(result.points)
 
         if result is None:
             self.infraction_points.insert_one(
-                {"user_id": user_id, "points": new_points}
+                {"user_id": user_id, "guild_id": guild_id, "points": new_points}
             )
         else:
             self.infraction_points.update_one(
