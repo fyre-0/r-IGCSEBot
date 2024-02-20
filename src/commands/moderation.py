@@ -1,7 +1,7 @@
 from bot import bot, discord, pymongo, datetime, time
 from commands.dms import send_dm
 from utils.bans import is_banned
-from utils.roles import is_chat_moderator, is_moderator
+from utils.roles import is_chat_moderator, is_moderator, is_admin
 from utils.mongodb import gpdb, punishdb
 from utils.constants import GUILD_ID
 
@@ -382,6 +382,11 @@ async def ban(
     if await is_banned(user, interaction.guild):
         await interaction.send("User is banned from the server!", ephemeral=True)
         return
+    if user.id == interaction.user.id:
+        await interaction.send(
+            "Well, why do you wanna ban yourself? Just leave!", ephemeral=True
+        )
+        return
     await interaction.response.defer()
     try:
         if interaction.guild.id == GUILD_ID:
@@ -459,3 +464,71 @@ async def unban(
         ban_msg = f"""Case #{case_no} | [{action_type}]\nUsername: {str(user)} ({user.id})\nModerator: {mod}"""
         await ban_msg_channel.send(ban_msg)
         punishdb.add_punishment(case_no, user.id, interaction.user.id, "", action_type)
+
+
+class PunishmentsSelect(discord.ui.Select):
+    def __init__(self, results: list[dict]):
+        super().__init__(
+            placeholder="Select a punishment to remove", min_values=1, max_values=1
+        )
+        self.results = results
+        for result in self.results:
+            self.add_option(
+                label=f"Case #{result['case_no']} | {result['action']} - {result['reason']}",
+                value=str(result["_id"]),
+            )
+
+
+class PunishmentsView(discord.ui.View):
+    def __init__(self, results: list[dict]):
+        super().__init__()
+        self.results = results
+        self.select = PunishmentsSelect(results)
+        self.add_item(self.select)
+
+    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, row=2)
+    async def confirm(
+        self, button: discord.ui.Button, interaction: discord.Interaction
+    ):
+        if not self.select.values or len(self.select.values) == 0:
+            await interaction.edit(
+                content="Well, you need to select something for me to delete it, don't you? So do it!"
+            )
+            return
+
+        punishdb.remove_punishment(self.select.values[0])
+
+        await interaction.edit(content="Punishment removed!", view=None)
+        for child in self.children:
+            child.disabled = True
+        self.stop()
+
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, row=2)
+    async def cancel(self, button: discord.ui.Button, interaction: discord.Interaction):
+        for child in self.children:
+            child.disabled = True
+        await interaction.edit(content="Cancelled!", view=None)
+        self.stop()
+
+
+@bot.slash_command(description="Remove infraction (for admins)")
+async def remove_infraction(
+    interaction: discord.Interaction,
+    user: discord.User = discord.SlashOption(
+        name="user", description="User to remove infraction from", required=True
+    ),
+):
+    if not await is_admin(interaction.user):
+        await interaction.send(
+            "You are not permitted to use this command.", ephemeral=True
+        )
+        return
+    await interaction.response.defer(ephemeral=True)
+    results = punishdb.get_punishments_by_user(user.id)
+    results = list(results)
+    if len(results) == 0:
+        await interaction.send(f"{user} does not have any previous offenses.")
+        return
+
+    view = PunishmentsView(results)
+    await interaction.send(view=view, ephemeral=True)

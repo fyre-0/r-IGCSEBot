@@ -1251,6 +1251,8 @@ async def send_editcommand(
     ):
         await interaction.send("You are not authorized to perform this action.")
         return
+    if channel == None:
+        channel = interaction.channel
     if action_type == "Send Message":
         await interaction.response.send_modal(modal=SendMessage(channel))
     if action_type == "Edit Message":

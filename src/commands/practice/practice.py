@@ -139,16 +139,36 @@ async def new_session(interaction: discord.Interaction):
     if timedout:
         TempSessionData.delete(str(interaction.user.id))
 
-    views = [SelectMenuSubject, SelectMenuTopic, SelectMenuVisibility, SelectUsersView]
+    views = [
+        {
+            "view": SelectMenuSubject,
+            "message": "Select a subject to practice!",
+        },
+        {
+            "view": SelectMenuTopic,
+            "message": "Select the topics you want to practice! Click continue if you want to practice all topics.",
+        },
+        {
+            "view": SelectMenuVisibility,
+            "message": "Do you want the session to be private or public?",
+        },
+        {
+            "view": SelectUsersView,
+            "message": "Select the users you want to add to the session!",
+        },
+    ]
 
     msg = interaction.message or None
 
-    for view in views:
-        view: discord.ui.View = view(interaction)
+    for view_item in views:
+        view: discord.ui.View = view_item["view"](interaction)
+
         if msg is None:
-            msg = await interaction.send(view=view, ephemeral=True)
+            msg = await interaction.send(
+                view_item["message"], view=view, ephemeral=True
+            )
         else:
-            await msg.edit(view=view)
+            await msg.edit(view=view, content=view_item["message"])
 
         timedout = await view.wait()
         if timedout:
@@ -635,6 +655,12 @@ async def practice(
         choices=list(options.keys()),
     ),
 ):
+    if not action or action not in options.keys():
+        await interaction.send(
+            "Invalid action! Please choose a valid action.", ephemeral=True
+        )
+        return
+
     await options[action](interaction)
 
 

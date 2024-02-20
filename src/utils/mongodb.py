@@ -347,6 +347,9 @@ class PunishmentsDB:
     def get_punishments_by_user(self, user_id: int):
         return self.punishment_history.find({"action_against": str(user_id)})
 
+    def remove_punishment(self, identifier: str):
+        return self.punishment_history.delete_one({"_id": ObjectId(identifier)})
+
 
 punishdb = PunishmentsDB(client)
 
