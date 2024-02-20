@@ -72,6 +72,7 @@ from commands import (
     reputation,
     advstick,
     snipe,
+    infraction_points,
 )
 
 
