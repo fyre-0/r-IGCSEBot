@@ -1242,7 +1242,7 @@ async def send_editcommand(
     channel: discord.TextChannel = discord.SlashOption(
         name="channel",
         description="The channel to send the message to or where the message is located",
-        required=True,
+        required=False,
     ),
 ):
 
