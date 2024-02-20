@@ -19,16 +19,17 @@ class InfractionPointsDB:
         self.db = self.client.IGCSEBot
         self.infraction_points = self.db.infraction_points
 
-    def set(self, user_id: int, guild_id: int, points: int):
-        result = self.infraction_points.update_one(
-            {"user_id": user_id, "guild_id": guild_id},
-            {"$set": {"points": {"$add": ["$points", points]}}},
-        )
 
-        if result.modified_count == 0:
-            self.infraction_points.insert_one(
-                {"user_id": user_id, "guild_id": guild_id, "points": points}
-            )
+def set(self, user_id: int, guild_id: int, points: int):
+    result = self.infraction_points.update_one(
+        {"user_id": user_id, "guild_id": guild_id},
+        {"$set": {"points": {"$add": ["$points", points]}}},
+    )
+
+    if result.modified_count == 0:
+        self.infraction_points.insert_one(
+            {"user_id": user_id, "guild_id": guild_id, "points": points}
+        )
 
 
 ipdb = InfractionPointsDB(client)

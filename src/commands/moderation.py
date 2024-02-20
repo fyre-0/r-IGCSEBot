@@ -17,7 +17,7 @@ def convert_time(time: tuple[str, str, str, str]) -> str:
     return time_str.strip()
 
 
-@bot.slash_command(description="Check a user's previous offenses (warns/timeouts/bans)")
+@bot.tree.command(description="Check a user's previous offenses (warns/timeouts/bans)")
 async def history(
     interaction: discord.Interaction,
     user: discord.User = discord.SlashOption(
@@ -94,7 +94,7 @@ async def history(
         await interaction.send(f"```{text}```", ephemeral=False)
 
 
-@bot.slash_command(description="Warn a user (for mods)")
+@bot.tree.command(description="Warn a user (for mods)")
 async def warn(
     interaction: discord.Interaction,
     user: discord.Member = discord.SlashOption(
@@ -147,7 +147,7 @@ async def warn(
     ipdb.set(user.id, interaction.guild.id, 1)
 
 
-@bot.slash_command(description="Timeout a user (for mods)")
+@bot.tree.command(description="Timeout a user (for mods)")
 @commands.guild_only
 async def timeout(
     interaction: discord.Interaction,
@@ -265,7 +265,7 @@ Until: <t:{int(time.time()) + seconds}> (<t:{int(time.time()) + seconds}:R>)""",
     ipdb.set(user.id, interaction.guild.id, points)
 
 
-@bot.slash_command(description="Untimeout a user (for mods)")
+@bot.tree.command(description="Untimeout a user (for mods)")
 async def untimeout(
     interaction: discord.Interaction,
     user: discord.Member = discord.SlashOption(
@@ -313,7 +313,7 @@ Moderator: {mod}"""
     punishdb.add_punishment(case_no, user.id, interaction.user.id, "", action_type)
 
 
-@bot.slash_command(description="Kick a user from the server (for mods)")
+@bot.tree.command(description="Kick a user from the server (for mods)")
 async def kick(
     interaction: discord.Interaction,
     user: discord.Member = discord.SlashOption(
@@ -366,7 +366,7 @@ async def kick(
     punishdb.add_punishment(case_no, user.id, interaction.user.id, reason, action_type)
 
 
-@bot.slash_command(description="Ban a user from the server (for mods)")
+@bot.tree.command(description="Ban a user from the server (for mods)")
 async def ban(
     interaction: discord.Interaction,
     user: discord.Member = discord.SlashOption(
@@ -445,7 +445,7 @@ async def ban(
     punishdb.add_punishment(case_no, user.id, interaction.user.id, reason, action_type)
 
 
-@bot.slash_command(description="Unban a user from the server (for mods)")
+@bot.tree.command(description="Unban a user from the server (for mods)")
 async def unban(
     interaction: discord.Interaction,
     user: discord.User = discord.SlashOption(
@@ -532,7 +532,7 @@ class PunishmentsView(discord.ui.View):
         self.stop()
 
 
-@bot.slash_command(description="Remove infraction (for admins)")
+@bot.tree.command(description="Remove infraction (for admins)")
 async def remove_infraction(
     interaction: discord.Interaction,
     user: discord.User = discord.SlashOption(

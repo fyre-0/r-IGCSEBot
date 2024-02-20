@@ -1,4 +1,4 @@
-import nextcord as discord
+import discord
 from schemas.redis import Session, Question, User, ExtendedModel, View
 from .DisabledButtonsView import DisabledButtonsView
 from redis_om import NotFoundError

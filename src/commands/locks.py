@@ -3,9 +3,7 @@ from utils.constants import LINK, GUILD_ID, MODLOG_CHANNEL_ID
 from utils.roles import is_bot_developer, is_moderator
 
 
-@bot.slash_command(
-    name="channellock", description="Locks a channel at a specified time"
-)
+@bot.tree.command(name="channellock", description="Locks a channel at a specified time")
 async def Channellockcommand(
     interaction: discord.Interaction,
     channelinput: discord.TextChannel = discord.SlashOption(
@@ -149,7 +147,7 @@ async def Channellockcommand(
     )
 
 
-@bot.slash_command(
+@bot.tree.command(
     name="forumlock", description="Locks a forum thread at a specified time (for mods)"
 )
 async def Forumlockcommand(

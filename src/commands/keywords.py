@@ -94,7 +94,7 @@ class RemoveKeywords(discord.ui.Modal):
         )
 
 
-@bot.slash_command(name="keywords", description="Adds or Deletes a keyword (for mods)")
+@bot.tree.command(name="keywords", description="Adds or Deletes a keyword (for mods)")
 async def keywordscommand(
     interaction: discord.Interaction,
     action_type: str = discord.SlashOption(
@@ -115,7 +115,7 @@ async def keywordscommand(
         await interaction.response.send_modal(modal=RemoveKeywords())
 
 
-@bot.slash_command(description="Display all keywords")
+@bot.tree.command(description="Display all keywords")
 async def list_keywords(interaction: discord.Interaction):
     page = 1
 
