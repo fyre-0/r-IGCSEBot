@@ -16,5 +16,5 @@ async def on_message_edit(before: discord.Message, after: discord.Message):
         content_after=after.content,
         author_name=before.author.name,
         author_icon_url=before.author.display_avatar.url,
-        timestamp=str(before.edited_at.timestamp()),
+        timestamp=str(after.edited_at.timestamp()),
     ).save().expire(90)
