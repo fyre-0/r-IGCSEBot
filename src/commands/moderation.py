@@ -76,12 +76,16 @@ async def history(
             f"{user} does not have any previous offenses.", ephemeral=False
         )
     else:
+        points = ipdb.infraction_points.find_one(
+            {"user_id": user.id, "guild_id": interaction.guild.id}
+        )["points"]
+
         text = f"Moderation History for {user}:\n\nNo. of offences ({total}):\n"
         text += "\n".join(list(map(lambda x: f"{x[0]}: {x[1]}", list(actions.items()))))
         text += "\n"
         text += "\nFurther Details:\n"
         text += ("\n".join(history))[:1900]
-        text += "\nFurther Details:\n"
+        text += f"\nTotal Points: {f"{points} - Mods Review & Take appropriate action" if points >= 10 else f"{points}"}"
         await interaction.send(f"```{text}```", ephemeral=False)
 
 
