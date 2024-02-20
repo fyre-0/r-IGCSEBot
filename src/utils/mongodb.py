@@ -1,3 +1,4 @@
+from typing import Callable
 from bot import bot, discord, pymongo
 from utils.constants import LINK, DMS_CLOSED_CHANNEL_ID
 from datetime import datetime, UTC
@@ -9,6 +10,32 @@ from bson import ObjectId
 client = pymongo.MongoClient(
     LINK, server_api=pymongo.server_api.ServerApi("1"), minPoolSize=1
 )
+
+
+class InfractionPointsDB:
+    def __init__(self, client: pymongo.MongoClient):
+        self.client = client
+        self.db = self.client.IGCSEBot
+        self.infraction_points = self.db.infraction_points
+
+    def set(self, user_id: int, guild_id: int, points: Callable[[int], int]):
+        result = self.infraction_points.find_one(
+            {"user_id": user_id, "guild_id": guild_id}
+        )
+
+        new_points = points(result.points)
+
+        if result is None:
+            self.infraction_points.insert_one(
+                {"user_id": user_id, "guild_id": guild_id, "points": new_points}
+            )
+        else:
+            self.infraction_points.update_one(
+                {"user_id": user_id}, {"$set": {"points": new_points}}
+            )
+
+
+ipdb = InfractionPointsDB(client)
 
 
 class ReactionRolesDB:
