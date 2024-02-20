@@ -2,7 +2,7 @@ from bot import bot, discord, pymongo, datetime, time
 from commands.dms import send_dm
 from utils.bans import is_banned
 from utils.roles import is_chat_moderator, is_moderator, is_admin
-from utils.mongodb import gpdb, punishdb
+from utils.mongodb import gpdb, punishdb, ipdb
 from utils.constants import GUILD_ID, LINK
 
 
@@ -134,6 +134,7 @@ async def warn(
         content=f'You have been warned in r/IGCSE by moderator {mod} for "{reason}".\n\nPlease be mindful in your further interaction in the server to avoid further action being taken against you, such as a timeout or a ban.',
     )
     punishdb.add_punishment(case_no, user.id, interaction.user.id, reason, action_type)
+    ipdb.set(user.id, lambda x: x + 1)
 
 
 @bot.slash_command(description="Timeout a user (for mods)")
@@ -242,6 +243,15 @@ Until: <t:{int(time.time()) + seconds}> (<t:{int(time.time()) + seconds}:R>)""",
         action_type,
         duration=timeout_duration_simple,
     )
+
+    if seconds >= 604800:
+        points = 4
+    elif seconds >= 21600:
+        points = 3
+    else:
+        points = 2
+
+    ipdb.set(user.id, lambda x: x + points)
 
 
 @bot.slash_command(description="Untimeout a user (for mods)")
@@ -511,27 +521,46 @@ class PunishmentsView(discord.ui.View):
         self.stop()
 
 
-@bot.slash_command(name="remove_infraction", description="Removes a Infraction using the case number (for admins)")
-async def remove_infraction(interaction: discord.Interaction, 
-                            casenumber: str = discord.SlashOption(name="case_number", description="What is the case number? Example - Case #1345", required=True), 
-                            logs = discord.SlashOption(name="logs_type", choices=["warn-logs", "behaviour-logs"], required=True)):
-        
-        if not await is_admin(interaction.user):
-            await interaction.send("You are not permitted to use this command.", ephemeral=True)
-            return
-        
-        guild = bot.get_guild(GUILD_ID)
-        client = pymongo.MongoClient(LINK)
-        db = client.IGCSEBot
-        punish_db = db["punishment_history"]
-        if "#" in casenumber or "Case #" in casenumber:
-              caseno = casenumber.replace("Case ", "")
-              casenumber = caseno.replace("#", "")            
-        if logs == "warn-logs":
-            user = punish_db.find_one({"case_id": casenumber, "action": "Warn"})["action_against"]
-            await interaction.send(f"The infraction has been successfully removed from {guild.get_member(int(user)).name}.")             
-            punish_db.delete_one({"case_id": casenumber, "action": "Warn"})
-        else:
-            user = punish_db.find_one({"case_id": casenumber})["action_against"]
-            await interaction.send(f"The infraction has been successfully removed from {guild.get_member(int(user)).name}.")                
-            punish_db.delete_one({"case_id": casenumber})
+@bot.slash_command(
+    name="remove_infraction",
+    description="Removes a Infraction using the case number (for admins)",
+)
+async def remove_infraction(
+    interaction: discord.Interaction,
+    casenumber: str = discord.SlashOption(
+        name="case_number",
+        description="What is the case number? Example - Case #1345",
+        required=True,
+    ),
+    logs=discord.SlashOption(
+        name="logs_type", choices=["warn-logs", "behaviour-logs"], required=True
+    ),
+):
+
+    if not await is_admin(interaction.user):
+        await interaction.send(
+            "You are not permitted to use this command.", ephemeral=True
+        )
+        return
+
+    guild = bot.get_guild(GUILD_ID)
+    client = pymongo.MongoClient(LINK)
+    db = client.IGCSEBot
+    punish_db = db["punishment_history"]
+    if "#" in casenumber or "Case #" in casenumber:
+        caseno = casenumber.replace("Case ", "")
+        casenumber = caseno.replace("#", "")
+    if logs == "warn-logs":
+        user = punish_db.find_one({"case_id": casenumber, "action": "Warn"})[
+            "action_against"
+        ]
+        await interaction.send(
+            f"The infraction has been successfully removed from {guild.get_member(int(user)).name}."
+        )
+        punish_db.delete_one({"case_id": casenumber, "action": "Warn"})
+    else:
+        user = punish_db.find_one({"case_id": casenumber})["action_against"]
+        await interaction.send(
+            f"The infraction has been successfully removed from {guild.get_member(int(user)).name}."
+        )
+        punish_db.delete_one({"case_id": casenumber})
