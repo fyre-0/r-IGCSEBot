@@ -78,7 +78,7 @@ async def history(
     else:
         points = ipdb.infraction_points.find_one(
             {"user_id": user.id, "guild_id": interaction.guild.id}
-        )["points"]
+        ).points
 
         text = f"Moderation History for {user}:\n\nNo. of offences ({total}):\n"
         text += "\n".join(list(map(lambda x: f"{x[0]}: {x[1]}", list(actions.items()))))

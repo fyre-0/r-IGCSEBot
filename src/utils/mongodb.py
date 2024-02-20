@@ -23,15 +23,13 @@ class InfractionPointsDB:
             {"user_id": user_id, "guild_id": guild_id}
         )
 
-        new_points = points(result.points)
-
         if result is None:
             self.infraction_points.insert_one(
-                {"user_id": user_id, "guild_id": guild_id, "points": new_points}
+                {"user_id": user_id, "guild_id": guild_id, "points": points(0)}
             )
         else:
             self.infraction_points.update_one(
-                {"user_id": user_id}, {"$set": {"points": new_points}}
+                {"user_id": user_id}, {"$set": {"points": points(result.points)}}
             )
 
 
