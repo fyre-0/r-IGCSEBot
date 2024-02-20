@@ -120,7 +120,7 @@ async def toggleforumlock(thread_id, unlock, unlocktime):
         print(e)
 
 
-@tasks.loop(hours=720)
+@tasks.loop(hours=168)
 async def infractionnotification():
     docs = ipdb.infraction_points.find({"points": {"$gte": 10}})
 
