@@ -76,11 +76,16 @@ async def history(
             f"{user} does not have any previous offenses.", ephemeral=False
         )
     else:
+        points = ipdb.infraction_points.find_one(
+            {"user_id": user.id, "guild_id": interaction.guild.id}
+        )["points"]
+
         text = f"Moderation History for {user}:\n\nNo. of offences ({total}):\n"
         text += "\n".join(list(map(lambda x: f"{x[0]}: {x[1]}", list(actions.items()))))
         text += "\n"
         text += "\nFurther Details:\n"
         text += ("\n".join(history))[:1900]
+        text += f"\nTotal Points: {f"{points} - Mods Review & Take appropriate action" if points >= 10 else f"{points}"}"
         await interaction.send(f"```{text}```", ephemeral=False)
 
 
@@ -134,7 +139,7 @@ async def warn(
         content=f'You have been warned in r/IGCSE by moderator {mod} for "{reason}".\n\nPlease be mindful in your further interaction in the server to avoid further action being taken against you, such as a timeout or a ban.',
     )
     punishdb.add_punishment(case_no, user.id, interaction.user.id, reason, action_type)
-    ipdb.set(user.id, lambda x: x + 1)
+    ipdb.set(user.id, interaction.guild.id, lambda x: x + 1)
 
 
 @bot.slash_command(description="Timeout a user (for mods)")
@@ -251,7 +256,7 @@ Until: <t:{int(time.time()) + seconds}> (<t:{int(time.time()) + seconds}:R>)""",
     else:
         points = 2
 
-    ipdb.set(user.id, lambda x: x + points)
+    ipdb.set(user.id, interaction.guild.id, lambda x: x + points)
 
 
 @bot.slash_command(description="Untimeout a user (for mods)")
