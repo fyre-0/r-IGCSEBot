@@ -162,9 +162,11 @@ async def new_session(interaction: discord.Interaction):
 
     for view_item in views:
         view: discord.ui.View = view_item["view"](interaction)
-        
+
         if msg is None:
-            msg = await interaction.send(view_item["message"], view=view, ephemeral=True)
+            msg = await interaction.send(
+                view_item["message"], view=view, ephemeral=True
+            )
         else:
             await msg.edit(view=view, content=view_item["message"])
 
@@ -658,7 +660,7 @@ async def practice(
             "Invalid action! Please choose a valid action.", ephemeral=True
         )
         return
-    
+
     await options[action](interaction)
 
 
