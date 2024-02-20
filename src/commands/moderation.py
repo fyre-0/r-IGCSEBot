@@ -3,7 +3,7 @@ from commands.dms import send_dm
 from utils.bans import is_banned
 from utils.roles import is_chat_moderator, is_moderator, is_admin
 from utils.mongodb import gpdb, punishdb
-from utils.constants import GUILD_ID
+from utils.constants import GUILD_ID, LINK
 
 
 def convert_time(time: tuple[str, str, str, str]) -> str:
