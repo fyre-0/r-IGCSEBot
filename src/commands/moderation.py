@@ -76,9 +76,14 @@ async def history(
             f"{user} does not have any previous offenses.", ephemeral=False
         )
     else:
-        points = ipdb.infraction_points.find_one(
+        result = ipdb.infraction_points.find_one(
             {"user_id": user.id, "guild_id": interaction.guild.id}
-        )["points"]
+        )
+
+        if result is None:
+            points = 0
+        else:
+            points = result.points
 
         text = f"Moderation History for {user}:\n\nNo. of offences ({total}):\n"
         text += "\n".join(list(map(lambda x: f"{x[0]}: {x[1]}", list(actions.items()))))
