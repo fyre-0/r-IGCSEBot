@@ -81,6 +81,7 @@ async def history(
         text += "\n"
         text += "\nFurther Details:\n"
         text += ("\n".join(history))[:1900]
+        text += "\nFurther Details:\n"
         await interaction.send(f"```{text}```", ephemeral=False)
 
 

@@ -132,7 +132,11 @@ async def infractionnotification():
         guild = bot.get_guild(guild_id)
         member = guild.get_member(user_id)
 
-        modlog_channel_id = gpdb.get_pref("modlog_channel")
+        modlog_channel_id = (
+            1209480261754945576
+            if guild_id == GUILD_ID
+            else gpdb.get_pref("modlog_channel")
+        )
         modlog_channel = bot.get_channel(modlog_channel_id)
 
         embed = discord.Embed(
