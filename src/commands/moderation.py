@@ -1,4 +1,4 @@
-from bot import bot, discord, pymongo, datetime, time
+from bot import bot, discord, pymongo, datetime, time, commands
 from commands.dms import send_dm
 from utils.bans import is_banned
 from utils.roles import is_chat_moderator, is_moderator, is_admin
@@ -144,10 +144,11 @@ async def warn(
         content=f'You have been warned in r/IGCSE by moderator {mod} for "{reason}".\n\nPlease be mindful in your further interaction in the server to avoid further action being taken against you, such as a timeout or a ban.',
     )
     punishdb.add_punishment(case_no, user.id, interaction.user.id, reason, action_type)
-    ipdb.set(user.id, interaction.guild.id, lambda x: x + 1)
+    ipdb.set(user.id, interaction.guild.id, 1)
 
 
 @bot.slash_command(description="Timeout a user (for mods)")
+@commands.guild_only
 async def timeout(
     interaction: discord.Interaction,
     user: discord.Member = discord.SlashOption(
@@ -261,7 +262,7 @@ Until: <t:{int(time.time()) + seconds}> (<t:{int(time.time()) + seconds}:R>)""",
     else:
         points = 2
 
-    ipdb.set(user.id, interaction.guild.id, lambda x: x + points)
+    ipdb.set(user.id, interaction.guild.id, points)
 
 
 @bot.slash_command(description="Untimeout a user (for mods)")
