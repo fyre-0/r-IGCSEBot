@@ -1,4 +1,4 @@
-import nextcord as discord
+import discord
 from .MCQButton import MCQButton
 
 options = ["A", "B", "C", "D"]

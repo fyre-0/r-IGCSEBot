@@ -9,7 +9,7 @@ from utils.data import (
 )
 
 
-@bot.slash_command(name="random_pyp", description="Gets a random CAIE past year paper.")
+@bot.tree.command(name="random_pyp", description="Gets a random CAIE past year paper.")
 async def random_pyp(
     interaction: discord.Interaction,
     programme: str = discord.SlashOption(

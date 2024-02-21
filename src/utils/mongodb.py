@@ -1,5 +1,6 @@
 from typing import Callable
 from bot import bot, discord, pymongo
+from pymongo import errors
 from utils.constants import LINK, DMS_CLOSED_CHANNEL_ID
 from datetime import datetime, UTC
 import time
@@ -18,19 +19,17 @@ class InfractionPointsDB:
         self.db = self.client.IGCSEBot
         self.infraction_points = self.db.infraction_points
 
-    def set(self, user_id: int, guild_id: int, points: Callable[[int], int]):
-        result = self.infraction_points.find_one(
-            {"user_id": user_id, "guild_id": guild_id}
-        )
 
-        if result is None:
-            self.infraction_points.insert_one(
-                {"user_id": user_id, "guild_id": guild_id, "points": points(0)}
-            )
-        else:
-            self.infraction_points.update_one(
-                {"user_id": user_id}, {"$set": {"points": points(result.points)}}
-            )
+def set(self, user_id: int, guild_id: int, points: int):
+    result = self.infraction_points.update_one(
+        {"user_id": user_id, "guild_id": guild_id},
+        {"$set": {"points": {"$add": ["$points", points]}}},
+    )
+
+    if result.modified_count == 0:
+        self.infraction_points.insert_one(
+            {"user_id": user_id, "guild_id": guild_id, "points": points}
+        )
 
 
 ipdb = InfractionPointsDB(client)
