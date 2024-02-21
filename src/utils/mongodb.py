@@ -349,7 +349,7 @@ class PunishmentsDB:
         )
 
     def get_punishments_by_user(self, user_id: int, guild_id: int | str):
-        return self.punishment_history.find({"action_against": str(user_id), "guild_id": str(guild_id)})
+        return self.punishment_history.find({"action_against": str(user_id), "guild_id": str(guild_id)}).sort({ "when": 1 })
 
     def remove_punishment(self, identifier: str):
         return self.punishment_history.delete_one({"_id": ObjectId(identifier)})
