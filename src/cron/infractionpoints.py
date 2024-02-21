@@ -25,7 +25,7 @@ async def send_infraction_messages():
     )
     points = punishment_history.aggregate(
         [
-            {"$match": {"guild_id": "576460042774118420"}},
+            {"$match": {"guild_id": GUILD_ID}},
             {"$group": {"_id": "$action_against", "total_points": {"$sum": "$points"}}},
             {"$match": {"$expr": {"$gte": ["$total_points", 10]}}},
             {"$sort": {"total_points": -1}},
