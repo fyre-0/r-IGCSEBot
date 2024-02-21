@@ -1,4 +1,4 @@
-from bot import bot, discord, app_commands
+from bot import bot, discord
 from typing import Optional
 import pubchempy as pcp
 import requests
@@ -57,14 +57,17 @@ metals = [
 ]
 
 
-@bot.tree.command(
+@bot.slash_command(
     description="Information about a compound/element using the formula or name"
 )
-@app_commands.describe(
-    formula="Formula of the chemical compound", name="Name of the chemical compound"
-)
 async def cheminfo(
-    interaction: discord.Interaction, formula: Optional[str], name: Optional[str]
+    interaction: discord.Interaction,
+    formula: Optional[str] = discord.SlashOption(
+        name="formula", description="Formula of the chemical compound", required=False
+    ),
+    name: Optional[str] = discord.SlashOption(
+        name="name", description="Name of the chemical compound", required=False
+    ),
 ):
     if formula is None and name is None:
         await interaction.send("Please enter a formula or name", ephemeral=True)

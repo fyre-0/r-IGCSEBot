@@ -13,7 +13,7 @@ from pytimeparse import parse
 from typing import Optional
 
 
-@bot.tree.command(
+@bot.slash_command(
     name="gostudy", description="disables the access to the offtopics for 1 hour."
 )
 async def gostudy(
@@ -198,7 +198,7 @@ async def gostudy(
         message = await interaction.send("Are you sure?", view=view, ephemeral=True)
 
 
-@bot.tree.command(
+@bot.slash_command(
     name="remove_gostudy", description="remove the Forced Mute role. (for mods)"
 )
 async def remove_gostudy(

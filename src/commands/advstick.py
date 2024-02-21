@@ -4,7 +4,7 @@ from utils.constants import GUILD_ID
 from utils.mongodb import smdb
 
 
-@bot.tree.command(
+@bot.slash_command(
     name="advstick",
     description="sends a message in advance and automatically sticks it.",
     guild_ids=[GUILD_ID],

@@ -1,6 +1,6 @@
 from .Select import Select
 from .SelectMenuVisibility import SelectMenuVisibility
-import discord
+import nextcord as discord
 from schemas.redis import TempSessionData
 
 topics_for_practice = {

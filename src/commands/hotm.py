@@ -3,7 +3,7 @@ from utils.constants import GUILD_ID, LINK, HOTM_VOTING_CHANNEL
 from utils.roles import is_helper, is_moderator
 
 
-@bot.tree.command(description="Vote for the helper of the month", guild_ids=[GUILD_ID])
+@bot.slash_command(description="Vote for the helper of the month", guild_ids=[GUILD_ID])
 async def votehotm(
     interaction: discord.Interaction,
     helper: discord.Member = discord.SlashOption(
@@ -69,7 +69,7 @@ async def votehotm(
         await interaction.send(f"{helper} is not a helper.", ephemeral=True)
 
 
-@bot.tree.command(
+@bot.slash_command(
     name="resethotm",
     description="Reset the Helper of the Month data",
     guild_ids=[GUILD_ID],

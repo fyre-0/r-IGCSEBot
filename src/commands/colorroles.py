@@ -65,7 +65,7 @@ class DropdownViewRR(discord.ui.View):
             self.add_item(DropdownRR(category, options))
 
 
-@bot.tree.command(
+@bot.slash_command(
     description="Choose a display colour for your name", guild_ids=[GUILD_ID]
 )
 async def colorroles(interaction: discord.Interaction):

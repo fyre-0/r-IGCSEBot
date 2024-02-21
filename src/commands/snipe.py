@@ -4,7 +4,7 @@ from redis_om import NotFoundError
 import datetime
 
 
-@bot.tree.command(name="snipe", description="Snipe a deleted/edited message")
+@bot.slash_command(name="snipe", description="Snipe a deleted/edited message")
 @commands.guild_only()
 async def snipe(
     interaction: discord.Interaction,

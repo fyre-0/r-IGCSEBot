@@ -4,7 +4,7 @@ from utils.roles import is_moderator, is_bot_developer
 from utils.constants import MODLOG_CHANNEL_ID
 
 
-@bot.tree.command(name="rep", description="View someone's current rep")
+@bot.slash_command(name="rep", description="View someone's current rep")
 async def rep(
     interaction: discord.Interaction,
     user: discord.User = discord.SlashOption(
@@ -20,7 +20,7 @@ async def rep(
     await interaction.send(f"{user} has {rep} rep.", ephemeral=False)
 
 
-@bot.tree.command(
+@bot.slash_command(
     name="change_rep", description="Change someone's current rep (for mods)"
 )
 async def change_rep(
@@ -67,7 +67,7 @@ async def change_rep(
         )
 
 
-@bot.tree.command(description="View the current rep leaderboard")
+@bot.slash_command(description="View the current rep leaderboard")
 async def leaderboard(
     interaction: discord.Interaction,
     page: int = discord.SlashOption(
