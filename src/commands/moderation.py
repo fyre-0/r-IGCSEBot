@@ -70,7 +70,7 @@ async def history(
         except discord.errors.NotFound:
             moderator = result["action_by"].strip()
 
-        final_string = f"[{date_of_event}] {result['action']}{duration_as_text}{reason} by {moderator.strip()}"
+        final_string = f"[{date_of_event}] [{result.get('points', 0)}] {result['action']}{duration_as_text}{reason} by {moderator.strip()}"
         history.append(final_string)
 
     if len(history) == 0:
