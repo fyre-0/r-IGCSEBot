@@ -11,31 +11,6 @@ client = pymongo.MongoClient(
     LINK, server_api=pymongo.server_api.ServerApi("1"), minPoolSize=1
 )
 
-
-class InfractionPointsDB:
-    def __init__(self, client: pymongo.MongoClient):
-        self.client = client
-        self.db = self.client.IGCSEBot
-        self.infraction_points = self.db.infraction_points
-
-    def set(self, user_id: int, guild_id: int, points: Callable[[int], int]):
-        result = self.infraction_points.find_one(
-            {"user_id": user_id, "guild_id": guild_id}
-        )
-
-        if result is None:
-            self.infraction_points.insert_one(
-                {"user_id": user_id, "guild_id": guild_id, "points": points(0)}
-            )
-        else:
-            self.infraction_points.update_one(
-                {"user_id": user_id}, {"$set": {"points": points(result.points)}}
-            )
-
-
-ipdb = InfractionPointsDB(client)
-
-
 class ReactionRolesDB:
     def __init__(self, client):
         self.client = client
@@ -354,6 +329,8 @@ class PunishmentsDB:
         action_by: int,
         reason: str,
         action: str,
+        guild_id: int | str,
+        points: int = 0,
         when=None,
         duration: str = None,
     ):
@@ -366,11 +343,13 @@ class PunishmentsDB:
                 "action": action,
                 "duration": duration,
                 "when": when or datetime.now(UTC),
+                "points": points,
+                "guild_id": str(guild_id)
             }
         )
 
-    def get_punishments_by_user(self, user_id: int):
-        return self.punishment_history.find({"action_against": str(user_id)})
+    def get_punishments_by_user(self, user_id: int, guild_id: int | str):
+        return self.punishment_history.find({"action_against": str(user_id), "guild_id": str(guild_id)})
 
     def remove_punishment(self, identifier: str):
         return self.punishment_history.delete_one({"_id": ObjectId(identifier)})
