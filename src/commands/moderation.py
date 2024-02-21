@@ -1,4 +1,4 @@
-from bot import bot, discord, pymongo, datetime, time
+from bot import bot, discord, pymongo, datetime, time, commands
 from commands.dms import send_dm
 from utils.bans import is_banned
 from utils.roles import is_chat_moderator, is_moderator, is_admin
@@ -552,3 +552,24 @@ async def remove_infraction(
 
     view = PunishmentsView(results)
     await interaction.send(view=view, ephemeral=True)
+
+
+@bot.slash_command(
+    name="infraction_points", description="Get the infraction points of a user"
+)
+@commands.guild_only()
+async def infraction_points(
+    interaction: discord.Interaction,
+    user: discord.Member = discord.SlashOption(
+        name="user", description="The user to get the infraction points of"
+    ),
+):
+    user = ipdb.infraction_points.find_one(
+        {"guild_id": interaction.guild.id, "user_id": user.id}
+    )
+
+    await interaction.send(
+        f"{user.mention} has no infraction points"
+        if user is None
+        else f"{user.mention} has {user['points']} infraction points"
+    )
