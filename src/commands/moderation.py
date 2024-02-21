@@ -303,7 +303,11 @@ Username: {str(user)} ({user.id})
 Moderator: {mod}"""
         await ban_msg_channel.send(ban_msg)
     await interaction.send(f"Timeout has been removed from {str(user)}.")
-    punishdb.add_punishment(case_no, user.id, interaction.user.id, "", action_type, interaction.guild.id)
+    punishments = list(punishdb.get_punishments_by_user(user.id, interaction.guild.id))
+    points = 0
+    if punishments[-1]["action"] == "Timeout":
+        points = -punishments[-1]["points"]
+    punishdb.add_punishment(case_no, user.id, interaction.user.id, "", action_type, interaction.guild.id, points=points)
 
 
 @bot.slash_command(description="Kick a user from the server (for mods)")
