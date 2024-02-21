@@ -488,7 +488,7 @@ class PunishmentsSelect(discord.ui.Select):
         self.results = results
         for result in self.results:
             self.add_option(
-                label=f"Case #{result.get('case_id', "0000")} | {result['action']} - {result['reason']}",
+                label=f"Case #{result.get('case_id', '0000')} | {result['action']} - {result['reason']}",
                 value=str(result["_id"]),
             )
 

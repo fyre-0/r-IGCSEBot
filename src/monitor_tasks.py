@@ -7,7 +7,7 @@ from schemas.redis import Session, Question, View
 from commands.practice.ui import MCQButtonsView
 from commands.practice import close_session
 import datetime
-from utils.mongodb import smdb, ipdb, gpdb
+from utils.mongodb import smdb, gpdb
 
 
 async def togglechannellock(channel_id, unlock, *, unlocktime=0):
