@@ -305,8 +305,9 @@ Moderator: {mod}"""
     await interaction.send(f"Timeout has been removed from {str(user)}.")
     punishments = list(punishdb.get_punishments_by_user(user.id, interaction.guild.id))
     points = 0
-    if punishments[-1]["action"] == "Timeout":
-        points = -punishments[-1]["points"]
+    if punishments and punishments[-1]:
+        if punishments[-1]["action"] == "Timeout":
+            points = -punishments[-1]["points"]
     punishdb.add_punishment(case_no, user.id, interaction.user.id, "", action_type, interaction.guild.id, points=points)
 
 
