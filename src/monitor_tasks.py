@@ -120,35 +120,6 @@ async def toggleforumlock(thread_id, unlock, unlocktime):
         print(e)
 
 
-@tasks.loop(hours=168)
-async def infractionnotification():
-    docs = ipdb.infraction_points.find({"points": {"$gte": 10}})
-
-    for doc in docs:
-        guild_id = doc["guild_id"]
-        user_id = doc["user_id"]
-        points = doc["points"]
-
-        guild = bot.get_guild(guild_id)
-        member = guild.get_member(user_id)
-
-        modlog_channel_id = (
-            1209480261754945576
-            if guild_id == GUILD_ID
-            else gpdb.get_pref("modlog_channel")
-        )
-        modlog_channel = bot.get_channel(modlog_channel_id)
-
-        embed = discord.Embed(
-            description=f"{member.mention} has reached {points} points.",
-            colour=discord.Colour.red(),
-        )
-
-        embed.set_author(name=str(bot.user), icon_url=bot.user.display_avatar.url)
-
-        modlog_channel.send(embed=embed)
-
-
 @tasks.loop(hours=720)
 async def autorefreshhelpers():
     changed = []

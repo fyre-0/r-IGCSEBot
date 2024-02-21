@@ -2,9 +2,8 @@ from bot import bot, discord, pymongo, datetime, time
 from commands.dms import send_dm
 from utils.bans import is_banned
 from utils.roles import is_chat_moderator, is_moderator, is_admin
-from utils.mongodb import gpdb, punishdb, ipdb
-from utils.constants import GUILD_ID, LINK
-
+from utils.mongodb import gpdb, punishdb
+from utils.constants import GUILD_ID
 
 def convert_time(time: tuple[str, str, str, str]) -> str:
     time_str = ""
@@ -35,9 +34,9 @@ async def history(
     history = []
     total = 0
     allowed_actions_for_total = ["Warn", "Timeout", "Mute", "Ban", "Kick"]
-    results = punishdb.get_punishments_by_user(user.id)
+    results = punishdb.get_punishments_by_user(user.id, interaction.guild.id)
+    points = 0
     for result in results:
-
         if result["action"] not in actions:
             actions[result["action"]] = 1
         else:
@@ -45,6 +44,9 @@ async def history(
 
         if result["action"] in allowed_actions_for_total:
             total += 1
+            
+        points += result.get("points", 0)
+        
         if isinstance(result["when"], datetime.datetime):
             date_of_event = result["when"].strftime("%d %b, %Y at %I:%M %p")
         else:
@@ -76,21 +78,16 @@ async def history(
             f"{user} does not have any previous offenses.", ephemeral=False
         )
     else:
-        result = ipdb.infraction_points.find_one(
-            {"user_id": user.id, "guild_id": interaction.guild.id}
-        )
-
-        if result is None:
-            points = 0
-        else:
-            points = result.points
-
+        points_message = ""
+        if points >= 10:
+            points_message = " (Action needed)"
+        
         text = f"Moderation History for {user}:\n\nNo. of offences ({total}):\n"
         text += "\n".join(list(map(lambda x: f"{x[0]}: {x[1]}", list(actions.items()))))
         text += "\n"
         text += "\nFurther Details:\n"
         text += ("\n".join(history))[:1900]
-        text += f"\nTotal Points: {f"{points} - Mods Review & Take appropriate action" if points >= 10 else f"{points}"}"
+        text += f"\n\nTotal Points: {points}{points_message}"
         await interaction.send(f"```{text}```", ephemeral=False)
 
 
@@ -143,8 +140,7 @@ async def warn(
         user,
         content=f'You have been warned in r/IGCSE by moderator {mod} for "{reason}".\n\nPlease be mindful in your further interaction in the server to avoid further action being taken against you, such as a timeout or a ban.',
     )
-    punishdb.add_punishment(case_no, user.id, interaction.user.id, reason, action_type)
-    ipdb.set(user.id, interaction.guild.id, lambda x: x + 1)
+    punishdb.add_punishment(case_no, user.id, interaction.user.id, reason, action_type, interaction.guild.id, points=1)
 
 
 @bot.slash_command(description="Timeout a user (for mods)")
@@ -245,24 +241,22 @@ Until: <t:{int(time.time()) + seconds}> (<t:{int(time.time()) + seconds}:R>)""",
             str(seconds % 60),
         )
     )
+    points = 2
+    if seconds >= (3600 * 6):
+        points = 3
+    if seconds >= (3600 * 24 * 7):
+        points = 4
+        
     punishdb.add_punishment(
         case_no,
         user.id,
         interaction.user.id,
         reason,
         action_type,
+        interaction.guild.id,
         duration=timeout_duration_simple,
+        points=points,
     )
-
-    if seconds >= 604800:
-        points = 4
-    elif seconds >= 21600:
-        points = 3
-    else:
-        points = 2
-
-    ipdb.set(user.id, interaction.guild.id, lambda x: x + points)
-
 
 @bot.slash_command(description="Untimeout a user (for mods)")
 async def untimeout(
@@ -309,7 +303,7 @@ Username: {str(user)} ({user.id})
 Moderator: {mod}"""
         await ban_msg_channel.send(ban_msg)
     await interaction.send(f"Timeout has been removed from {str(user)}.")
-    punishdb.add_punishment(case_no, user.id, interaction.user.id, "", action_type)
+    punishdb.add_punishment(case_no, user.id, interaction.user.id, "", action_type, interaction.guild.id)
 
 
 @bot.slash_command(description="Kick a user from the server (for mods)")
@@ -362,7 +356,7 @@ async def kick(
         await ban_msg_channel.send(ban_msg)
     await interaction.guild.kick(user)
     await interaction.send(f"{str(user)} has been kicked.")
-    punishdb.add_punishment(case_no, user.id, interaction.user.id, reason, action_type)
+    punishdb.add_punishment(case_no, user.id, interaction.user.id, reason, action_type, interaction.guild.id)
 
 
 @bot.slash_command(description="Ban a user from the server (for mods)")
@@ -441,7 +435,7 @@ async def ban(
         await ban_msg_channel.send(ban_msg)
     await interaction.guild.ban(user, delete_message_days=delete_message_days)
     await interaction.send(f"{str(user)} has been banned.")
-    punishdb.add_punishment(case_no, user.id, interaction.user.id, reason, action_type)
+    punishdb.add_punishment(case_no, user.id, interaction.user.id, reason, action_type, interaction.guild.id)
 
 
 @bot.slash_command(description="Unban a user from the server (for mods)")
@@ -483,7 +477,7 @@ async def unban(
             case_no = 1
         ban_msg = f"""Case #{case_no} | [{action_type}]\nUsername: {str(user)} ({user.id})\nModerator: {mod}"""
         await ban_msg_channel.send(ban_msg)
-        punishdb.add_punishment(case_no, user.id, interaction.user.id, "", action_type)
+        punishdb.add_punishment(case_no, user.id, interaction.user.id, "", action_type, interaction.guild.id)
 
 
 class PunishmentsSelect(discord.ui.Select):
@@ -544,7 +538,7 @@ async def remove_infraction(
         )
         return
     await interaction.response.defer(ephemeral=True)
-    results = punishdb.get_punishments_by_user(user.id)
+    results = punishdb.get_punishments_by_user(user.id, interaction.guild.id)
     results = list(results)
     if len(results) == 0:
         await interaction.send(f"{user} does not have any previous offenses.")
