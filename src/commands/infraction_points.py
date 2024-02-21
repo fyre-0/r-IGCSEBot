@@ -2,7 +2,7 @@ from bot import bot, discord, commands
 from utils.mongodb import ipdb
 
 
-@bot.tree.command(
+@bot.slash_command(
     name="infraction_points", description="Get the infraction points of a user"
 )
 @commands.guild_only()

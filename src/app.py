@@ -123,7 +123,7 @@ class EvalModal(discord.ui.Modal):
         await interaction.send(result)
 
 
-@bot.tree.command(
+@bot.slash_command(
     name="eval", description="Evaluate a piece of code.", guild_ids=[GUILD_ID]
 )
 async def _eval(interaction: discord.Interaction):
@@ -136,7 +136,7 @@ async def _eval(interaction: discord.Interaction):
     await interaction.response.send_modal(eval_modal)
 
 
-@bot.tree.command(
+@bot.slash_command(
     name="rrmake", description="Create reaction roles", guild_ids=[GUILD_ID]
 )
 async def rrmake(
@@ -204,7 +204,7 @@ async def rrmake(
         return
 
 
-@bot.tree.command(description="Create a new in-channel poll")
+@bot.slash_command(description="Create a new in-channel poll")
 async def yesnopoll(
     interaction: discord.Interaction,
     poll: str = discord.SlashOption(
@@ -259,7 +259,7 @@ class CancelPingBtn(discord.ui.View):
             await self.message.delete()
 
 
-@bot.tree.command(
+@bot.slash_command(
     name="helper_old",
     description="[OUTDATED] pings helper for this subject in 15 minutes",
     guild_ids=[GUILD_ID],
@@ -383,12 +383,12 @@ async def clear(ctx, num_to_clear: int):
         await ctx.reply("Oops! I can only delete messages sent in the last 14 days")
 
 
-@bot.tree.command(description="Pong!")
+@bot.slash_command(description="Pong!")
 async def ping(interaction: discord.Interaction):
     await interaction.send("Pong!")
 
 
-@bot.tree.command(name="joke", description="Get a random joke", guild_ids=[GUILD_ID])
+@bot.slash_command(name="joke", description="Get a random joke", guild_ids=[GUILD_ID])
 async def joke(
     interaction: discord.Interaction,
     category: str = discord.SlashOption(
@@ -417,7 +417,7 @@ async def joke(
     await interaction.send(joke)
 
 
-@bot.tree.command(name="meme", description="Get a random meme")
+@bot.slash_command(name="meme", description="Get a random meme")
 async def meme(
     interaction=discord.Interaction,
     subreddit: str = discord.SlashOption(
@@ -448,7 +448,7 @@ async def meme(
     await interaction.send(image_url)
 
 
-@bot.tree.command(
+@bot.slash_command(
     name="search",
     description="Search for IGCSE past papers with subject code/question text",
 )
@@ -502,7 +502,7 @@ async def search(
         )
 
 
-@bot.tree.command(description="Set server preferences (for mods)")
+@bot.slash_command(description="Set server preferences (for mods)")
 async def set_preferences(
     interaction: discord.Interaction,
     modlog_channel: discord.abc.GuildChannel = discord.SlashOption(
@@ -552,7 +552,7 @@ async def set_preferences(
     await interaction.send("Done.")
 
 
-@bot.tree.command(description="Start a study session", guild_ids=[GUILD_ID])
+@bot.slash_command(description="Start a study session", guild_ids=[GUILD_ID])
 async def study_session(interaction: discord.Interaction):
     try:
         role = interaction.guild.get_role(study_roles[interaction.channel.id])
@@ -621,7 +621,7 @@ class Feedback(discord.ui.Modal):
         await interaction.send("Feedback sent!", ephemeral=True)
 
 
-@bot.tree.command(name="feedback", description="Submit some feedback to the mods!")
+@bot.slash_command(name="feedback", description="Submit some feedback to the mods!")
 async def feedback(
     interaction: discord.Interaction,
     target=discord.SlashOption(
@@ -652,7 +652,7 @@ async def sync_commands(ctx):
     await ctx.message.reply("Slash Commands Synchronized !!")
 
 
-@bot.tree.command(description="Get a random fun fact")
+@bot.slash_command(description="Get a random fun fact")
 async def funfact(interaction: discord.Interaction):
     await interaction.response.defer()
     url = "https://uselessfacts.jsph.pl/random.json?language=en"
@@ -662,7 +662,7 @@ async def funfact(interaction: discord.Interaction):
     await interaction.send(useless_fact)
 
 
-@bot.tree.command(
+@bot.slash_command(
     name="instant_lockdown",
     description="Instantly locks/unlocks a channel/thread (for mods)",
 )
@@ -903,7 +903,9 @@ class ApplyDropdown(discord.ui.Select):
             await interaction.response.send_modal(modal=chat_modal)
 
 
-@bot.tree.command(name="apply", description="Apply for positions in the Discord server")
+@bot.slash_command(
+    name="apply", description="Apply for positions in the Discord server"
+)
 async def apply(interaction: discord.Interaction):
     view = discord.ui.View()
     view.add_item(ApplyDropdown())
@@ -951,7 +953,7 @@ class NewEmbed(discord.ui.Modal):
         await interaction.send("Done!", ephemeral=True, delete_after=1)
 
 
-@bot.tree.command(description="send and edit embeds (for mods)")
+@bot.slash_command(description="send and edit embeds (for mods)")
 async def embed(
     interaction: discord.Interaction,
     channel: discord.abc.GuildChannel = discord.SlashOption(
@@ -1010,7 +1012,7 @@ async def embed(
     await interaction.response.send_modal(modal)
 
 
-@bot.tree.command(description="Make an anonymous confession.")
+@bot.slash_command(description="Make an anonymous confession.")
 async def confess(
     interaction: discord.Interaction,
     confession: str = discord.SlashOption(
@@ -1114,12 +1116,12 @@ class DropdownView(discord.ui.View):
         self.add_item(Level())
 
 
-@bot.tree.command(description="View the r/igcse resources repository")
+@bot.slash_command(description="View the r/igcse resources repository")
 async def resources(interaction: discord.Interaction):
     await interaction.send(view=DropdownView())
 
 
-@bot.tree.command(description="Suggest an emote for the server!")
+@bot.slash_command(description="Suggest an emote for the server!")
 async def submit_emote(
     interaction: discord.Interaction,
     name: str = discord.SlashOption(
@@ -1229,7 +1231,7 @@ class SendMessage(discord.ui.Modal):
             await interaction.send("Message sent!", ephemeral=True)
 
 
-@bot.tree.command(name="message", description="Sends or Edits a Message (for mods)")
+@bot.slash_command(name="message", description="Sends or Edits a Message (for mods)")
 async def send_editcommand(
     interaction: discord.Interaction,
     action_type: str = discord.SlashOption(

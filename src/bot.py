@@ -3,15 +3,14 @@ import time
 import typing
 import pymongo
 import requests
-import discord
+import nextcord as discord
 import traceback
 import ast
 import json
 import random
 import pyshorteners
 
-from discord import app_commands
-from discord.ext import tasks, commands
+from nextcord.ext import tasks, commands
 from utils.constants import GUILD_ID
 
 intents = discord.Intents().all()

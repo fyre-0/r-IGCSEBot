@@ -643,7 +643,7 @@ options = {
 }
 
 
-@bot.tree.command(
+@bot.slash_command(
     name="practice", description="Choose a subject and practice with your friends."
 )
 async def practice(

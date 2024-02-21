@@ -1,5 +1,5 @@
 from .SelectUsersView import SelectUsersView
-import discord
+import nextcord as discord
 from schemas.redis import TempSessionData
 
 

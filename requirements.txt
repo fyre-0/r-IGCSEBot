@@ -1,4 +1,4 @@
-discord.py
+nextcord
 requests
 pymongo[srv]
 pyshorteners

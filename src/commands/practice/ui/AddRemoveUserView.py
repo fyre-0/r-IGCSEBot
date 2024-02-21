@@ -1,4 +1,4 @@
-import discord
+import nextcord as discord
 
 
 class AddRemoveUserView(discord.ui.View):
