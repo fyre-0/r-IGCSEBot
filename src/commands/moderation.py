@@ -228,7 +228,7 @@ Until: <t:{int(time.time()) + seconds}> (<t:{int(time.time()) + seconds}:R>)"""
         await ban_msg_channel.send(ban_msg)
 
     embed = discord.Embed(title="You are on a timeout!", 
-                          description=f"You have been given a timeout on the {interaction.guild.name} server due to '{reason}'. This {human_readable_time} timeout ends <t:{int(time.time()) + seconds}> (<t:{int(time.time()) + seconds}:R>)", 
+                          description=f"You have been given a timeout on the {interaction.guild.name} server due to '{reason}'. This timeout ends <t:{int(time.time()) + seconds}> (<t:{int(time.time()) + seconds}:R>)", 
                           color=0xA20000)
     await send_dm(user, 
                   embed=embed)
