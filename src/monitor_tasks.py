@@ -214,36 +214,39 @@ async def checkmute():
                 user_id = int(result["user_id"])
                 guild = bot.get_guild(GUILD_ID)
                 # The user ID may not be present in cache.
-                user = guild.get_member(user_id)
-                if user is None:
-                    mute.delete_many({"user_id": str(user_id)})
-                    return
-                forced_mute_role = guild.get_role(FORCED_MUTE_ROLE)
-                if forced_mute_role not in user.roles:
-                    mute.delete_many({"user_id": str(user_id)})
-                    return
-                await user.remove_roles(forced_mute_role)
-                # mute.update_one({"_id": result["_id"]}, {"$set": {"muted": False}})
-                embed = discord.Embed(
-                    description="Go Study Mode Deactivated",
-                    colour=discord.Colour.green(),
-                )
-                embed.set_author(
-                    name="MongoDB#0082",
-                    icon_url="https://cdn.discordapp.com/attachments/947859228649992213/1196753678342819933/mongodb.png?ex=65b8c6b7&is=65a651b7&hm=db7fdb12435ba54299497dfb26f65dac5993caa8b48b976cf01238233c54a508&",
-                )
-                embed.add_field(name="User", value=f"{user.mention}", inline=False)
-                embed.add_field(name="Date", value=f"<t:{timern}:F>", inline=False)
-                embed.add_field(
-                    name="ID",
-                    value=f"```py\nUser = {bot.user.id}\nRole = {FORCED_MUTE_ROLE}```",
-                    inline=False,
-                )
-                embed.set_footer(
-                    text=f"{bot.user}", icon_url=bot.user.display_avatar.url
-                )
-                await Logging.send(embed=embed)
-                mute.delete_one({"_id": result["_id"]})
+                try:
+                    user = guild.get_member(user_id)
+                    if user is None:
+                        mute.delete_many({"user_id": str(user_id)})
+                        return
+                    forced_mute_role = guild.get_role(FORCED_MUTE_ROLE)
+                    if forced_mute_role not in user.roles:
+                        mute.delete_many({"user_id": str(user_id)})
+                        return
+                    await user.remove_roles(forced_mute_role)
+                    # mute.update_one({"_id": result["_id"]}, {"$set": {"muted": False}})
+                    embed = discord.Embed(
+                        description="Go Study Mode Deactivated",
+                        colour=discord.Colour.green(),
+                    )
+                    embed.set_author(
+                        name="MongoDB#0082",
+                        icon_url="https://cdn.discordapp.com/attachments/947859228649992213/1196753678342819933/mongodb.png?ex=65b8c6b7&is=65a651b7&hm=db7fdb12435ba54299497dfb26f65dac5993caa8b48b976cf01238233c54a508&",
+                    )
+                    embed.add_field(name="User", value=f"{user.mention}", inline=False)
+                    embed.add_field(name="Date", value=f"<t:{timern}:F>", inline=False)
+                    embed.add_field(
+                        name="ID",
+                        value=f"```py\nUser = {bot.user.id}\nRole = {FORCED_MUTE_ROLE}```",
+                        inline=False,
+                    )
+                    embed.set_footer(
+                        text=f"{bot.user}", icon_url=bot.user.display_avatar.url
+                    )
+                    await Logging.send(embed=embed)
+                    mute.delete_one({"_id": result["_id"]})
+                except Exception:
+                    print(traceback.format_exc())
         except Exception:
             print(traceback.format_exc())
 
