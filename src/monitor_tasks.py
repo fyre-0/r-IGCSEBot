@@ -214,7 +214,7 @@ async def checkmute():
                 user_id = int(result["user_id"])
                 guild = bot.get_guild(GUILD_ID)
                 # The user ID may not be present in cache.
-                user = guild.get_member(user_id) or await guild.fetch_member(user_id)
+                user = guild.get_member(user_id)
                 if user is None:
                     mute.delete_many({"user_id": str(user_id)})
                     return
