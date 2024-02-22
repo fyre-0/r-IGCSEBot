@@ -10,8 +10,7 @@ async def send_dm(member: discord.Member, **kwargs):
     except Exception:
         if member.guild.id == GUILD_ID:
             thread = await dmsdb.get_thread(member)
-            await thread.send(**kwargs)
-            await thread.send(content=member.mention)
+            await thread.send(**kwargs, content=member.mention)
 
 
 @bot.command(name="Delete DM thread")

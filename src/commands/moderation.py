@@ -136,9 +136,12 @@ async def warn(
         ban_msg = f"""Case #{case_no} | [{action_type}]\nUsername: {str(user)} ({user.id})\nModerator: {mod} \nReason: {reason}"""
         await interaction.send(f"{str(user)} has been warned.")
         await ban_msg_channel.send(ban_msg)
+    embed = discord.Embed(title="You have been warned!",
+                          description=f'You have been warned in {interaction.guild.name} by moderator {mod} for "{reason}".\n\nPlease be mindful in your further interaction in the server to avoid further action being taken against you, such as a timeout or a ban.',
+                          color = 0xA20000)
     await send_dm(
         user,
-        content=f'You have been warned in r/IGCSE by moderator {mod} for "{reason}".\n\nPlease be mindful in your further interaction in the server to avoid further action being taken against you, such as a timeout or a ban.',
+        embed=embed,
     )
     punishdb.add_punishment(case_no, user.id, interaction.user.id, reason, action_type, interaction.guild.id, points=1)
 
@@ -223,13 +226,12 @@ Reason: {reason}
 Duration: {human_readable_time}
 Until: <t:{int(time.time()) + seconds}> (<t:{int(time.time()) + seconds}:R>)"""
         await ban_msg_channel.send(ban_msg)
-    await send_dm(
-        user,
-        content=f"""You have been given a timeout on the r/IGCSE server
-Reason: {reason}
-Duration: {human_readable_time}
-Until: <t:{int(time.time()) + seconds}> (<t:{int(time.time()) + seconds}:R>)""",
-    )
+
+    embed = discord.Embed(title="You are on a timeout!", 
+                          description=f"You have been given a timeout on the {interaction.guild.name} server due to '{reason}'. This {human_readable_time} timeout ends <t:{int(time.time()) + seconds}> (<t:{int(time.time()) + seconds}:R>)", 
+                          color=0xA20000)
+    await send_dm(user, 
+                  embed=embed)
     await interaction.send(
         f"{str(user)} has been put on time out until <t:{int(time.time()) + seconds}>, which is <t:{int(time.time()) + seconds}:R>."
     )
@@ -329,9 +331,10 @@ async def kick(
         return
     await interaction.response.defer()
     try:
-        await user.send(
-            f"Hi there from {interaction.guild.name}. You have been kicked from the server due to '{reason}'."
-        )
+        embed = discord.Embed(title="You have been kicked!", 
+                              description=f"Hi there from {interaction.guild.name}. You have been kicked from the server due to '{reason}'.", 
+                              color=0xA20000)
+        await user.send(embed=embed)
     except Exception:
         pass
     ban_msg_channel = bot.get_channel(
@@ -404,13 +407,15 @@ async def ban(
     await interaction.response.defer()
     try:
         if interaction.guild.id == GUILD_ID:
-            await user.send(
-                f"Hi there from {interaction.guild.name}. You have been banned from the server due to '{reason}'. If you feel this ban was done in error, to appeal your ban, please fill the form below.\nhttps://forms.gle/8qnWpSFbLDLdntdt8"
-            )
+            embed = discord.Embed(title="You have been banned!", 
+                                  description=f"Hi there from {interaction.guild.name}. You have been banned from the server due to '{reason}'. If you feel this ban was done in error, to appeal your ban, please fill the form [here](https://forms.gle/8qnWpSFbLDLdntdt8).",
+                                  color=0xA20000)
+            await user.send(embed=embed)
         else:
-            await user.send(
-                f"Hi there from {interaction.guild.name}. You have been banned from the server due to '{reason}'."
-            )
+            embed = discord.Embed(title="You have been banned!", 
+                                  description=f"Hi there from {interaction.guild.name}. You have been banned from the server due to '{reason}'.",
+                                  color=0xA20000)
+            await user.send(embed=embed)
     except Exception:
         pass
     ban_msg_channel = bot.get_channel(

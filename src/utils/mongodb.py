@@ -1,7 +1,7 @@
 from typing import Callable
 from bot import bot, discord, pymongo
 from utils.constants import LINK, DMS_CLOSED_CHANNEL_ID
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 import time
 from schemas.redis import StickyMessage
 import global_vars
@@ -342,7 +342,7 @@ class PunishmentsDB:
                 "reason": reason,
                 "action": action,
                 "duration": duration,
-                "when": when or datetime.now(UTC),
+                "when": when or datetime.now(timezone.utc),
                 "points": points,
                 "guild_id": str(guild_id)
             }
