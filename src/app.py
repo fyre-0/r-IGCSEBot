@@ -54,7 +54,6 @@ from events import (
     on_thread_create,
     on_voice_state_update,
     auto_moderation,
-    on_message_edit,
 )
 from commands import (
     role as role_command,
