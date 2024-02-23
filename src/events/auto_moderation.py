@@ -68,7 +68,7 @@ async def on_auto_moderation_action_execution(automod_execution):
                 "Automod",
                 reason,
                 "Timeout",
-                duration=timeout_duration_simple,
                 guild.id,
+                duration=timeout_duration_simple,
                 points=points
             )
