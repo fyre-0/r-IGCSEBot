@@ -55,6 +55,13 @@ async def on_auto_moderation_action_execution(automod_execution):
                     str(timeout_time_seconds % 60),
                 )
             )
+            
+            points = 2
+            if timeout_time_seconds >= (3600 * 6):
+                points = 3
+            if timeout_time_seconds >= (3600 * 24 * 7):
+                points = 4
+                
             punishdb.add_punishment(
                 case_no,
                 member.id,
@@ -63,5 +70,5 @@ async def on_auto_moderation_action_execution(automod_execution):
                 "Timeout",
                 duration=timeout_duration_simple,
                 guild.id,
-                points=2
+                points=points
             )
