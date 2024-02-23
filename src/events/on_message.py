@@ -249,6 +249,7 @@ async def on_message(message: discord.Message):
                 await message.channel.send(embed=embed)
                 return
             channel = await member.create_dm()
+            await message.delete()
             if message.stickers:
                 for sticker in message.stickers:
                     sticker_name = sticker.name
@@ -292,7 +293,6 @@ async def on_message(message: discord.Message):
                 await message.channel.set_permissions(member, overwrite=perms)
                 await message.channel.send(f"{member.mention}")
                 return
-            await message.delete()
 
     channel_id_rep = message.channel.id
     if isinstance(message.channel, discord.threads.Thread):
