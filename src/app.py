@@ -641,11 +641,11 @@ async def feedback(
 
 
 @bot.command(name="sync_commands")
-async def sync_commands(ctx):
+async def sync_commands(ctx: discord.Message):
     if not await is_moderator(ctx.author) and not await is_bot_developer(ctx.author):
         return
-    await ctx.guild.sync_application_commands()
-    await ctx.message.reply("Slash Commands Synchronized !!")
+    await bot.sync_application_commands()
+    await ctx.message.reply("Slash commands syncronized.")
 
 
 @bot.slash_command(description="Get a random fun fact")
