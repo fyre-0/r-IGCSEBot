@@ -1,6 +1,4 @@
 from bot import bot, discord
-from schemas.redis import EditedMessage
-
 
 @bot.event
 async def on_message_edit(before: discord.Message, after: discord.Message):
