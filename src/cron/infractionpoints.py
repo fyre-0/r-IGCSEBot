@@ -25,7 +25,7 @@ async def send_infraction_messages():
     )
     points = punishment_history.aggregate(
         [
-            {"$match": {"guild_id": str(GUILD_ID) }},
+            {"$match": {"guild_id": str(GUILD_ID)}},
             {"$group": {"_id": "$action_against", "total_points": {"$sum": "$points"}}},
             {"$match": {"$expr": {"$gte": ["$total_points", 10]}}},
             {"$sort": {"total_points": -1}},
@@ -49,29 +49,29 @@ async def send_infraction_messages():
             )
         except discord.errors.NotFound:
             continue
-    
+
     if fields:
         embeds = []
         embed = discord.Embed(
             title="Infraction Points Leaderboard",
             description="The following users have accumulated 10 or more infraction points.",
-            colour=0x1e293b,
+            colour=0x1E293B,
         )
-        
+
         for field in fields:
             if len(embed.fields) == 25:
                 embeds.append(embed)
                 embed = discord.Embed(
                     title=f"Infraction Points Leaderboard Page {len(embeds) + 1}",
                     description="The following users have accumulated 10 or more infraction points.",
-                    colour=0x1e293b,
+                    colour=0x1E293B,
                 )
             embed.add_field(name=field["name"], value=field["value"], inline=False)
-            
+
         embeds.append(embed)
-        
+
         await action_channel.send(embeds=embeds)
-            
+
 
 @bot.event
 async def on_ready():

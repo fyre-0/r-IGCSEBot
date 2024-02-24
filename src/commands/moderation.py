@@ -5,6 +5,7 @@ from utils.roles import is_chat_moderator, is_moderator, is_admin
 from utils.mongodb import gpdb, punishdb
 from utils.constants import GUILD_ID
 
+
 def convert_time(time: tuple[str, str, str, str]) -> str:
     time_str = ""
     if time[0] != "0":
@@ -44,9 +45,9 @@ async def history(
 
         if result["action"] in allowed_actions_for_total:
             total += 1
-            
+
         points += result.get("points", 0)
-        
+
         if isinstance(result["when"], datetime.datetime):
             date_of_event = result["when"].strftime("%d %b, %Y at %I:%M %p")
         else:
@@ -81,7 +82,7 @@ async def history(
         points_message = ""
         if points >= 10:
             points_message = " (Action needed)"
-        
+
         text = f"Moderation History for {user}:\n\nNo. of offences ({total}):\n"
         text += "\n".join(list(map(lambda x: f"{x[0]}: {x[1]}", list(actions.items()))))
         text += "\n"
@@ -136,14 +137,24 @@ async def warn(
         ban_msg = f"""Case #{case_no} | [{action_type}]\nUsername: {str(user)} ({user.id})\nModerator: {mod} \nReason: {reason}"""
         await interaction.send(f"{str(user)} has been warned.")
         await ban_msg_channel.send(ban_msg)
-    embed = discord.Embed(title="You have been warned!",
-                          description=f'You have been warned in {interaction.guild.name} by moderator {mod} for "{reason}".\n\nPlease be mindful in your further interaction in the server to avoid further action being taken against you, such as a timeout or a ban.',
-                          color = 0xA20000)
+    embed = discord.Embed(
+        title="You have been warned!",
+        description=f'You have been warned in {interaction.guild.name} by moderator {mod} for "{reason}".\n\nPlease be mindful in your further interaction in the server to avoid further action being taken against you, such as a timeout or a ban.',
+        color=0xA20000,
+    )
     await send_dm(
         user,
         embed=embed,
     )
-    punishdb.add_punishment(case_no, user.id, interaction.user.id, reason, action_type, interaction.guild.id, points=1)
+    punishdb.add_punishment(
+        case_no,
+        user.id,
+        interaction.user.id,
+        reason,
+        action_type,
+        interaction.guild.id,
+        points=1,
+    )
 
 
 @bot.slash_command(description="Timeout a user (for mods)")
@@ -227,11 +238,12 @@ Duration: {human_readable_time}
 Until: <t:{int(time.time()) + seconds}> (<t:{int(time.time()) + seconds}:R>)"""
         await ban_msg_channel.send(ban_msg)
 
-    embed = discord.Embed(title="You are on a timeout!", 
-                          description=f"You have been given a timeout on the {interaction.guild.name} server due to '{reason}'. This timeout ends <t:{int(time.time()) + seconds}> (<t:{int(time.time()) + seconds}:R>)", 
-                          color=0xA20000)
-    await send_dm(user, 
-                  embed=embed)
+    embed = discord.Embed(
+        title="You are on a timeout!",
+        description=f"You have been given a timeout on the {interaction.guild.name} server due to '{reason}'. This timeout ends <t:{int(time.time()) + seconds}> (<t:{int(time.time()) + seconds}:R>)",
+        color=0xA20000,
+    )
+    await send_dm(user, embed=embed)
     await interaction.send(
         f"{str(user)} has been put on time out until <t:{int(time.time()) + seconds}>, which is <t:{int(time.time()) + seconds}:R>."
     )
@@ -248,7 +260,7 @@ Until: <t:{int(time.time()) + seconds}> (<t:{int(time.time()) + seconds}:R>)"""
         points = 3
     if seconds >= (3600 * 24 * 7):
         points = 4
-        
+
     punishdb.add_punishment(
         case_no,
         user.id,
@@ -259,6 +271,7 @@ Until: <t:{int(time.time()) + seconds}> (<t:{int(time.time()) + seconds}:R>)"""
         duration=timeout_duration_simple,
         points=points,
     )
+
 
 @bot.slash_command(description="Untimeout a user (for mods)")
 async def untimeout(
@@ -310,7 +323,15 @@ Moderator: {mod}"""
     if punishments and punishments[-1]:
         if punishments[-1]["action"] == "Timeout":
             points = -punishments[-1]["points"]
-    punishdb.add_punishment(case_no, user.id, interaction.user.id, "", action_type, interaction.guild.id, points=points)
+    punishdb.add_punishment(
+        case_no,
+        user.id,
+        interaction.user.id,
+        "",
+        action_type,
+        interaction.guild.id,
+        points=points,
+    )
 
 
 @bot.slash_command(description="Kick a user from the server (for mods)")
@@ -336,9 +357,11 @@ async def kick(
         return
     await interaction.response.defer()
     try:
-        embed = discord.Embed(title="You have been kicked!", 
-                              description=f"Hi there from {interaction.guild.name}. You have been kicked from the server due to '{reason}'.", 
-                              color=0xA20000)
+        embed = discord.Embed(
+            title="You have been kicked!",
+            description=f"Hi there from {interaction.guild.name}. You have been kicked from the server due to '{reason}'.",
+            color=0xA20000,
+        )
         await user.send(embed=embed)
     except Exception:
         pass
@@ -364,7 +387,9 @@ async def kick(
         await ban_msg_channel.send(ban_msg)
     await interaction.guild.kick(user)
     await interaction.send(f"{str(user)} has been kicked.")
-    punishdb.add_punishment(case_no, user.id, interaction.user.id, reason, action_type, interaction.guild.id)
+    punishdb.add_punishment(
+        case_no, user.id, interaction.user.id, reason, action_type, interaction.guild.id
+    )
 
 
 @bot.slash_command(description="Ban a user from the server (for mods)")
@@ -412,14 +437,18 @@ async def ban(
     await interaction.response.defer()
     try:
         if interaction.guild.id == GUILD_ID:
-            embed = discord.Embed(title="You have been banned!", 
-                                  description=f"Hi there from {interaction.guild.name}. You have been banned from the server due to '{reason}'. If you feel this ban was done in error, to appeal your ban, please fill the form [here](https://forms.gle/8qnWpSFbLDLdntdt8).",
-                                  color=0xA20000)
+            embed = discord.Embed(
+                title="You have been banned!",
+                description=f"Hi there from {interaction.guild.name}. You have been banned from the server due to '{reason}'. If you feel this ban was done in error, to appeal your ban, please fill the form [here](https://forms.gle/8qnWpSFbLDLdntdt8).",
+                color=0xA20000,
+            )
             await user.send(embed=embed)
         else:
-            embed = discord.Embed(title="You have been banned!", 
-                                  description=f"Hi there from {interaction.guild.name}. You have been banned from the server due to '{reason}'.",
-                                  color=0xA20000)
+            embed = discord.Embed(
+                title="You have been banned!",
+                description=f"Hi there from {interaction.guild.name}. You have been banned from the server due to '{reason}'.",
+                color=0xA20000,
+            )
             await user.send(embed=embed)
     except Exception:
         pass
@@ -445,7 +474,9 @@ async def ban(
         await ban_msg_channel.send(ban_msg)
     await interaction.guild.ban(user, delete_message_days=delete_message_days)
     await interaction.send(f"{str(user)} has been banned.")
-    punishdb.add_punishment(case_no, user.id, interaction.user.id, reason, action_type, interaction.guild.id)
+    punishdb.add_punishment(
+        case_no, user.id, interaction.user.id, reason, action_type, interaction.guild.id
+    )
 
 
 @bot.slash_command(description="Unban a user from the server (for mods)")
@@ -487,7 +518,9 @@ async def unban(
             case_no = 1
         ban_msg = f"""Case #{case_no} | [{action_type}]\nUsername: {str(user)} ({user.id})\nModerator: {mod}"""
         await ban_msg_channel.send(ban_msg)
-        punishdb.add_punishment(case_no, user.id, interaction.user.id, "", action_type, interaction.guild.id)
+        punishdb.add_punishment(
+            case_no, user.id, interaction.user.id, "", action_type, interaction.guild.id
+        )
 
 
 class PunishmentsSelect(discord.ui.Select):
