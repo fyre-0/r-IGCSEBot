@@ -181,7 +181,7 @@ async def on_message(message: discord.Message):
     if message.author.bot:
         return
 
-    if message.author.id == 1211301061676236871:
+    if message.author.id == 1095875072012599377:
         if "thank you" in message.content or "ty" in message.content:
             igcse = bot.get_guild(GUILD_ID)
             channel = igcse.get_channel(1203910239133368390)
