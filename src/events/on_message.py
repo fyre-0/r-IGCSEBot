@@ -9,14 +9,14 @@ from utils.constants import (
     BOTUPDATES_CHANNEL,
 )
 from utils.data import REP_DISABLE_CHANNELS
-from bot import discord, bot, keywords
+from bot import discord, bot, keywords, datetime
 import sys
 from utils.mongodb import gpdb, smdb, repdb, kwdb
 from utils.roles import is_moderator, is_helper, is_chat_moderator, is_bot_developer
 import global_vars
 
 sticky_counter = {}
-
+user_message_counts = {}
 
 async def get_thread(message: discord.Message, is_dm: bool):
     member_id: int = 0
@@ -180,7 +180,25 @@ async def handle_rep(message: discord.Message):
 async def on_message(message: discord.Message):
     if message.author.bot:
         return
-    
+
+    if any(keyword in message.content.lower() for keyword in ["thank you", "ty"]):
+        user_id = message.author.id
+        current_time = datetime.datetime.utcnow()
+
+        if user_id not in user_message_counts:
+            user_message_counts[user_id] = {"count": 1, "timestamp": current_time}
+        else:
+            if current_time - user_message_counts[user_id]["timestamp"] <= datetime.timedelta(minutes=1):
+                user_message_counts[user_id]["count"] += 1
+                if user_message_counts[user_id]["count"] > 8:
+                    igcse = bot.get_guild(GUILD_ID)
+                    channel = igcse.get_channel(1203910239133368390)
+                    await message.author.edit(timeout=datetime.timedelta(hours=1))
+                    await channel.send(f"Potential Rep Farming by <@{message.author.id}> in {message.channel.mention}")
+                    user_message_counts[user_id]["count"] = 0
+            else:
+                user_message_counts[user_id] = {"count": 1, "timestamp": current_time}
+
     if SHOULD_LOG_ALL:
         igcse = bot.get_guild(GUILD_ID) or await bot.fetch_guild(GUILD_ID)
         logs = igcse.get_channel(BOTLOG_CHANNEL_ID) or await igcse.fetch_channel(
