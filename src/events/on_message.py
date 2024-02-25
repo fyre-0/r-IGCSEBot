@@ -193,7 +193,6 @@ async def on_message(message: discord.Message):
                 if user_message_counts[user_id]["count"] > 8:
                     igcse = bot.get_guild(GUILD_ID)
                     channel = igcse.get_channel(1203910239133368390)
-                    await message.author.edit(timeout=datetime.timedelta(hours=1))
                     await channel.send(f"Potential Rep Farming by <@{message.author.id}> in {message.channel.mention}")
                     user_message_counts[user_id]["count"] = 0
             else:
