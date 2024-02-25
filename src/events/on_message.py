@@ -180,14 +180,6 @@ async def handle_rep(message: discord.Message):
 async def on_message(message: discord.Message):
     if message.author.bot:
         return
-
-    if message.author.id == 1095875072012599377:
-        if "thank you" in message.content or "ty" in message.content:
-            igcse = bot.get_guild(GUILD_ID)
-            channel = igcse.get_channel(1203910239133368390)
-            await member.author.edit(timeout=datetime.timedelta(hours=1))
-            await channel.send(f"<@{message.author.id}> has been timed out for 1 hour for rep farming. check {message.channel.mention}")
-            return
     
     if SHOULD_LOG_ALL:
         igcse = bot.get_guild(GUILD_ID) or await bot.fetch_guild(GUILD_ID)
