@@ -51,7 +51,11 @@ async def on_ready():
     print("Client ready, updating leaderboard")
     await update_leaderboard()
     print("Leaderboard checked/updated, byeee")
-    await bot.close()
+    exit(0)
+    
+@bot.event
+async def on_connect():
+    print("said hi to discord")
 
 
 bot.run(TOKEN)
