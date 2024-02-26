@@ -188,7 +188,7 @@ async def on_message(message: discord.Message):
         if user_id not in user_message_counts:
             user_message_counts[user_id] = {"count": 1, "timestamp": current_time}
         else:
-            if current_time - user_message_counts[user_id]["timestamp"] <= datetime.timedelta(minutes=1):
+            if current_time - user_message_counts[user_id]["timestamp"] <= datetime.timedelta(minutes=3):
                 user_message_counts[user_id]["count"] += 1
                 if user_message_counts[user_id]["count"] > 8:
                     igcse = bot.get_guild(GUILD_ID)
