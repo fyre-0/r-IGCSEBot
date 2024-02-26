@@ -37,6 +37,7 @@ from utils.roles import (
     get_role,
     has_role,
     is_chat_moderator,
+    is_bot_developer,
 )
 from utils.mongodb import gpdb, repdb, rrdb, smdb, kwdb
 import re
@@ -640,7 +641,7 @@ async def feedback(
 
 @bot.command(name="sync_commands")
 async def sync_commands(ctx: discord.Message):
-    if not await is_moderator(ctx.author):
+    if not await is_moderator(ctx.author) and not await is_bot_developer(ctx.author):
         return
     await bot.sync_application_commands()
     await ctx.message.reply("Slash commands syncronized.")
