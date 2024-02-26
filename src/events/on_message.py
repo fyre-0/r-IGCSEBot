@@ -181,7 +181,7 @@ async def on_message(message: discord.Message):
     if message.author.bot:
         return
 
-    if any(keyword in message.content.lower() for keyword in ["thank you", "ty"]):
+    if any(keyword in message.content.lower() for keyword in ["thanks","thank","thank you","thx","tysm","thank u","thnks","tanks","thanku","tyvm","thankyou","ty!","you're welcome", "your welcome", "ur welcome", "no problem","np", "np!", "yw", "yw!"]):
         user_id = message.author.id
         current_time = datetime.datetime.utcnow()
 
