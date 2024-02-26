@@ -30,6 +30,7 @@ async def history(
         await interaction.send(
             "You are not permitted to use this command.", ephemeral=True
         )
+        return
     await interaction.response.defer()
     actions = {}
     history = []
