@@ -28,7 +28,7 @@ async def save_questions(questions: list, session_id: str):
     questions_mapped = list(
         map(
             lambda x: Question(
-                question_name=f"{x['subject']}_{x['season']}{str(x['year'])[2:4]}_qp_{x['paper']}{x['variant']}_q{x['questionNumber']}",
+                question_name=f"{x['subject']}_{x['season']}{str(x['year'])[2:4]}_qp_{x['paper']}{x['variant']}_q{x['questionNumber']}_{session_id}",
                 questions=x["questions"],
                 answers=x["answers"],
                 session_id=session_id,
