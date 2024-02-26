@@ -6,7 +6,6 @@ from utils.roles import (
     is_helper,
     is_moderator,
     is_server_booster,
-    is_bot_developer,
     is_chat_moderator,
 )
 from pytimeparse import parse
@@ -122,7 +121,6 @@ async def gostudy(
     else:
         if (
             not await is_moderator(interaction.user)
-            and not await is_bot_developer(interaction.user)
             and not await is_chat_moderator(interaction.user)
         ):
             await interaction.send(
@@ -213,7 +211,6 @@ async def remove_gostudy(
 
     if (
         not await is_moderator(interaction.user)
-        and not await is_bot_developer(interaction.user)
         and not await is_chat_moderator(interaction.user)
     ):
         await interaction.send(

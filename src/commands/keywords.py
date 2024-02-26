@@ -1,7 +1,7 @@
 from bot import bot, discord, pymongo, keywords, time
 from utils.constants import LINK, GUILD_ID, MODLOG_CHANNEL_ID
 from utils.mongodb import kwdb
-from utils.roles import is_moderator, is_bot_developer
+from utils.roles import is_moderator
 
 
 class AddKeywords(discord.ui.Modal):
@@ -104,9 +104,7 @@ async def keywordscommand(
         required=True,
     ),
 ):
-    if not await is_moderator(interaction.user) and not await is_bot_developer(
-        interaction.user
-    ):
+    if not await is_moderator(interaction.user):
         await interaction.send("You do not have the permissions to perform this action")
         return
     if action_type == "Add Keywords":

@@ -1,6 +1,6 @@
 from bot import bot, discord, pymongo, time
 from utils.constants import LINK, GUILD_ID, MODLOG_CHANNEL_ID
-from utils.roles import is_bot_developer, is_moderator
+from utils.roles import is_moderator
 
 
 @bot.slash_command(
@@ -26,9 +26,7 @@ async def Channellockcommand(
 ):
     timenow = int(time.time()) + 1
     await interaction.response.defer(ephemeral=True)
-    if not await is_moderator(interaction.user) and not await is_bot_developer(
-        interaction.user
-    ):
+    if not await is_moderator(interaction.user):
         await interaction.send(
             f"Sorry {interaction.user.mention},"
             " you don't have the permission to perform this action.",
@@ -172,9 +170,7 @@ async def Forumlockcommand(
 ):
     timenow = int(time.time()) + 1
     await interaction.response.defer(ephemeral=True)
-    if not await is_moderator(interaction.user) and not await is_bot_developer(
-        interaction.user
-    ):
+    if not await is_moderator(interaction.user):
         await interaction.send(
             f"Sorry {interaction.user.mention},"
             " you don't have the permission to perform this action.",

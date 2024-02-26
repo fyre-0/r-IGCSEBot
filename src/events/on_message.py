@@ -12,7 +12,7 @@ from utils.data import REP_DISABLE_CHANNELS
 from bot import discord, bot, keywords, datetime
 import sys
 from utils.mongodb import gpdb, smdb, repdb, kwdb
-from utils.roles import is_moderator, is_helper, is_chat_moderator, is_bot_developer
+from utils.roles import is_moderator, is_helper, is_chat_moderator
 import global_vars
 
 sticky_counter = {}
@@ -192,8 +192,13 @@ async def on_message(message: discord.Message):
                 user_message_counts[user_id]["count"] += 1
                 if user_message_counts[user_id]["count"] > 8:
                     igcse = bot.get_guild(GUILD_ID)
-                    channel = igcse.get_channel(1203910239133368390)
-                    await channel.send(f"Potential Rep Farming by <@{message.author.id}> in {message.channel.mention}")
+                    channel = igcse.get_channel(1072835539998347307)
+                    embed = discord.Embed(title="Potential Rep Farm", color=0xA10000)
+                    embed.add_field(name="Member", value=f"{message.author.mention}", inline=False)
+                    embed.add_field(name="Channel", value=f"{message.channel.mention}", inline=False)
+                    embed.add_field(name="Message Link",value=f"[Jump to Message]({message.jump_url})", inline=False)
+                    embed.set_footer(text=f"{bot.user}", icon_url=bot.user.display_avatar.url)                    
+                    await channel.send(embed=embed)
                     user_message_counts[user_id]["count"] = 0
             else:
                 user_message_counts[user_id] = {"count": 1, "timestamp": current_time}
@@ -365,7 +370,7 @@ async def on_message(message: discord.Message):
             await message.delete()
 
     if message.content.lower() == "stick":
-        if await is_moderator(message.author) or await is_bot_developer(message.author):
+        if await is_moderator(message.author):
             if message.reference is not None:
                 reference_msg = await message.channel.fetch_message(
                     message.reference.message_id
@@ -376,7 +381,7 @@ async def on_message(message: discord.Message):
                     )
 
     if message.content.lower() == "unstick":
-        if await is_moderator(message.author) or await is_bot_developer(message.author):
+        if await is_moderator(message.author):
             if message.reference is not None:
                 reference_msg = await message.channel.fetch_message(
                     message.reference.message_id

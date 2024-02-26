@@ -36,7 +36,6 @@ from utils.roles import (
     is_helper,
     get_role,
     has_role,
-    is_bot_developer,
     is_chat_moderator,
 )
 from utils.mongodb import gpdb, repdb, rrdb, smdb, kwdb
@@ -124,9 +123,7 @@ class EvalModal(discord.ui.Modal):
     name="eval", description="Evaluate a piece of code.", guild_ids=[GUILD_ID]
 )
 async def _eval(interaction: discord.Interaction):
-    if not await is_moderator(interaction.user) and not await is_bot_developer(
-        interaction.user
-    ):
+    if not await is_moderator(interaction.user):
         await interaction.send("This is not for you.", ephemeral=True)
         return
     eval_modal = EvalModal()
@@ -144,7 +141,7 @@ async def rrmake(
         required=True,
     ),
 ):
-    if await is_moderator(interaction.user) or await is_bot_developer(interaction.user):
+    if await is_moderator(interaction.user):
         guild = bot.get_guild(GUILD_ID)
         channel = interaction.channel
         try:
@@ -329,7 +326,7 @@ async def helper(interaction: discord.Interaction, message: discord.Message):
     guild_ids=[GUILD_ID],
 )
 async def refreshhelpers(ctx):
-    if not await is_moderator(ctx.author) and not await is_bot_developer(ctx.author):
+    if not await is_moderator(ctx.author):
         return
     changed = []
     for chnl, role in helper_roles.items():
@@ -372,7 +369,7 @@ async def refreshhelpers(ctx):
 
 @bot.command(description="Clear messages in a channel")
 async def clear(ctx, num_to_clear: int):
-    if not await is_moderator(ctx.author) and not await is_bot_developer(ctx.author):
+    if not await is_moderator(ctx.author):
         return
     try:
         await ctx.channel.purge(limit=num_to_clear + 1)
@@ -643,7 +640,7 @@ async def feedback(
 
 @bot.command(name="sync_commands")
 async def sync_commands(ctx: discord.Message):
-    if not await is_moderator(ctx.author) and not await is_bot_developer(ctx.author):
+    if not await is_moderator(ctx.author):
         return
     await bot.sync_application_commands()
     await ctx.message.reply("Slash commands syncronized.")
@@ -683,9 +680,7 @@ async def Instantlockcommand(
     ),
 ):
     await interaction.response.defer(ephemeral=True)
-    if not await is_moderator(interaction.user) and not await is_bot_developer(
-        interaction.user
-    ):
+    if not await is_moderator(interaction.user):
         await interaction.send(
             f"Sorry {interaction.user.mention},"
             " you don't have the permission to perform this action.",
@@ -974,9 +969,7 @@ async def embed(
     ),
 ):
 
-    if not await is_moderator(interaction.user) and not await is_bot_developer(
-        interaction.user
-    ):
+    if not await is_moderator(interaction.user):
         await interaction.send(
             "You do not have the necessary permissions to perform this action",
             ephemeral=True,
@@ -1244,9 +1237,7 @@ async def send_editcommand(
     ),
 ):
 
-    if not await is_moderator(interaction.user) and not await is_bot_developer(
-        interaction.user
-    ):
+    if not await is_moderator(interaction.user):
         await interaction.send("You are not authorized to perform this action.")
         return
     if channel is None:
