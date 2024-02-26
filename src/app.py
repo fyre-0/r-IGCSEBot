@@ -275,6 +275,9 @@ async def helper_old(
 @bot.message_command(
     name="helper",
     guild_ids=[GUILD_ID],
+    default_member_permissions=discord.Permissions(
+        send_messages=True, read_messages=True
+    ),
 )
 async def helper(interaction: discord.Interaction, message: discord.Message):
     message_id = message.id
@@ -643,6 +646,7 @@ async def feedback(
 async def sync_commands(ctx: discord.Message):
     if not await is_moderator(ctx.author) and not await is_bot_developer(ctx.author):
         return
+    bot.add_all_application_commands()
     await bot.sync_application_commands()
     await ctx.message.reply("Slash commands syncronized.")
 
