@@ -63,6 +63,8 @@ async def close_session(session: Session, message: str):
                 number_of_correct_answers[user] = 0
             if user_answers[user] == correct_answer:
                 number_of_correct_answers[user] += 1
+                
+        Question.delete(question.question_name)
 
     number_of_correct_answers = dict(
         sorted(number_of_correct_answers.items(), key=lambda x: x[1], reverse=True)
