@@ -175,8 +175,15 @@ async def handle_rep(message: discord.Message):
                 )
                 embed=discord.Embed(title="Congratulations!", description=f"Congrats {user} !! Thank you for boosting the server/helping other members. To appreciate your dedication to the server, we have added the ability for you to pick up your own color roles in <#946249349434863616>.\n\nTL;DW: Use the `/colorroles`  command to pick up your colour role\nNote: **This command is only available to Server Boosters and 100+ Rep Club members**.", color=0x8BF797)
                 await send_dm(user, embed=embed)
-                thread = await get_thread(user.id, False)
-                await thread.send(embed=embed)
+                channel = bot.get_guild(GUILD_ID).get_channel(FORUMTHREAD_ID)
+                threads = channel.threads
+                thread_name = f"{user.id}"
+                thread = discord.utils.get(threads, name=thread_name)
+                if thread is not None:
+                    await thread.send(embed=embed)
+                else:
+                    thread = await channel.create_thread(name=thread_name, content=f"Username: `{user.name}`\nUser ID: `{user.id}`")                    
+                    await thread.send(embed=embed)
             elif rep == 500:
                 role = discord.utils.get(user.guild.roles, name=f"{rep}+ Rep Club")
                 await user.add_roles(role)
