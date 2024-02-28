@@ -166,12 +166,28 @@ async def handle_rep(message: discord.Message):
     if repped and not BETA:
         for user in repped:
             rep = repdb.add_rep(user.id, message.guild.id)
-            if rep == 100 or rep == 500 or rep == 1000:
+            if rep == 100:
                 role = discord.utils.get(user.guild.roles, name=f"{rep}+ Rep Club")
                 await user.add_roles(role)
                 await message.channel.send(
                     f"Gave +1 Rep to {user.mention} ({rep})\nWelcome to the {rep}+ Rep Club!"
                 )
+                embed=discord.Embed(title="Congratulations!", description=f"Congrats {user} !! Thank you for boosting the server/helping other members. To appreciate your dedication to the server, we have added the ability for you to pick up your own color roles in <#946249349434863616>.\n\nTL;DW: Use the `/colorroles`  command to pick up your colour role\nNote: **This command is only available to Server Boosters and 100+ Rep Club members**.")
+                user_dm = await user.create_dm()
+                await user_dm.send(embed=embed)
+                await user_dm.send("https://github.com/fyre-0/r-IGCSEBot/raw/assets/Colorroles%20Tutorial.mp4")
+            elif rep == 500:
+                role = discord.utils.get(user.guild.roles, name=f"{rep}+ Rep Club")
+                await user.add_roles(role)
+                await message.channel.send(
+                    f"Gave +1 Rep to {user.mention} ({rep})\nWelcome to the {rep}+ Rep Club!"
+                )    
+            elif rep == 1000:
+                role = discord.utils.get(user.guild.roles, name=f"{rep}+ Rep Club")
+                await user.add_roles(role)
+                await message.channel.send(
+                    f"Gave +1 Rep to {user.mention} ({rep})\nWelcome to the {rep}+ Rep Club!"
+                )                            
             else:
                 await message.channel.send(f"Gave +1 Rep to {user} ({rep})")
 
