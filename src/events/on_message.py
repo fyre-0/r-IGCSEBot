@@ -11,6 +11,7 @@ from utils.constants import (
 from utils.data import REP_DISABLE_CHANNELS
 from bot import discord, bot, keywords, datetime
 import sys
+from commands.dms import send_dm
 from utils.mongodb import gpdb, smdb, repdb, kwdb
 from utils.roles import is_moderator, is_helper, is_chat_moderator
 import global_vars
@@ -173,8 +174,7 @@ async def handle_rep(message: discord.Message):
                     f"Gave +1 Rep to {user.mention} ({rep})\nWelcome to the {rep}+ Rep Club!"
                 )
                 embed=discord.Embed(title="Congratulations!", description=f"Congrats {user} !! Thank you for boosting the server/helping other members. To appreciate your dedication to the server, we have added the ability for you to pick up your own color roles in <#946249349434863616>.\n\nTL;DW: Use the `/colorroles`  command to pick up your colour role\nNote: **This command is only available to Server Boosters and 100+ Rep Club members**.", color=0x8BF797)
-                user_dm = await user.create_dm()
-                await user_dm.send(embed=embed)
+                await send_dm(message.author, embed=embed)
                 thread = await get_thread(user.id, False)
                 await thread.send(embed=embed)
             elif rep == 500:
