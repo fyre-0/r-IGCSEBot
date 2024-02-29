@@ -28,7 +28,7 @@ async def save_questions(questions: list, session_id: str):
     questions_mapped = list(
         map(
             lambda x: Question(
-                question_name=f"{x['subject']}_{x['season']}{str(x['year'])[2:4]}_qp_{x['paper']}{x['variant']}_q{x['questionNumber']}",
+                question_name=f"{x['subject']}_{x['season']}{str(x['year'])[2:4]}_qp_{x['paper']}{x['variant']}_q{x['questionNumber']}_{session_id}",
                 questions=x["questions"],
                 answers=x["answers"],
                 session_id=session_id,
@@ -63,6 +63,9 @@ async def close_session(session: Session, message: str):
                 number_of_correct_answers[user] = 0
             if user_answers[user] == correct_answer:
                 number_of_correct_answers[user] += 1
+                
+        Question.delete(question.question_name)
+        View.delete(question.question_name)
 
     number_of_correct_answers = dict(
         sorted(number_of_correct_answers.items(), key=lambda x: x[1], reverse=True)
@@ -110,11 +113,6 @@ async def close_session(session: Session, message: str):
         User.delete(user_id)
 
     User.delete(session["started_by"])
-
-    for question in questions:
-        Question.delete(question.question_name)
-        View.delete(question.question_name)
-
     Session.delete(session.session_id)
 
 
