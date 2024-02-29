@@ -1243,7 +1243,9 @@ async def send_editcommand(
 ):
 
     if not await is_moderator(interaction.user):
-        await interaction.send("You are not authorized to perform this action.", ephemeral=True)
+        await interaction.send(
+            "You are not authorized to perform this action.", ephemeral=True
+        )
         return
     if channel is None:
         channel = interaction.channel

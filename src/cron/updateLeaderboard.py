@@ -52,7 +52,8 @@ async def on_ready():
     await update_leaderboard()
     print("Leaderboard checked/updated, byeee")
     exit(0)
-    
+
+
 @bot.event
 async def on_connect():
     print("said hi to discord")

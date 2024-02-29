@@ -19,6 +19,7 @@ import global_vars
 sticky_counter = {}
 user_message_counts = {}
 
+
 async def get_thread(message: discord.Message, is_dm: bool):
     member_id: int = 0
     if is_dm:
@@ -173,7 +174,11 @@ async def handle_rep(message: discord.Message):
                 await message.channel.send(
                     f"Gave +1 Rep to {user.mention} ({rep})\nWelcome to the {rep}+ Rep Club!"
                 )
-                embed=discord.Embed(title="Congratulations!", description=f"Congrats {user} !! Thank you for boosting the server/helping other members. To appreciate your dedication to the server, we have added the ability for you to pick up your own color roles in <#946249349434863616>.\n\nTL;DW: Use the `/colorroles`  command to pick up your colour role\nNote: **This command is only available to Server Boosters and 100+ Rep Club members**.", color=0x8BF797)
+                embed = discord.Embed(
+                    title="Congratulations!",
+                    description=f"Congrats {user} !! Thank you for boosting the server/helping other members. To appreciate your dedication to the server, we have added the ability for you to pick up your own color roles in <#946249349434863616>.\n\nTL;DW: Use the `/colorroles`  command to pick up your colour role\nNote: **This command is only available to Server Boosters and 100+ Rep Club members**.",
+                    color=0x8BF797,
+                )
                 await send_dm(user, embed=embed)
                 channel = bot.get_guild(GUILD_ID).get_channel(FORUMTHREAD_ID)
                 threads = channel.threads
@@ -182,20 +187,23 @@ async def handle_rep(message: discord.Message):
                 if thread is not None:
                     await thread.send(embed=embed)
                 else:
-                    thread = await channel.create_thread(name=thread_name, content=f"Username: `{user.name}`\nUser ID: `{user.id}`")                    
+                    thread = await channel.create_thread(
+                        name=thread_name,
+                        content=f"Username: `{user.name}`\nUser ID: `{user.id}`",
+                    )
                     await thread.send(embed=embed)
             elif rep == 500:
                 role = discord.utils.get(user.guild.roles, name=f"{rep}+ Rep Club")
                 await user.add_roles(role)
                 await message.channel.send(
                     f"Gave +1 Rep to {user.mention} ({rep})\nWelcome to the {rep}+ Rep Club!"
-                )    
+                )
             elif rep == 1000:
                 role = discord.utils.get(user.guild.roles, name=f"{rep}+ Rep Club")
                 await user.add_roles(role)
                 await message.channel.send(
                     f"Gave +1 Rep to {user.mention} ({rep})\nWelcome to the {rep}+ Rep Club!"
-                )                            
+                )
             else:
                 await message.channel.send(f"Gave +1 Rep to {user} ({rep})")
 
@@ -205,23 +213,59 @@ async def on_message(message: discord.Message):
     if message.author.bot:
         return
 
-    if any(keyword in message.content.lower() for keyword in ["thanks","thank","thank you","thx","tysm","thank u","thnks","tanks","thanku","tyvm","thankyou","ty!","you're welcome", "your welcome", "ur welcome", "no problem","np", "np!", "yw", "yw!"]):
+    if any(
+        keyword in message.content.lower()
+        for keyword in [
+            "thanks",
+            "thank",
+            "thank you",
+            "thx",
+            "tysm",
+            "thank u",
+            "thnks",
+            "tanks",
+            "thanku",
+            "tyvm",
+            "thankyou",
+            "ty!",
+            "you're welcome",
+            "your welcome",
+            "ur welcome",
+            "no problem",
+            "np",
+            "np!",
+            "yw",
+            "yw!",
+        ]
+    ):
         user_id = message.author.id
         current_time = datetime.datetime.utcnow()
 
         if user_id not in user_message_counts:
             user_message_counts[user_id] = {"count": 1, "timestamp": current_time}
         else:
-            if current_time - user_message_counts[user_id]["timestamp"] <= datetime.timedelta(minutes=3):
+            if current_time - user_message_counts[user_id][
+                "timestamp"
+            ] <= datetime.timedelta(minutes=3):
                 user_message_counts[user_id]["count"] += 1
                 if user_message_counts[user_id]["count"] > 8:
                     igcse = bot.get_guild(GUILD_ID)
                     channel = igcse.get_channel(1072835539998347307)
                     embed = discord.Embed(title="Potential Rep Farm", color=0xA10000)
-                    embed.add_field(name="Member", value=f"{message.author.mention}", inline=False)
-                    embed.add_field(name="Channel", value=f"{message.channel.mention}", inline=False)
-                    embed.add_field(name="Message Link",value=f"[Jump to Message]({message.jump_url})", inline=False)
-                    embed.set_footer(text=f"{bot.user}", icon_url=bot.user.display_avatar.url)                    
+                    embed.add_field(
+                        name="Member", value=f"{message.author.mention}", inline=False
+                    )
+                    embed.add_field(
+                        name="Channel", value=f"{message.channel.mention}", inline=False
+                    )
+                    embed.add_field(
+                        name="Message Link",
+                        value=f"[Jump to Message]({message.jump_url})",
+                        inline=False,
+                    )
+                    embed.set_footer(
+                        text=f"{bot.user}", icon_url=bot.user.display_avatar.url
+                    )
                     await channel.send(embed=embed)
                     user_message_counts[user_id]["count"] = 0
             else:

@@ -33,6 +33,7 @@ loops = [
     populate_cache,
 ]
 
+
 @bot.event
 async def on_ready():
     print(f"Logged in as {str(bot.user)}.")

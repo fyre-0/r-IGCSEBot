@@ -17,6 +17,7 @@ client = pymongo.MongoClient(
 db = client.IGCSEBot
 punishment_history = db.punishment_history
 
+
 async def send_infraction_messages():
     guild = bot.get_guild(GUILD_ID)
     action_channel = guild.get_channel(ACTION_CHANNELID) or await guild.fetch_channel(
@@ -78,7 +79,8 @@ async def on_ready():
     await send_infraction_messages()
     print("alright byee now")
     exit(0)
-    
+
+
 @bot.event
 async def on_connect():
     print("said hi to discord")
