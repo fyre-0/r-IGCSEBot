@@ -140,7 +140,7 @@ async def warn(
         await ban_msg_channel.send(ban_msg)
     embed = discord.Embed(
         title="You have been warned!",
-        description=f'You have been warned in {interaction.guild.name} by {mod.mention} for `{reason}`.\n\nPlease be mindful in your further interaction in the server to avoid further action being taken against you, such as a timeout or a ban.',
+        description=f"You have been warned in {interaction.guild.name} by {mod.mention} for `{reason}`.\n\nPlease be mindful in your further interaction in the server to avoid further action being taken against you, such as a timeout or a ban.",
         color=0xA20000,
     )
     await send_dm(

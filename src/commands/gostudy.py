@@ -119,9 +119,8 @@ async def gostudy(
             "Are we ready to move forward?", view=view, ephemeral=True
         )
     else:
-        if (
-            not await is_moderator(interaction.user)
-            and not await is_chat_moderator(interaction.user)
+        if not await is_moderator(interaction.user) and not await is_chat_moderator(
+            interaction.user
         ):
             await interaction.send(
                 "You do not have the necessary permissions to perform this action",
@@ -209,9 +208,8 @@ async def remove_gostudy(
 ):
     await interaction.response.defer(ephemeral=True)
 
-    if (
-        not await is_moderator(interaction.user)
-        and not await is_chat_moderator(interaction.user)
+    if not await is_moderator(interaction.user) and not await is_chat_moderator(
+        interaction.user
     ):
         await interaction.send(
             "You do not have the necessary permissions to perform this action",

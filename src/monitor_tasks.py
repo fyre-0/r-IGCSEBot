@@ -341,14 +341,16 @@ async def send_questions():
 
         session["currently_solving"] = question.question_name
         session.save()
-        
+
         question_number = (session["limit"] - len(questions)) + 1
         embeds = []
         for qs in question["questions"]:
             embed = discord.Embed()
             if len(embeds) == 0:
-                embed.title = f"{question['question_name']}".replace(f"_{session['session_id']}", "")
-                embed.set_footer(f"Question {question_number}/{session['limit']}")
+                embed.title = f"{question['question_name']}".replace(
+                    f"_{session['session_id']}", ""
+                )
+                embed.set_footer(text=f"Question {question_number}/{session['limit']}")
             embed.set_image(
                 url=f"https://pub-8153dcb2290449f2924ed014b10896ee.r2.dev/{qs}"
             )
