@@ -89,7 +89,7 @@ async def gostudy(
 
             await Logging.send(embed=embed)
             await channel.send(
-                f"{user.name} has been put on forced mute until <t:{unmute_time}:f>, which is <t:{unmute_time}:R>."
+                f"{user.name} has been sent to study until <t:{unmute_time}:f>, which is <t:{unmute_time}:R>."
             )
 
             embed = discord.Embed(
