@@ -39,12 +39,7 @@ async def on_ready():
     print(f"Logged in as {str(bot.user)}.")
     await bot.change_presence(
         activity=discord.Activity(type=discord.ActivityType.watching, name="r/IGCSE")
-    )
-    guilds = bot.guilds
-    for guild in guilds:
-        if guild.name == "Palingenos's server" or guild.name == "jennifer's server" or guild.name == "school n study n shit" or guild.name == "Finals Study Group" or guild.name == "techno gamerz":
-            await guild.leave()
-            print(f"Left {guild}")  
+    ) 
     await smdb.populate_cache()
     for loop in loops:
         if loop and not loop.is_running():
