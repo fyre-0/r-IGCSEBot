@@ -16,7 +16,7 @@ welcome_embed = discord.Embed.from_dict(
 async def on_member_join(member: discord.Member):
     #if not BETA and member.guild.id == GUILD_ID:
     await send_dm(member, embed=welcome_embed)
-    welcome = discord.utils.get(guild.channels, name="welcome")
+    welcome = await bot.fetch_channel(WELCOME_CHANNEL_ID)
     await welcome.send(
         f"Welcome {member.mention}! Pick up your subject roles from <id:customize> to get access to subject channels and resources!"
     )
