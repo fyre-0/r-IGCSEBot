@@ -40,11 +40,14 @@ async def on_ready():
     await bot.change_presence(
         activity=discord.Activity(type=discord.ActivityType.watching, name="r/IGCSE")
     )
+    guilds = bot.guilds
+    for guild in guilds:
+      print(f"{guild} - {guild.member_count} members")    
     await smdb.populate_cache()
     for loop in loops:
         if loop and not loop.is_running():
             loop.start()
-
+            
     views = View.find().all()
     for view in views:
         bot.add_view(
