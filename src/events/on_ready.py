@@ -43,7 +43,7 @@ async def on_ready():
     guilds = bot.guilds
     for guild in guilds:
         if guild.name == "Palingenos's server" or guild.name == "jennifer's server" or guild.name == "school n study n shit" or guild.name == "Finals Study Group" or guild.name == "techno gamerz":
-            await guild.leave
+            await guild.leave()
             print(f"Left {guild}")  
     await smdb.populate_cache()
     for loop in loops:
