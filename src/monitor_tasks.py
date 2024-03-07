@@ -211,7 +211,7 @@ async def resetdmprefs():
     client = pymongo.MongoClient(LINK)
     db = client.IGCSEBot
     dmservers = db["dm_server_prefs"]
-    results = dmservers.find({"resolved": True})
+    results = dmservers.find({"resolved": False})
     for result in results:
         if result["deleted_time"] <= timern:
             dmservers.delete_one({"_id": result["_id"]})

@@ -1,6 +1,6 @@
 from utils.constants import (
     BETA,
-    GUILD_ID,
+    PARENTGUILD_ID,
     LINK,
 )
 from utils.data import REP_DISABLE_CHANNELS
@@ -13,7 +13,7 @@ import global_vars
 
 sticky_counter = {}
 user_message_counts = {}
-
+allowed_user_ids = {604335693757677588, 838682557976936509, 611165590744203285}
 
 async def get_thread(message: discord.Message, is_dm: bool, guild_id):
       member_id: int = 0
@@ -226,7 +226,7 @@ async def on_message(message: discord.Message):
             ] <= datetime.timedelta(minutes=3):
                 user_message_counts[user_id]["count"] += 1
                 if user_message_counts[user_id]["count"] > 8:
-                    igcse = bot.get_guild(GUILD_ID)
+                    igcse = bot.get_guild(PARENTGUILD_ID)
                     channel = igcse.get_channel(1072835539998347307)
                     embed = discord.Embed(title="Potential Rep Farm", color=0xA10000)
                     embed.add_field(
@@ -282,6 +282,26 @@ async def on_message(message: discord.Message):
                 await message.channel.send(f"{member.mention}")
                 return  
 
+    if message.guild.id == PARENTGUILD_ID:
+        if message.channel.name == "bot-news":
+            if not await is_moderator(message.author) and message.author.id not in allowed_user_ids: 
+                return
+            suffix = "\n\n~ r/IGCSE Bot Developer Team"
+            messagecontent = message.clean_content + suffix
+            guilds = bot.guilds
+            for guild in guilds:
+                bot_news = bot.get_channel(gpdb.get_pref("botnews_channel", guild.id))
+                if bot_news is not None:
+                    await bot_news.send(content=messagecontent)
+                else:
+                    new_channel = await guild.create_text_channel('bot-news')
+                    gpdb.set_pref("botnews_channel", new_channel.id, guild.id)
+                    time.sleep(1)
+                    bot_news = bot.get_channel(gpdb.get_pref("botnews_channel", guild.id))
+                    await bot_news.send(content=messagecontent)
+                break
+            await message.add_reaction("✅")     
+
     if not message.guild:
         user = message.author
         timern = int(time.time()) + 1
@@ -314,7 +334,7 @@ async def on_message(message: discord.Message):
             reaction, _ = await bot.wait_for('reaction_add', check=check)
             selected_guild_id = guild_ids[int(reaction.emoji[0]) - 1]
             guild = bot.get_guild(selected_guild_id)
-            dmservers.insert_one({"user_id": user.id, "chosen_guild": selected_guild_id, "created_time": timern, "deleted_time": delete_time, "resolved": True})
+            dmservers.insert_one({"user_id": user.id, "chosen_guild": selected_guild_id, "created_time": timern, "deleted_time": delete_time, "resolved": False})
             await msg.delete()
             await message.channel.send(f"ModMail Server has been swapped to {guild.name}.")    
             return         
@@ -346,7 +366,7 @@ async def on_message(message: discord.Message):
 
                 reaction, _ = await bot.wait_for('reaction_add', check=check)
                 selected_guild_id = guild_ids[int(reaction.emoji[0]) - 1]
-                dmservers.insert_one({"user_id": user.id, "chosen_guild": selected_guild_id, "created_time": timern, "deleted_time": delete_time, "resolved": True})
+                dmservers.insert_one({"user_id": user.id, "chosen_guild": selected_guild_id, "created_time": timern, "deleted_time": delete_time, "resolved": False})
                 await msg.delete()
 
             thread = await get_thread(message, True, selected_guild_id)
@@ -405,7 +425,7 @@ async def on_message(message: discord.Message):
         await counting(message)
 
     if (
-        message.guild.id == GUILD_ID
+        message.guild.id == PARENTGUILD_ID
         and str(message.channel.id) in global_vars.sticky_channels
     ):
         sticky_counter[message.channel.id] = (

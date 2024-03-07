@@ -583,6 +583,11 @@ async def set_preferences(
         description="Channel for notifying moderators about users who require action, such as bans.",
         required=False,
     ),
+    botnews_channel: discord.abc.GuildChannel = discord.SlashOption(
+        name="botnews_channel",
+        description="Channel for bot-related news and updates.",
+        required=False,
+    ),
 ):
 
     if not await is_moderator(interaction.user):
@@ -610,7 +615,8 @@ async def set_preferences(
             not feedback_mods_channel and
             not hotm_results_channel and
             not study_session_channel and
-            not action_required_channel
+            not action_required_channel and
+            not botnews_channel
         ):
             await interaction.send("Please input atleast one channel.", ephemeral=True)
             return
@@ -657,6 +663,8 @@ async def set_preferences(
         gpdb.set_pref("study_session_channel", study_session_channel.id, guild_id)
     if action_required_channel:
         gpdb.set_pref("action_required_channel", action_required_channel.id, guild_id)
+    if botnews_channel:
+        gpdb.set_pref("botnews_channel", botnews_channel.id, guild_id)
         
     await interaction.send("Guild preferences have been updated successfully!", ephemeral=True)
 
