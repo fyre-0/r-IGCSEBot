@@ -22,30 +22,31 @@ async def get_thread(message: discord.Message, is_dm: bool, guild_id):
 
       guild = bot.get_guild(guild_id)
       member = guild.get_member(member_id)
-      channel = guild.get_channel(gpdb.get_pref("dm_threads_channel", guild_id)) 
-      newmsg_channel = guild.get_channel(gpdb.get_pref("modmail_logs_channel", guild_id)) 
-      print(channel)
-      threads = channel.threads
-      thread_name = f"{member_id}"
-      thread = discord.utils.get(threads, name=thread_name)
-      if is_dm:
-            if thread == None:
-                  thread = await channel.create_thread(name=thread_name, content=f"Username: `{member.name}`\nUser ID: `{member_id}`")
-                  embed = discord.Embed(title="New DM Recieved", description=f"Username: `{member.name}`\nUser ID: `{member_id}`\nThread: {thread.mention}", color=0xFF3E00)
-                  await newmsg_channel.send(embed=embed)
-                  return thread
-            else:
-                  embed = discord.Embed(title="New Message Recieved", description=f"Username: `{member.name}`\nUser ID: `{member_id}`\nThread: {thread.mention}", color=0x8DD5A2)
-                  await newmsg_channel.send(embed=embed)
-                  return thread       
-      else:
-            if thread == None:
-                  thread = await channel.create_thread(name=thread_name, content=f"Username: `{member.name}`\nUser ID: `{member_id}`")
-                  await message.reply(f"DM Channel has been created at {thread.mention}!")
-                  return thread
-            else:
-                  await message.reply(f"DM Channel already exists for that user at {thread.mention}!")
-                  return thread   
+      channel = guild.get_channel(gpdb.get_pref("dm_threads_channel", guild_id))
+      if channel is not None:
+        newmsg_channel = guild.get_channel(gpdb.get_pref("modmail_logs_channel", guild_id)) 
+        print(channel)
+        threads = channel.threads
+        thread_name = f"{member_id}"
+        thread = discord.utils.get(threads, name=thread_name)
+        if is_dm:
+                if thread == None:
+                    thread = await channel.create_thread(name=thread_name, content=f"Username: `{member.name}`\nUser ID: `{member_id}`")
+                    embed = discord.Embed(title="New DM Recieved", description=f"Username: `{member.name}`\nUser ID: `{member_id}`\nThread: {thread.mention}", color=0xFF3E00)
+                    await newmsg_channel.send(embed=embed)
+                    return thread
+                else:
+                    embed = discord.Embed(title="New Message Recieved", description=f"Username: `{member.name}`\nUser ID: `{member_id}`\nThread: {thread.mention}", color=0x8DD5A2)
+                    await newmsg_channel.send(embed=embed)
+                    return thread       
+        else:
+                if thread == None:
+                    thread = await channel.create_thread(name=thread_name, content=f"Username: `{member.name}`\nUser ID: `{member_id}`")
+                    await message.reply(f"DM Channel has been created at {thread.mention}!")
+                    return thread
+                else:
+                    await message.reply(f"DM Channel already exists for that user at {thread.mention}!")
+                    return thread   
 
 
 async def counting(message: discord.Message):
