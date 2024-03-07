@@ -743,13 +743,13 @@ async def feedback(
     global FEEDBACK_NAME
     await interaction.response.send_modal(modal=Feedback())
     if target == "Bot Developers":
-        FEEDBACK_CHANNEL_ID = bot.get_channel(gpdb.get_pref("feedback_channel", interaction.guild.id)) 
+        FEEDBACK_CHANNEL_ID = gpdb.get_pref("feedback_channel", interaction.guild.id)
         FEEDBACK_NAME = "Bot Feedback"
     elif target == "Moderators":
-        FEEDBACK_CHANNEL_ID = bot.get_channel(gpdb.get_pref("feedback_mods_channel", interaction.guild.id)) 
+        FEEDBACK_CHANNEL_ID = gpdb.get_pref("feedback_mods_channel", interaction.guild.id)
         FEEDBACK_NAME = "Mod Feedback"
     else:
-        FEEDBACK_CHANNEL_ID = bot.get_channel(gpdb.get_pref("feedback_mods_channel", interaction.guild.id)) 
+        FEEDBACK_CHANNEL_ID = gpdb.get_pref("feedback_mods_channel", interaction.guild.id)
         FEEDBACK_NAME = "Repository Feedback"
 
 

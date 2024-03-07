@@ -24,6 +24,7 @@ async def get_thread(message: discord.Message, is_dm: bool, guild_id):
       member = guild.get_member(member_id)
       channel = guild.get_channel(gpdb.get_pref("dm_threads_channel", guild_id)) 
       newmsg_channel = guild.get_channel(gpdb.get_pref("modmail_logs_channel", guild_id)) 
+      print(channel)
       threads = channel.threads
       thread_name = f"{member_id}"
       thread = discord.utils.get(threads, name=thread_name)
@@ -314,6 +315,7 @@ async def on_message(message: discord.Message):
             selected_guild_id = guild_ids[int(reaction.emoji[0]) - 1]
             guild = bot.get_guild(selected_guild_id)
             dmservers.insert_one({"user_id": user.id, "chosen_guild": selected_guild_id, "created_time": timern, "deleted_time": delete_time, "resolved": True})
+            await message.delete()
             await msg.delete()
             await message.channel.send(f"ModMail Server has been swapped to {guild.name}.")    
             return         
