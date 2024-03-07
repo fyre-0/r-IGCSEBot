@@ -1128,10 +1128,6 @@ async def confess(
     ),
 ):
 
-    if interaction.guild.id != GUILD_ID:
-        await interaction.send("This command is not available on this server.")
-        return
-
     approval_channel = bot.get_channel(gpdb.get_pref("confession_approval_channel", interaction.guild.id)) 
     confession_channel = bot.get_channel(gpdb.get_pref("anon_confession_channel", interaction.guild.id)) 
 
