@@ -1,6 +1,6 @@
 from utils.constants import (
     BETA,
-    PARENTGUILD_ID,
+    GUILD_ID,
     LINK,
 )
 from utils.data import REP_DISABLE_CHANNELS
@@ -226,7 +226,7 @@ async def on_message(message: discord.Message):
             ] <= datetime.timedelta(minutes=3):
                 user_message_counts[user_id]["count"] += 1
                 if user_message_counts[user_id]["count"] > 8:
-                    igcse = bot.get_guild(PARENTGUILD_ID)
+                    igcse = bot.get_guild(GUILD_ID)
                     channel = igcse.get_channel(1072835539998347307)
                     embed = discord.Embed(title="Potential Rep Farm", color=0xA10000)
                     embed.add_field(
@@ -282,7 +282,7 @@ async def on_message(message: discord.Message):
                 await message.channel.send(f"{member.mention}")
                 return  
 
-    if message.guild.id == PARENTGUILD_ID:
+    if message.guild.id == GUILD_ID:
         if message.channel.name == "bot-news":
             if not await is_moderator(message.author) and message.author.id not in allowed_user_ids: 
                 return
@@ -425,7 +425,7 @@ async def on_message(message: discord.Message):
         await counting(message)
 
     if (
-        message.guild.id == PARENTGUILD_ID
+        message.guild.id == GUILD_ID
         and str(message.channel.id) in global_vars.sticky_channels
     ):
         sticky_counter[message.channel.id] = (

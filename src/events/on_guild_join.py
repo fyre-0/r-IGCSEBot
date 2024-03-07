@@ -1,6 +1,6 @@
 from utils.constants import (
     BETA,
-    PARENTGUILD_ID,
+    GUILD_ID,
     LINK,
 )
 from utils.data import REP_DISABLE_CHANNELS
