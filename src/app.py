@@ -616,7 +616,7 @@ async def set_preferences(
             return
 
 
-    await interaction.response.defer()
+    await interaction.response.defer(ephemeral=True)
     guild_id = interaction.guild.id
 
     if modlog_channel:
@@ -658,7 +658,7 @@ async def set_preferences(
     if action_required_channel:
         gpdb.set_pref("action_required_channel", action_required_channel.id, guild_id)
         
-    await interaction.send("Guild prefrences successfully updated!", ephemeral=True)
+    await interaction.send("Guild preferences have been updated successfully!", ephemeral=True)
 
 
 @bot.slash_command(description="Start a study session", guild_ids=[GUILD_ID])
