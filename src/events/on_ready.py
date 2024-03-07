@@ -39,12 +39,12 @@ async def on_ready():
     print(f"Logged in as {str(bot.user)}.")
     await bot.change_presence(
         activity=discord.Activity(type=discord.ActivityType.watching, name="r/IGCSE")
-    )
+    ) 
     await smdb.populate_cache()
     for loop in loops:
         if loop and not loop.is_running():
             loop.start()
-
+            
     views = View.find().all()
     for view in views:
         bot.add_view(

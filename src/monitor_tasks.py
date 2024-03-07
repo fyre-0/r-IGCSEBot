@@ -314,7 +314,7 @@ async def handle_slowmode():
             await channel.edit(slowmode_delay=slowmode)
 
 
-@tasks.loop(seconds=8)
+@tasks.loop(seconds=5)
 async def send_questions():
     sessions = Session.find(
         Session.paused == 0 and Session.currently_solving == "none"

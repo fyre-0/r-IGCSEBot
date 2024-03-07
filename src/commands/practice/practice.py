@@ -53,6 +53,7 @@ async def close_session(session: Session, message: str):
     for question in questions:
         user_answers = question["user_answers"]
         correct_answer = question["answers"]
+        View.delete(question["question_name"])
         for user in user_answers.keys():
             if user not in number_of_answers.keys():
                 number_of_answers[user] = 0
@@ -63,9 +64,6 @@ async def close_session(session: Session, message: str):
                 number_of_correct_answers[user] = 0
             if user_answers[user] == correct_answer:
                 number_of_correct_answers[user] += 1
-
-        Question.delete(question.question_name)
-        View.delete(question.question_name)
 
     number_of_correct_answers = dict(
         sorted(number_of_correct_answers.items(), key=lambda x: x[1], reverse=True)
@@ -114,6 +112,7 @@ async def close_session(session: Session, message: str):
 
     User.delete(session["started_by"])
     Session.delete(session.session_id)
+    Question.delete_many(questions)
 
 
 async def new_session(interaction: discord.Interaction):
