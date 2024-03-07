@@ -19,6 +19,7 @@ from monitor_tasks import (
     send_questions,
     expire_sessions,
     populate_cache,
+    resetdmprefs,
 )
 from schemas.redis import View
 from commands.practice.ui import MCQButtonsView
@@ -32,6 +33,7 @@ loops = [
     send_questions,
     expire_sessions,
     populate_cache,
+    resetdmprefs,
 ]
 
 
@@ -39,7 +41,7 @@ loops = [
 async def on_ready():
     print(f"Logged in as {str(bot.user)}.")
     await bot.change_presence(
-        activity=discord.Activity(type=discord.ActivityType.watching, name="r/guild")
+        activity=discord.Activity(type=discord.ActivityType.watching, name="r/IGCSE")
     ) 
     await smdb.populate_cache()
     for loop in loops:
