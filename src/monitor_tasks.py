@@ -10,9 +10,9 @@ import datetime
 from utils.mongodb import smdb, gpdb
 
 
-async def togglechannellock(channel_id, unlock, *, unlocktime=0):
+async def togglechannellock(channel_id, guild_id, unlock, *, unlocktime=0):
     everyone = bot.get_guild(GUILD_ID).default_role
-    Logging = bot.get_channel(MODLOG_CHANNEL_ID)
+    mod_log_channel = bot.get_channel(gpdb.get_pref("modlog_channel", guild_id)) 
     timern = int(time.time()) + 1
     channel = bot.get_channel(channel_id)
     overwrite = channel.overwrites_for(everyone)
@@ -36,7 +36,8 @@ async def togglechannellock(channel_id, unlock, *, unlocktime=0):
                 inline=False,
             )
             embed.set_footer(text=f"{bot.user}", icon_url=bot.user.display_avatar.url)
-            await Logging.send(embed=embed)
+            if mod_log_channel:
+                await mod_log_channel.send(embed=embed)
             await channel.send("Channel has been unlocked.")
         else:
             embed = discord.Embed(
@@ -57,7 +58,8 @@ async def togglechannellock(channel_id, unlock, *, unlocktime=0):
                 inline=False,
             )
             embed.set_footer(text=f"{bot.user}", icon_url=bot.user.display_avatar.url)
-            await Logging.send(embed=embed)
+            if mod_log_channel:
+                await mod_log_channel.send(embed=embed)
             await channel.send("Channel has been locked.")
             time.sleep(1)
             await channel.send(f"Unlocking channel <t:{unlocktime}:R>.")
@@ -67,8 +69,8 @@ async def togglechannellock(channel_id, unlock, *, unlocktime=0):
         print("failed to set permissions")
 
 
-async def toggleforumlock(thread_id, unlock, unlocktime):
-    Logging = bot.get_channel(MODLOG_CHANNEL_ID)
+async def toggleforumlock(thread_id, guild_id, unlock, unlocktime):
+    mod_log_channel = bot.get_channel(gpdb.get_pref("modlog_channel", guild_id)) 
     timern = int(time.time()) + 1
     thread = bot.get_channel(thread_id)
     try:
@@ -89,7 +91,8 @@ async def toggleforumlock(thread_id, unlock, unlocktime):
                 inline=False,
             )
             embed.set_footer(text=f"{bot.user}", icon_url=bot.user.display_avatar.url)
-            await Logging.send(embed=embed)
+            if mod_log_channel:
+                await mod_log_channel.send(embed=embed)
             await thread.send("Thread has been unlocked.")
         else:
             embed = discord.Embed(
@@ -110,7 +113,8 @@ async def toggleforumlock(thread_id, unlock, unlocktime):
                 inline=False,
             )
             embed.set_footer(text=f"{bot.user}", icon_url=bot.user.display_avatar.url)
-            await Logging.send(embed=embed)
+            if mod_log_channel:
+                await mod_log_channel.send(embed=embed)
             await thread.send("Thread has been locked.")
             time.sleep(1)
             await thread.send(f"Unlocking thread <t:{unlocktime}:R>.")
@@ -123,7 +127,7 @@ async def toggleforumlock(thread_id, unlock, unlocktime):
 @tasks.loop(hours=720)
 async def autorefreshhelpers():
     changed = []
-    Logging = bot.get_channel(MODLOG_CHANNEL_ID)
+    mod_log_channel = bot.get_channel(gpdb.get_pref("modlog_channel", GUILD_ID)) 
     timenow = int(time.time()) + 1
     for chnl, role in helper_roles.items():
         try:
@@ -155,7 +159,8 @@ async def autorefreshhelpers():
             inline=False,
         )
         embed.set_footer(text=f"{bot.user}", icon_url=bot.user.display_avatar.url)
-        await Logging.send(embed=embed)
+        if mod_log_channel:
+            await mod_log_channel.send(embed=embed)
     else:
         embed = discord.Embed(description="Helpers Refreshed !!", color=0x51ADBB)
         embed.set_author(name=str(bot.user), icon_url=bot.user.display_avatar.url)
@@ -167,7 +172,8 @@ async def autorefreshhelpers():
             inline=False,
         )
         embed.set_footer(text=f"{bot.user}", icon_url=bot.user.display_avatar.url)
-        await Logging.send(embed=embed)
+        if mod_log_channel:
+            await mod_log_channel.send(embed=embed)
 
 
 @tasks.loop(seconds=20)
@@ -182,7 +188,7 @@ async def checklock():
             if result["time"] <= time.time():
                 ult = clocks.find_one({"_id": "u" + result["_id"][1:]})["time"]
                 await togglechannellock(
-                    result["channel_id"], result["unlock"], unlocktime=ult
+                    result["channel_id"], result["guild_id"], result["unlock"], unlocktime=ult
                 )
 
                 clocks.update_one({"_id": result["_id"]}, {"$set": {"resolved": True}})
@@ -192,27 +198,38 @@ async def checklock():
             if result["time"] <= time.time():
                 ult = flocks.find_one({"_id": "u" + result["_id"][1:]})["time"]
                 await toggleforumlock(
-                    result["thread_id"], result["unlock"], unlocktime=ult
+                    result["thread_id"], result["guild_id"], result["unlock"], unlocktime=ult
                 )
                 flocks.update_one({"_id": result["_id"]}, {"$set": {"resolved": True}})
 
     except Exception:
         print(traceback.format_exc())
 
+@tasks.loop(hours=24)
+async def resetdmprefs():
+    timern = int(time.time()) + 1
+    client = pymongo.MongoClient(LINK)
+    db = client.IGCSEBot
+    dmservers = db["dm_server_prefs"]
+    results = dmservers.find({"resolved": True})
+    for result in results:
+        if result["deleted_time"] <= timern:
+            dmservers.delete_one({"_id": result["_id"]})
 
 @tasks.loop(seconds=20)
 async def checkmute():
     client = pymongo.MongoClient(LINK)
     db = client.IGCSEBot
     mute = db["mute"]
-    Logging = bot.get_channel(MODLOG_CHANNEL_ID)
     timern = int(time.time()) + 1
     results = mute.find({"muted": True})
     for result in results:
         try:
             if int(result["unmute_time"]) <= timern:
                 user_id = int(result["user_id"])
-                guild = bot.get_guild(GUILD_ID)
+                guild_id = int(result["guild_id"])
+                mod_log_channel = bot.get_channel(gpdb.get_pref("modlog_channel", guild_id)) 
+                guild = bot.get_guild(guild_id)
                 # The user ID may not be present in cache.
                 try:
                     user = guild.get_member(user_id)
@@ -243,7 +260,8 @@ async def checkmute():
                     embed.set_footer(
                         text=f"{bot.user}", icon_url=bot.user.display_avatar.url
                     )
-                    await Logging.send(embed=embed)
+                    if mod_log_channel:
+                        await mod_log_channel.send(embed=embed)
                     mute.delete_one({"_id": result["_id"]})
                 except Exception:
                     print(traceback.format_exc())

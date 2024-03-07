@@ -1,5 +1,6 @@
 from bot import bot, discord, pymongo, time
 from utils.constants import LINK, GUILD_ID, MODLOG_CHANNEL_ID
+from utils.mongodb import gpdb
 from utils.roles import is_moderator
 
 
@@ -99,24 +100,25 @@ async def Channellockcommand(
 
     # user_id = f"<@{interaction.user.id}>"
     channel_id = f"<#{channelinput.id}>"
-    Logging = bot.get_channel(MODLOG_CHANNEL_ID)
-    embed = discord.Embed(
-        description="Scheduled Channel Lockdown", colour=discord.Colour.red()
-    )
-    embed.set_author(
-        name=str(interaction.user), icon_url=interaction.user.display_avatar.url
-    )
-    embed.add_field(name="Locked Channel", value=f"{channel_id}", inline=False)
-    embed.add_field(name="Lock time", value=f"<t:{locktime}:R>", inline=False)
-    embed.add_field(name="Unlock time", value=f"<t:{unlocktime}:R>", inline=False)
-    embed.add_field(name="Date", value=f"<t:{timenow}:F>", inline=False)
-    embed.add_field(
-        name="ID",
-        value=f"```py\nUser = {interaction.user.id}\nChannel = {channelinput.id}```",
-        inline=False,
-    )
-    embed.set_footer(text=f"{bot.user}", icon_url=bot.user.display_avatar.url)
-    await Logging.send(embed=embed)
+    mod_log_channel = bot.get_channel(gpdb.get_pref("modlog_channel", interaction.guild.id)) 
+    if mod_log_channel:
+        embed = discord.Embed(
+            description="Scheduled Channel Lockdown", colour=discord.Colour.red()
+        )
+        embed.set_author(
+            name=str(interaction.user), icon_url=interaction.user.display_avatar.url
+        )
+        embed.add_field(name="Locked Channel", value=f"{channel_id}", inline=False)
+        embed.add_field(name="Lock time", value=f"<t:{locktime}:R>", inline=False)
+        embed.add_field(name="Unlock time", value=f"<t:{unlocktime}:R>", inline=False)
+        embed.add_field(name="Date", value=f"<t:{timenow}:F>", inline=False)
+        embed.add_field(
+            name="ID",
+            value=f"```py\nUser = {interaction.user.id}\nChannel = {channelinput.id}```",
+            inline=False,
+        )
+        embed.set_footer(text=f"{bot.user}", icon_url=bot.user.display_avatar.url)
+        await mod_log_channel.send(embed=embed)
 
     client = pymongo.MongoClient(LINK)
     db = client.IGCSEBot
@@ -126,6 +128,7 @@ async def Channellockcommand(
         {
             "_id": "l" + str(timenow),
             "channel_id": channelinput.id,
+            "guild_id" : interaction.guild.id,
             "unlock": False,
             "time": locktime,
             "resolved": False,
@@ -136,6 +139,7 @@ async def Channellockcommand(
         {
             "_id": "u" + str(timenow),
             "channel_id": channelinput.id,
+            "guild_id" : interaction.guild.id,
             "unlock": True,
             "time": unlocktime,
             "resolved": False,
@@ -242,24 +246,25 @@ async def Forumlockcommand(
 
     # user_id = f"<@{interaction.user.id}>"
     thread_id = f"<#{threadinput.id}>"
-    Logging = bot.get_channel(MODLOG_CHANNEL_ID)
-    embed = discord.Embed(
-        description="Scheduled Forum Lockdown", colour=discord.Colour.red()
-    )
-    embed.set_author(
-        name=str(interaction.user), icon_url=interaction.user.display_avatar.url
-    )
-    embed.add_field(name="Locked Thread", value=f"{thread_id}", inline=False)
-    embed.add_field(name="Lock time", value=f"<t:{locktime}:R>", inline=False)
-    embed.add_field(name="Unlock time", value=f"<t:{unlocktime}:R>", inline=False)
-    embed.add_field(name="Date", value=f"<t:{timenow}:F>", inline=False)
-    embed.add_field(
-        name="ID",
-        value=f"```py\nUser = {interaction.user.id}\nThread = {threadinput.id}```",
-        inline=False,
-    )
-    embed.set_footer(text=f"{bot.user}", icon_url=bot.user.display_avatar.url)
-    await Logging.send(embed=embed)
+    mod_log_channel = bot.get_channel(gpdb.get_pref("modlog_channel", interaction.guild.id)) 
+    if mod_log_channel:
+        embed = discord.Embed(
+            description="Scheduled Forum Lockdown", colour=discord.Colour.red()
+        )
+        embed.set_author(
+            name=str(interaction.user), icon_url=interaction.user.display_avatar.url
+        )
+        embed.add_field(name="Locked Thread", value=f"{thread_id}", inline=False)
+        embed.add_field(name="Lock time", value=f"<t:{locktime}:R>", inline=False)
+        embed.add_field(name="Unlock time", value=f"<t:{unlocktime}:R>", inline=False)
+        embed.add_field(name="Date", value=f"<t:{timenow}:F>", inline=False)
+        embed.add_field(
+            name="ID",
+            value=f"```py\nUser = {interaction.user.id}\nThread = {threadinput.id}```",
+            inline=False,
+        )
+        embed.set_footer(text=f"{bot.user}", icon_url=bot.user.display_avatar.url)
+        await mod_log_channel.send(embed=embed)
 
     client = pymongo.MongoClient(LINK)
     db = client.IGCSEBot
@@ -270,6 +275,7 @@ async def Forumlockcommand(
             {
                 "_id": "l" + str(timenow),
                 "thread_id": threadinput.id,
+                "guild_id" : interaction.guild.id,
                 "unlock": False,
                 "time": locktime,
                 "resolved": False,
@@ -277,6 +283,7 @@ async def Forumlockcommand(
             {
                 "_id": "u" + str(timenow),
                 "thread_id": threadinput.id,
+                "guild_id" : interaction.guild.id,
                 "unlock": True,
                 "time": unlocktime,
                 "resolved": False,

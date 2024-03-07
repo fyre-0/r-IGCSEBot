@@ -1,19 +1,10 @@
 # Importing Variables
 from bot import bot, datetime, discord, json, pymongo, requests, time, ast, traceback
 from utils.constants import (
-    FEEDBACK_CHANNEL_ID,
-    FEEDBACK_NAME,
     GUILD_ID,
     LINK,
-    BOTLOG_CHANNEL_ID,
-    MODLOG_CHANNEL_ID,
     TOKEN,
-    WELCOME_CHANNEL_ID,
     FORCED_MUTE_ROLE,
-    CHATMOD_APP_CHANNEL,
-    MOD_CHANNEL,
-    CONFESSION_CHANNEL,
-    STUDY_SESSION_CHANNEL,
 )
 from utils.data import (
     helper_roles,
@@ -85,7 +76,6 @@ def insert_returns(body):
 
     if isinstance(body[-1], ast.With):
         insert_returns(body[-1].body)
-
 
 class EvalModal(discord.ui.Modal):
     def __init__(self):
@@ -353,7 +343,7 @@ async def refreshhelpers(ctx):
         except Exception:
             continue
     if changed:
-        Logging = bot.get_channel(MODLOG_CHANNEL_ID)
+        mod_log_channel = bot.get_channel(gpdb.get_pref("modlog_channel", ctx.guild.id)) 
         timenow = int(time.time()) + 1
         embed = discord.Embed(description="Helpers Refreshed !!", color=0x51ADBB)
         embed.set_author(name=str(ctx.author), icon_url=ctx.author.display_avatar.url)
@@ -365,7 +355,7 @@ async def refreshhelpers(ctx):
             inline=False,
         )
         embed.set_footer(text=f"{bot.user}", icon_url=bot.user.display_avatar.url)
-        await Logging.send(embed=embed)
+        await mod_log_channel.send(embed=embed)
         await ctx.message.reply("Done! Changed channels: " + ", ".join(changed))
     else:
         await ctx.message.reply("No changes were made.")
@@ -384,7 +374,6 @@ async def clear(ctx, num_to_clear: int):
 @bot.slash_command(description="Pong!")
 async def ping(interaction: discord.Interaction):
     await interaction.send("Pong!")
-
 
 @bot.slash_command(name="joke", description="Get a random joke", guild_ids=[GUILD_ID])
 async def joke(
@@ -511,19 +500,87 @@ async def set_preferences(
     rep_enabled: bool = discord.SlashOption(
         name="rep_enabled", description="Enable the reputation system?", required=False
     ),
-    suggestions_channel: discord.abc.GuildChannel = discord.SlashOption(
-        name="suggestions_channel",
-        description="Channel for new server suggestions to be displayed and voted upon.",
-        required=False,
+    welcome_channel: discord.abc.GuildChannel = discord.SlashOption(
+        name="welcome_channel", description="Channel for welcome messages.", required=False
     ),
     warnlog_channel: discord.abc.GuildChannel = discord.SlashOption(
         name="warnlog_channel",
         description="Channel for warns to be logged.",
         required=False,
     ),
-    emote_channel: discord.abc.GuildChannel = discord.SlashOption(
-        name="emote_channel",
-        description="Channel for emote voting to take place.",
+    behavior_log_channel: discord.abc.GuildChannel = discord.SlashOption(
+        name="behavior_log_channel",
+        description="Channel for logging user behavior.",
+        required=False,
+    ),
+    feedback_channel: discord.abc.GuildChannel = discord.SlashOption(
+        name="feedback_channel",
+        description="Channel for receiving feedback from bot developers.",
+        required=False,
+    ),
+    anon_confession_channel: discord.abc.GuildChannel = discord.SlashOption(
+        name="anon_confession_channel",
+        description="Channel for anonymous confessions.",
+        required=False,
+    ),
+    counting_channel: discord.abc.GuildChannel = discord.SlashOption(
+        name="counting_channel",
+        description="Channel for counting.",
+        required=False,
+    ),
+    chatmod_apps_channel: discord.abc.GuildChannel = discord.SlashOption(
+        name="chatmod_apps_channel",
+        description="Channel for chat moderation applications.",
+        required=False,
+    ),
+    botlogs_channel: discord.abc.GuildChannel = discord.SlashOption(
+        name="botlogs_channel",
+        description="Channel for logs related to the bot's activities.",
+        required=False,
+    ),
+    modmail_logs_channel: discord.abc.GuildChannel = discord.SlashOption(
+        name="modmail_logs_channel",
+        description="Channel for logging modmail interactions.",
+        required=False,
+    ),
+    create_dm_channel: discord.abc.GuildChannel = discord.SlashOption(
+        name="create_dm_channel",
+        description="Channel for creating new DM threads.",
+        required=False,
+    ),
+    closed_dm_channel: discord.abc.GuildChannel = discord.SlashOption(
+        name="closed_dm_channel",
+        description="Channel for closed DM threads.",
+        required=False,
+    ),
+    dm_threads_channel: discord.abc.GuildChannel = discord.SlashOption(
+        name="dm_threads_channel",
+        description="Channel for ongoing DM threads.",
+        required=False,
+    ),
+    confession_approval_channel: discord.abc.GuildChannel = discord.SlashOption(
+        name="confession_approval_channel",
+        description="Channel for approving anonymous confessions.",
+        required=False,
+    ),
+    feedback_mods_channel: discord.abc.GuildChannel = discord.SlashOption(
+        name="feedback_mods_channel",
+        description="Channel for providing feedback to the mods.",
+        required=False,
+    ),
+    hotm_results_channel: discord.abc.GuildChannel = discord.SlashOption(
+        name="hotm_results_channel",
+        description="Channel for displaying 'Hot of the Month' results.",
+        required=False,
+    ),
+    study_session_channel: discord.abc.GuildChannel = discord.SlashOption(
+        name="study_session_channel",
+        description="Channel for coordinating study sessions.",
+        required=False,
+    ),
+    action_required_channel: discord.abc.GuildChannel = discord.SlashOption(
+        name="action_required_channel",
+        description="Channel for notifying moderators about users who require action, such as bans.",
         required=False,
     ),
 ):
@@ -533,21 +590,75 @@ async def set_preferences(
             "You are not authorized to perform this action", ephemeral=True
         )
         return
+    
+    if (
+            not modlog_channel and
+            not rep_enabled and
+            not welcome_channel and
+            not warnlog_channel and
+            not behavior_log_channel and
+            not feedback_channel and
+            not anon_confession_channel and
+            not counting_channel and
+            not chatmod_apps_channel and
+            not botlogs_channel and
+            not modmail_logs_channel and
+            not create_dm_channel and
+            not closed_dm_channel and
+            not dm_threads_channel and
+            not confession_approval_channel and
+            not feedback_mods_channel and
+            not hotm_results_channel and
+            not study_session_channel and
+            not action_required_channel
+        ):
+            await interaction.send("Please input atleast one channel.", ephemeral=True)
+            return
+
 
     await interaction.response.defer()
+    guild_id = interaction.guild.id
+
     if modlog_channel:
-        gpdb.set_pref("modlog_channel", modlog_channel.id, interaction.guild.id)
-    if rep_enabled:
-        gpdb.set_pref("rep_enabled", rep_enabled, interaction.guild.id)
-    if suggestions_channel:
-        gpdb.set_pref(
-            "suggestions_channel", suggestions_channel.id, interaction.guild.id
-        )
+        gpdb.set_pref("modlog_channel", modlog_channel.id, guild_id)
+    if rep_enabled is not None:
+        gpdb.set_pref("rep_enabled", rep_enabled, guild_id)
+    if welcome_channel:
+        gpdb.set_pref("welcome_channel", welcome_channel.id, guild_id)
     if warnlog_channel:
-        gpdb.set_pref("warnlog_channel", warnlog_channel.id, interaction.guild.id)
-    if emote_channel:
-        gpdb.set_pref("emote_channel", emote_channel.id, interaction.guild.id)
-    await interaction.send("Done.")
+        gpdb.set_pref("warnlog_channel", warnlog_channel.id, guild_id)
+    if behavior_log_channel:
+        gpdb.set_pref("behavior_log_channel", behavior_log_channel.id, guild_id)
+    if feedback_channel:
+        gpdb.set_pref("feedback_channel", feedback_channel.id, guild_id)
+    if anon_confession_channel:
+        gpdb.set_pref("anon_confession_channel", anon_confession_channel.id, guild_id)
+    if counting_channel:
+        gpdb.set_pref("counting_channel", counting_channel.id, guild_id)
+    if chatmod_apps_channel:
+        gpdb.set_pref("chatmod_apps_channel", chatmod_apps_channel.id, guild_id)
+    if botlogs_channel:
+        gpdb.set_pref("botlogs_channel", botlogs_channel.id, guild_id)
+    if modmail_logs_channel:
+        gpdb.set_pref("modmail_logs_channel", modmail_logs_channel.id, guild_id)
+    if create_dm_channel:
+        gpdb.set_pref("create_dm_channel", create_dm_channel.id, guild_id)
+    if closed_dm_channel:
+        gpdb.set_pref("closed_dm_channel", closed_dm_channel.id, guild_id)
+    if dm_threads_channel:
+        gpdb.set_pref("dm_threads_channel", dm_threads_channel.id, guild_id)
+    if feedback_mods_channel:
+        gpdb.set_pref("feedback_mods_channel", feedback_mods_channel.id, guild_id)
+    if confession_approval_channel:
+        gpdb.set_pref("confession_approval_channel", confession_approval_channel.id, guild_id)
+    if hotm_results_channel:
+        gpdb.set_pref("hotm_results_channel", hotm_results_channel.id, guild_id)
+    if study_session_channel:
+        gpdb.set_pref("study_session_channel", study_session_channel.id, guild_id)
+    if action_required_channel:
+        gpdb.set_pref("action_required_channel", action_required_channel.id, guild_id)
+        
+    await interaction.send("Guild prefrences successfully updated!", ephemeral=True)
 
 
 @bot.slash_command(description="Start a study session", guild_ids=[GUILD_ID])
@@ -561,7 +672,7 @@ async def study_session(interaction: discord.Interaction):
         )
         return
     await interaction.response.defer()
-    study_sesh_channel = bot.get_channel(STUDY_SESSION_CHANNEL)
+    study_sesh_channel = bot.get_channel(gpdb.get_pref("study_session_channel", interaction.guild.id)) 
     msg_history = await study_sesh_channel.history(limit=3).flatten()
     for msg in msg_history:
         if (
@@ -628,17 +739,17 @@ async def feedback(
         required=True,
     ),
 ):
-    await interaction.response.send_modal(modal=Feedback())
     global FEEDBACK_CHANNEL_ID
     global FEEDBACK_NAME
+    await interaction.response.send_modal(modal=Feedback())
     if target == "Bot Developers":
-        FEEDBACK_CHANNEL_ID = 1189409960875016253
+        FEEDBACK_CHANNEL_ID = bot.get_channel(gpdb.get_pref("feedback_channel", interaction.guild.id)) 
         FEEDBACK_NAME = "Bot Feedback"
     elif target == "Moderators":
-        FEEDBACK_CHANNEL_ID = 1057505291014524939
+        FEEDBACK_CHANNEL_ID = bot.get_channel(gpdb.get_pref("feedback_mods_channel", interaction.guild.id)) 
         FEEDBACK_NAME = "Mod Feedback"
     else:
-        FEEDBACK_CHANNEL_ID = 1057505291014524939
+        FEEDBACK_CHANNEL_ID = bot.get_channel(gpdb.get_pref("feedback_mods_channel", interaction.guild.id)) 
         FEEDBACK_NAME = "Repository Feedback"
 
 
@@ -692,161 +803,164 @@ async def Instantlockcommand(
             ephemeral=True,
         )
         return
-    Logging = bot.get_channel(MODLOG_CHANNEL_ID)
-    timenow = int(time.time()) + 1
-    if action_type == "Forum Lock":
-        if threadinput is None:
-            await interaction.send(
-                "Please mention the forum post in the `thread_name` field.",
-                ephemeral=True,
-            )
-        else:
-            thread_id = bot.get_channel(threadinput.id)
-            if not thread_id.locked:
-                thread = await thread_id.edit(locked=True)
-                embed = discord.Embed(
-                    description="Instant Forum Lockdown", colour=discord.Colour.red()
-                )
-                embed.set_author(
-                    name=str(interaction.user),
-                    icon_url=interaction.user.display_avatar.url,
-                )
-                embed.add_field(
-                    name="Locked Thread", value=f"<#{threadinput.id}>", inline=False
-                )
-                embed.add_field(name="Date", value=f"<t:{timenow}:F>", inline=False)
-                embed.add_field(
-                    name="ID",
-                    value=f"```py\nUser = {interaction.user.id}\nThread = {threadinput.id}```",
-                    inline=False,
-                )
-                embed.set_footer(
-                    text=f"{bot.user}", icon_url=bot.user.display_avatar.url
-                )
-                await Logging.send(embed=embed)
+    mod_log_channel = bot.get_channel(gpdb.get_pref("modlog_channel", interaction.guild.id))
+    if mod_log_channel:
+        timenow = int(time.time()) + 1
+        if action_type == "Forum Lock":
+            if threadinput is None:
                 await interaction.send(
-                    f"<#{threadinput.id}> has been locked", ephemeral=True
+                    "Please mention the forum post in the `thread_name` field.",
+                    ephemeral=True,
                 )
-                await thread.send("This thread has been locked.")
             else:
-                client = pymongo.MongoClient(LINK)
-                db = client.IGCSEBot
-                locks = db["forumlock"]
-                embed = discord.Embed(
-                    description="Instant Forum Lockdown", colour=discord.Colour.green()
-                )
-                embed.set_author(
-                    name=str(interaction.user),
-                    icon_url=interaction.user.display_avatar.url,
-                )
-                embed.add_field(
-                    name="Unlocked Thread", value=f"<#{threadinput.id}>", inline=False
-                )
-                embed.add_field(name="Date", value=f"<t:{timenow}:F>", inline=False)
-                embed.add_field(
-                    name="ID",
-                    value=f"```py\nUser = {interaction.user.id}\nThread = {threadinput.id}```",
-                    inline=False,
-                )
-                embed.set_footer(
-                    text=f"{bot.user}", icon_url=bot.user.display_avatar.url
-                )
-                await Logging.send(embed=embed)
-                thread = await thread_id.edit(locked=False)
-                await interaction.send(
-                    f"<#{threadinput.id}> has been unlocked", ephemeral=True
-                )
-                await thread.send("This thread has been unlocked.")
-                results = locks.find({"thread_id": threadinput.id, "resolved": False})
-                for result in results:
-                    try:
-                        locks.update_one(
-                            {"_id": result["_id"]}, {"$set": {"resolved": True}}
-                        )
-                    except Exception:
-                        print(traceback.format_exc())
+                thread_id = bot.get_channel(threadinput.id)
+                if not thread_id.locked:
+                    thread = await thread_id.edit(locked=True)
+                    embed = discord.Embed(
+                        description="Instant Forum Lockdown", colour=discord.Colour.red()
+                    )
+                    embed.set_author(
+                        name=str(interaction.user),
+                        icon_url=interaction.user.display_avatar.url,
+                    )
+                    embed.add_field(
+                        name="Locked Thread", value=f"<#{threadinput.id}>", inline=False
+                    )
+                    embed.add_field(name="Date", value=f"<t:{timenow}:F>", inline=False)
+                    embed.add_field(
+                        name="ID",
+                        value=f"```py\nUser = {interaction.user.id}\nThread = {threadinput.id}```",
+                        inline=False,
+                    )
+                    embed.set_footer(
+                        text=f"{bot.user}", icon_url=bot.user.display_avatar.url
+                    )
+                    await mod_log_channel.send(embed=embed)
+                    await interaction.send(
+                        f"<#{threadinput.id}> has been locked", ephemeral=True
+                    )
+                    await thread.send("This thread has been locked.")
+                else:
+                    client = pymongo.MongoClient(LINK)
+                    db = client.IGCSEBot
+                    locks = db["forumlock"]
+                    embed = discord.Embed(
+                        description="Instant Forum Lockdown", colour=discord.Colour.green()
+                    )
+                    embed.set_author(
+                        name=str(interaction.user),
+                        icon_url=interaction.user.display_avatar.url,
+                    )
+                    embed.add_field(
+                        name="Unlocked Thread", value=f"<#{threadinput.id}>", inline=False
+                    )
+                    embed.add_field(name="Date", value=f"<t:{timenow}:F>", inline=False)
+                    embed.add_field(
+                        name="ID",
+                        value=f"```py\nUser = {interaction.user.id}\nThread = {threadinput.id}```",
+                        inline=False,
+                    )
+                    embed.set_footer(
+                        text=f"{bot.user}", icon_url=bot.user.display_avatar.url
+                    )
+                    await mod_log_channel.send(embed=embed)
+                    thread = await thread_id.edit(locked=False)
+                    await interaction.send(
+                        f"<#{threadinput.id}> has been unlocked", ephemeral=True
+                    )
+                    await thread.send("This thread has been unlocked.")
+                    results = locks.find({"thread_id": threadinput.id, "resolved": False})
+                    for result in results:
+                        try:
+                            locks.update_one(
+                                {"_id": result["_id"]}, {"$set": {"resolved": True}}
+                            )
+                        except Exception:
+                            print(traceback.format_exc())
+    else:
+        await interaction.send(f"Please ")
 
-    if action_type == "Channel Lock":
-        if channelinput is None:
-            await interaction.send(
-                "Please mention the channel in the `channel_name` field.",
-                ephemeral=True,
-            )
-        else:
-            channel = bot.get_channel(channelinput.id)
-            overwrite = channel.overwrites_for(interaction.guild.default_role)
-            if overwrite.send_messages and overwrite.send_messages_in_threads:
-                overwrite.send_messages = False
-                overwrite.send_messages_in_threads = False
-                embed = discord.Embed(
-                    description="Instant Channel Lockdown", colour=discord.Colour.red()
-                )
-                embed.set_author(
-                    name=str(interaction.user),
-                    icon_url=interaction.user.display_avatar.url,
-                )
-                embed.add_field(
-                    name="Locked Channel", value=f"<#{channelinput.id}>", inline=False
-                )
-                embed.add_field(name="Date", value=f"<t:{timenow}:F>", inline=False)
-                embed.add_field(
-                    name="ID",
-                    value=f"```py\nUser = {interaction.user.id}\nChannel = {channelinput.id}```",
-                    inline=False,
-                )
-                embed.set_footer(
-                    text=f"{bot.user}", icon_url=bot.user.display_avatar.url
-                )
-                await Logging.send(embed=embed)
-                await channel.set_permissions(
-                    interaction.guild.default_role, overwrite=overwrite
-                )
+        if action_type == "Channel Lock":
+            if channelinput is None:
                 await interaction.send(
-                    f"<#{channelinput.id}> has been locked", ephemeral=True
+                    "Please mention the channel in the `channel_name` field.",
+                    ephemeral=True,
                 )
-                await channel.send("This channel has been locked.")
             else:
-                client = pymongo.MongoClient(LINK)
-                db = client.IGCSEBot
-                locks = db["channellock"]
-                overwrite.send_messages = True
-                overwrite.send_messages_in_threads = True
-                embed = discord.Embed(
-                    description="Instant Channel Lockdown",
-                    colour=discord.Colour.green(),
-                )
-                embed.set_author(
-                    name=str(interaction.user),
-                    icon_url=interaction.user.display_avatar.url,
-                )
-                embed.add_field(
-                    name="Unlocked Channel", value=f"<#{channelinput.id}>", inline=False
-                )
-                embed.add_field(name="Date", value=f"<t:{timenow}:F>", inline=False)
-                embed.add_field(
-                    name="ID",
-                    value=f"```py\nUser = {interaction.user.id}\nChannel = {channelinput.id}```",
-                    inline=False,
-                )
-                embed.set_footer(
-                    text=f"{bot.user}", icon_url=bot.user.display_avatar.url
-                )
-                await Logging.send(embed=embed)
-                await channel.set_permissions(
-                    interaction.guild.default_role, overwrite=overwrite
-                )
-                await interaction.send(
-                    f"<#{channelinput.id}> has been unlocked", ephemeral=True
-                )
-                await channel.send("This channel has been unlocked.")
-                results = locks.find({"channel_id": channelinput.id, "resolved": False})
-                for result in results:
-                    try:
-                        locks.update_one(
-                            {"_id": result["_id"]}, {"$set": {"resolved": True}}
-                        )
-                    except Exception:
-                        print(traceback.format_exc())
+                channel = bot.get_channel(channelinput.id)
+                overwrite = channel.overwrites_for(interaction.guild.default_role)
+                if overwrite.send_messages and overwrite.send_messages_in_threads:
+                    overwrite.send_messages = False
+                    overwrite.send_messages_in_threads = False
+                    embed = discord.Embed(
+                        description="Instant Channel Lockdown", colour=discord.Colour.red()
+                    )
+                    embed.set_author(
+                        name=str(interaction.user),
+                        icon_url=interaction.user.display_avatar.url,
+                    )
+                    embed.add_field(
+                        name="Locked Channel", value=f"<#{channelinput.id}>", inline=False
+                    )
+                    embed.add_field(name="Date", value=f"<t:{timenow}:F>", inline=False)
+                    embed.add_field(
+                        name="ID",
+                        value=f"```py\nUser = {interaction.user.id}\nChannel = {channelinput.id}```",
+                        inline=False,
+                    )
+                    embed.set_footer(
+                        text=f"{bot.user}", icon_url=bot.user.display_avatar.url
+                    )
+                    await mod_log_channel.send(embed=embed)
+                    await channel.set_permissions(
+                        interaction.guild.default_role, overwrite=overwrite
+                    )
+                    await interaction.send(
+                        f"<#{channelinput.id}> has been locked", ephemeral=True
+                    )
+                    await channel.send("This channel has been locked.")
+                else:
+                    client = pymongo.MongoClient(LINK)
+                    db = client.IGCSEBot
+                    locks = db["channellock"]
+                    overwrite.send_messages = True
+                    overwrite.send_messages_in_threads = True
+                    embed = discord.Embed(
+                        description="Instant Channel Lockdown",
+                        colour=discord.Colour.green(),
+                    )
+                    embed.set_author(
+                        name=str(interaction.user),
+                        icon_url=interaction.user.display_avatar.url,
+                    )
+                    embed.add_field(
+                        name="Unlocked Channel", value=f"<#{channelinput.id}>", inline=False
+                    )
+                    embed.add_field(name="Date", value=f"<t:{timenow}:F>", inline=False)
+                    embed.add_field(
+                        name="ID",
+                        value=f"```py\nUser = {interaction.user.id}\nChannel = {channelinput.id}```",
+                        inline=False,
+                    )
+                    embed.set_footer(
+                        text=f"{bot.user}", icon_url=bot.user.display_avatar.url
+                    )
+                    await mod_log_channel.send(embed=embed)
+                    await channel.set_permissions(
+                        interaction.guild.default_role, overwrite=overwrite
+                    )
+                    await interaction.send(
+                        f"<#{channelinput.id}> has been unlocked", ephemeral=True
+                    )
+                    await channel.send("This channel has been unlocked.")
+                    results = locks.find({"channel_id": channelinput.id, "resolved": False})
+                    for result in results:
+                        try:
+                            locks.update_one(
+                                {"_id": result["_id"]}, {"$set": {"resolved": True}}
+                            )
+                        except Exception:
+                            print(traceback.format_exc())
 
 
 class ChatModerator(discord.ui.Modal):
@@ -862,16 +976,16 @@ class ChatModerator(discord.ui.Modal):
         self.add_item(self.timezone)
 
     async def callback(self, interaction: discord.Interaction):
-        channel = bot.get_channel(CHATMOD_APP_CHANNEL)
+        chatmod_app_channel = bot.get_channel(gpdb.get_pref("chatmod_apps_channel", interaction.guild.id)) 
 
         application_embed = discord.Embed(
             title="New application received", color=0xE3FB6D
         )
-        application_embed.add_field(name="User", value=interaction.user)
-        application_embed.add_field(name="Position", value="Chat Moderator")
-        application_embed.add_field(name="Timezone", value=self.timezone.value)
+        application_embed.add_field(name="User", value=interaction.user, inline=False)
+        application_embed.add_field(name="Position", value="Chat Moderator", inline=False)
+        application_embed.add_field(name="Timezone", value=self.timezone.value, inline=False)
 
-        await channel.send(embed=application_embed)
+        await chatmod_app_channel.send(embed=application_embed)
         await interaction.send(
             "Thank you for applying. If you are selected as a Chat Moderator, we will send you a modmail with more information. Good luck!",
             ephemeral=True,
@@ -907,7 +1021,6 @@ async def apply(interaction: discord.Interaction):
     view = discord.ui.View()
     view.add_item(ApplyDropdown())
     await interaction.send(view=view, ephemeral=True)
-
 
 class NewEmbed(discord.ui.Modal):
     def __init__(
@@ -948,7 +1061,6 @@ class NewEmbed(discord.ui.Modal):
         else:
             await self.channel.send(content=self.content, embed=self.embed)
         await interaction.send("Done!", ephemeral=True, delete_after=1)
-
 
 @bot.slash_command(description="send and edit embeds (for mods)")
 async def embed(
@@ -1006,7 +1118,6 @@ async def embed(
     modal = NewEmbed(embed, embed_message, content, embed_channel)
     await interaction.response.send_modal(modal)
 
-
 @bot.slash_command(description="Make an anonymous confession.")
 async def confess(
     interaction: discord.Interaction,
@@ -1021,8 +1132,8 @@ async def confess(
         await interaction.send("This command is not available on this server.")
         return
 
-    mods_channel = interaction.guild.get_channel(MOD_CHANNEL)
-    confession_channel = interaction.guild.get_channel(CONFESSION_CHANNEL)
+    approval_channel = bot.get_channel(gpdb.get_pref("confession_approval_channel", interaction.guild.id)) 
+    confession_channel = bot.get_channel(gpdb.get_pref("anon_confession_channel", interaction.guild.id)) 
 
     view = discord.ui.View(timeout=None)
     approveBTN = discord.ui.Button(label="Approve", style=discord.ButtonStyle.blurple)
@@ -1053,12 +1164,11 @@ async def confess(
     view.add_item(approveBTN)
     view.add_item(rejectBTN)
     embed = discord.Embed(colour=discord.Colour.random(), description=confession)
-    await mods_channel.send(embed=embed, view=view)
+    await approval_channel.send(embed=embed, view=view)
     await interaction.send(
         "Your confession has been sent to the moderators.\nYou have to wait for their approval.",
         ephemeral=True,
     )
-
 
 class Level(discord.ui.Select):
     def __init__(self):
@@ -1114,47 +1224,6 @@ class DropdownView(discord.ui.View):
 @bot.slash_command(description="View the r/igcse resources repository")
 async def resources(interaction: discord.Interaction):
     await interaction.send(view=DropdownView())
-
-
-@bot.slash_command(description="Suggest an emote for the server!")
-async def submit_emote(
-    interaction: discord.Interaction,
-    name: str = discord.SlashOption(
-        name="name", description="Name for emote", required=True
-    ),
-    img: discord.Attachment = discord.SlashOption(
-        name="image", description="Image to create emote from", required=True
-    ),
-):
-    if "image" in img.content_type:
-        await interaction.response.defer(ephemeral=True)
-        channel_id = gpdb.get_pref("emote_channel", interaction.guild.id)
-
-        if channel_id:
-            channel = interaction.guild.get_channel(channel_id)
-            if " " in name:
-                await interaction.send(
-                    "Spaces are not allowed in emoji names!", ephemeral=True
-                )
-                return
-            if not (name[0] == ":" and name[-1] == ":"):
-                name = f":{name}:"
-            msg = await channel.send(
-                f"New emote suggestion by {interaction.user.mention} `{name}`",
-                file=await img.to_file(),
-            )
-            await msg.add_reaction("👍")
-            await msg.add_reaction("🔒")
-            await msg.add_reaction("👎")
-            await interaction.send("Done!", ephemeral=True)
-        else:
-            await interaction.send(
-                "Emote voting is not set up on this server. Please ask a moderator/admin to set it up using `/set_preferences`!",
-                ephemeral=True,
-            )
-    else:
-        await interaction.send("Invalid input!", ephemeral=True)
-
 
 class EditMessage(discord.ui.Modal):
     def __init__(self, channel: discord.abc.GuildChannel):

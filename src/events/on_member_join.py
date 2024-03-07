@@ -1,6 +1,7 @@
 from bot import bot, discord
 from commands.dms import send_dm
 from utils.constants import GUILD_ID, WELCOME_CHANNEL_ID, BETA
+from utils.mongodb import gpdb
 
 welcome_embed = discord.Embed.from_dict(
     {
@@ -16,7 +17,8 @@ welcome_embed = discord.Embed.from_dict(
 async def on_member_join(member: discord.Member):
     #if not BETA and member.guild.id == GUILD_ID:
     await send_dm(member, embed=welcome_embed)
-    welcome = discord.utils.get(guild.channels, name="welcome")
-    await welcome.send(
-        f"Welcome {member.mention}! Pick up your subject roles from <id:customize> to get access to subject channels and resources!"
-    )
+    welcome = bot.get_channel(gpdb.get_pref("welcome_channel", member.guild.id)) 
+    if welcome:
+        await welcome.send(
+            f"Welcome {member.mention}! Pick up your subject roles from <id:customize> to get access to subject channels and resources!"
+        )

@@ -1,15 +1,10 @@
 from utils.constants import (
     BETA,
     GUILD_ID,
-    SHOULD_LOG_ALL,
-    BOTLOG_CHANNEL_ID,
-    MODMAIL_LOGS_ID,
-    FORUMTHREAD_ID,
-    CREATEDM_ID,
-    BOTUPDATES_CHANNEL,
+    LINK,
 )
 from utils.data import REP_DISABLE_CHANNELS
-from bot import discord, bot, keywords, datetime
+from bot import discord, bot, keywords, datetime, time, pymongo
 import sys
 from commands.dms import send_dm
 from utils.mongodb import gpdb, smdb, repdb, kwdb
@@ -29,8 +24,8 @@ async def get_thread(message: discord.Message, is_dm: bool):
 
     guild = bot.get_guild(GUILD_ID)
     member = guild.get_member(member_id)
-    channel = guild.get_channel(FORUMTHREAD_ID)
-    newmsg_channel = guild.get_channel(MODMAIL_LOGS_ID)
+    channel = bot.get_channel(gpdb.get_pref("dm_threads_channel", message.guild.id)) 
+    newmsg_channel = bot.get_channel(gpdb.get_pref("modmail_logs_channel", message.guild.id)) 
     threads = channel.threads
     thread_name = f"{member_id}"
     thread = discord.utils.get(threads, name=thread_name)
@@ -180,7 +175,7 @@ async def handle_rep(message: discord.Message):
                     color=0x8BF797,
                 )
                 await send_dm(user, embed=embed)
-                channel = bot.get_guild(GUILD_ID).get_channel(FORUMTHREAD_ID)
+                channel = bot.get_channel(gpdb.get_pref("dm_threads_channel", message.guild.id)) 
                 threads = channel.threads
                 thread_name = f"{user.id}"
                 thread = discord.utils.get(threads, name=thread_name)
@@ -271,118 +266,152 @@ async def on_message(message: discord.Message):
             else:
                 user_message_counts[user_id] = {"count": 1, "timestamp": current_time}
 
-    if SHOULD_LOG_ALL:
-        igcse = bot.get_guild(GUILD_ID) or await bot.fetch_guild(GUILD_ID)
-        logs = igcse.get_channel(BOTLOG_CHANNEL_ID) or await igcse.fetch_channel(
-            BOTLOG_CHANNEL_ID
-        )
-        embed = discord.Embed(
-            title="Message", description=message.content, color=0x5865F2
-        )
-        embed.set_author(
-            name=message.author.name,
-            url=message.jump_url,
-            icon_url=message.author.avatar.url,
-        )
-        embed.add_field(
-            name="Created", value=f"<t:{int(message.created_at.timestamp())}>"
-        )
-        await logs.send(embed=embed)
+    if message.guild and bot.get_channel(gpdb.get_pref("create_dm_channel", message.guild.id)): 
+        if message.channel == bot.get_channel(gpdb.get_pref("create_dm_channel", message.guild.id)): await get_thread(message, False, message.guild.id)
 
-    if message.channel.id == CREATEDM_ID:
-        await get_thread(message, False)
-
-    if not message.guild:
-        thread = await get_thread(message, True)
-        if message.stickers:
-            for sticker in message.stickers:
-                sticker_name = sticker.name
-                embed = discord.Embed(
-                    title="Message Received",
-                    description=f"{sticker_name} Sticker Recieved",
-                    colour=discord.Colour.green(),
-                )
-                embed.set_author(
-                    name=str(message.author), icon_url=message.author.display_avatar.url
-                )
-        else:
-            embed = discord.Embed(
-                title="Message Received",
-                description=message.clean_content,
-                colour=discord.Colour.green(),
-            )
-            embed.set_author(
-                name=str(message.author), icon_url=message.author.display_avatar.url
-            )
-        for attachment in message.attachments:
-            if attachment.content_type == "image/png":
-                embed.set_image(url=attachment.url)
-            else:
-                embed.add_field(name="Attachments Added", value=f"{attachment.url}")
-        await thread.send(embed=embed)
-        await message.add_reaction("✅")
-        return
-
-    if message.guild.id == GUILD_ID:
-        if (
-            str(message.channel.type) in ["public_thread", "private_thread"]
-            and message.channel.parent_id == FORUMTHREAD_ID
-        ):
+        if str(message.channel.type) in ["public_thread", "private_thread"] and message.channel.parent_id == gpdb.get_pref("dm_threads_channel", message.guild.id):
             member = message.guild.get_member(int(message.channel.name))
-            if member is None:
-                embed = discord.Embed(
-                    title="Error Encountered",
-                    description="I don't have permission to send direct messages to that user as they either left the server or has been banned/kicked.",
-                    colour=discord.Colour.red(),
-                )
+            paused_threads = {}
+            if member == None:
+                embed = discord.Embed(title="Error Encountered", description="I don't have permission to send direct messages to that user as they either left the server or has been banned/kicked.", colour=discord.Colour.red())
                 embed.set_footer(text="DM Closed")
                 await message.channel.send(embed=embed)
-                return
             channel = await member.create_dm()
-            await message.delete()
+            if message.stickers:
+                for sticker in message.stickers:
+                        sticker_name = sticker.name
+                embed = discord.Embed(title="Message from r/IGCSE Moderators", description=f"{sticker_name} Sticker", colour=discord.Colour.green())
+                embed.set_author(name=str(message.author), icon_url=message.author.display_avatar.url) 
+            else:                  
+                embed = discord.Embed(title="Message from r/IGCSE Moderators", description=message.clean_content, colour=discord.Colour.green())
+                embed.set_author(name=str(message.author), icon_url=message.author.display_avatar.url)  
+            try:
+                for attachment in message.attachments:
+                        if attachment.content_type == "image/png":
+                            embed.set_image(url=attachment.url)
+                        else:
+                            embed.add_field(name=f"Attachments Added", value=f"{attachment.url}")
+                await channel.send(embed=embed)
+                await message.delete()
+                await message.channel.send(embed=embed)
+            except:
+                perms = message.channel.overwrites_for(member)
+                perms.send_messages, perms.read_messages, perms.view_channel, perms.read_message_history, perms.attach_files = True, True, True, True, True
+                await message.channel.set_permissions(member, overwrite=perms)
+                await message.channel.send(f"{member.mention}")
+                return  
+
+    if not message.guild:
+        user = message.author
+        timern = int(time.time()) + 1
+        delete_time = int(time.time()) + 86400
+        user_obj = bot.get_user(user.id)
+        mutual_guilds = [guild for guild in user_obj.mutual_guilds]
+        guild_ids = [guild.id for guild in mutual_guilds]
+        no_mutual_guilds = len(mutual_guilds)
+        msg = None    
+        if message.content == ".swap":
+            client = pymongo.MongoClient(LINK)
+            db = client.IGCSEBot
+            dmservers = db["dm_server_prefs"]
+            pref = dmservers.delete_one({"user_id": user.id})  
+            embed = discord.Embed(title="Select a server", description="Please select the server you want to send this message to. You can do so by reacting with the corresponding emote:\n\n", color=0xDDF19B)
+
+            for i, guild in enumerate(mutual_guilds):
+                emoji = f"{i+1}\N{COMBINING ENCLOSING KEYCAP}"
+                embed.add_field(name=f"{emoji} {guild.name}", value=f"Guild ID: {guild.id}", inline=True)
+
+            msg = await message.channel.send(embed=embed)
+
+            for i in range(no_mutual_guilds):
+                emoji = f"{i+1}\N{COMBINING ENCLOSING KEYCAP}"
+                await msg.add_reaction(emoji)
+
+            def check(reaction, user):
+                return user == message.author and reaction.message.id == msg.id and str(reaction.emoji) in [f"{i+1}\N{COMBINING ENCLOSING KEYCAP}" for i in range(no_mutual_guilds)]
+
+            reaction, _ = await bot.wait_for('reaction_add', check=check)
+            selected_guild_id = guild_ids[int(reaction.emoji[0]) - 1]
+            guild = bot.get_guild(selected_guild_id)
+            dmservers.insert_one({"user_id": user.id, "chosen_guild": selected_guild_id, "created_time": timern, "deleted_time": delete_time, "resolved": True})
+            await msg.delete()
+            await message.channel.send(f"ModMail Server has been swapped to {guild.name}.")    
+            return         
+
+        if no_mutual_guilds != 1:
+            client = pymongo.MongoClient(LINK)
+            db = client.IGCSEBot
+            dmservers = db["dm_server_prefs"]
+            pref = dmservers.find_one({"user_id": user.id})
+
+            if pref:
+                selected_guild_id = pref["chosen_guild"]
+            else:
+                embed = discord.Embed(title="Select a server", description="Please select the server you want to send this message to. You can do so by reacting with the corresponding emote:\n\n", color=0xDDF19B)
+
+                for i, guild in enumerate(mutual_guilds):
+                    emoji = f"{i+1}\N{COMBINING ENCLOSING KEYCAP}"
+                    embed.add_field(name=f"{emoji} {guild.name}", value=f"Guild ID: {guild.id}", inline=True)
+                    embed.set_footer(text="use '.swap' to change Modmail Guilds/Servers")
+
+                msg = await message.channel.send(embed=embed)
+
+                for i in range(no_mutual_guilds):
+                    emoji = f"{i+1}\N{COMBINING ENCLOSING KEYCAP}"
+                    await msg.add_reaction(emoji)
+
+                def check(reaction, user):
+                    return user == message.author and reaction.message.id == msg.id and str(reaction.emoji) in [f"{i+1}\N{COMBINING ENCLOSING KEYCAP}" for i in range(no_mutual_guilds)]
+
+                reaction, _ = await bot.wait_for('reaction_add', check=check)
+                selected_guild_id = guild_ids[int(reaction.emoji[0]) - 1]
+                dmservers.insert_one({"user_id": user.id, "chosen_guild": selected_guild_id, "created_time": timern, "deleted_time": delete_time, "resolved": True})
+                await msg.delete()
+
+            thread = await get_thread(message, True, selected_guild_id)
+            sticker_name = None
+
             if message.stickers:
                 for sticker in message.stickers:
                     sticker_name = sticker.name
-                    embed = discord.Embed(
-                        title="Message from r/IGCSE Moderators",
-                        description=f"{sticker_name} Sticker",
-                        colour=discord.Colour.green(),
-                    )
-                    embed.set_author(
-                        name=str(message.author),
-                        icon_url=message.author.display_avatar.url,
-                    )
+                embed = discord.Embed(title="Message Received", description=f"{sticker_name} Sticker Received", colour=discord.Colour.green())
+                embed.set_author(name=str(message.author), icon_url=message.author.display_avatar.url)
             else:
-                embed = discord.Embed(
-                    title="Message from r/IGCSE Moderators",
-                    description=message.clean_content,
-                    colour=discord.Colour.green(),
-                )
-                embed.set_author(
-                    name=str(message.author), icon_url=message.author.display_avatar.url
-                )
-            try:
-                for attachment in message.attachments:
-                    if attachment.content_type == "image/png":
-                        embed.set_image(url=attachment.url)
-                    else:
-                        embed.add_field(
-                            name="Attachments Added", value=f"{attachment.url}"
-                        )
-                await channel.send(embed=embed)
-                await message.channel.send(embed=embed)
-            except Exception:
-                perms = message.channel.overwrites_for(member)
-                (
-                    perms.send_messages,
-                    perms.read_messages,
-                    perms.view_channel,
-                    perms.read_message_history,
-                    perms.attach_files,
-                ) = (True, True, True, True, True)
-                await message.channel.set_permissions(member, overwrite=perms)
-                await message.channel.send(f"{member.mention}")
-                return
+                embed = discord.Embed(title="Message Received", description=message.clean_content, colour=discord.Colour.green())
+                embed.set_author(name=str(message.author), icon_url=message.author.display_avatar.url)
+
+            for attachment in message.attachments:
+                if attachment.content_type == "image/png":
+                    embed.set_image(url=attachment.url)
+                else:
+                    embed.add_field(name=f"Attachments Added", value=f"{attachment.url}")
+
+            await thread.send(embed=embed)
+            await message.add_reaction("✅")
+            return
+        
+        else:
+            thread = await get_thread(message, True, guild_ids[0])
+            sticker_name = None
+
+            if message.stickers:
+                for sticker in message.stickers:
+                    sticker_name = sticker.name
+                embed = discord.Embed(title="Message Received", description=f"{sticker_name} Sticker Received", colour=discord.Colour.green())
+                embed.set_author(name=str(message.author), icon_url=message.author.display_avatar.url)
+            else:
+                embed = discord.Embed(title="Message Received", description=message.clean_content, colour=discord.Colour.green())
+                embed.set_author(name=str(message.author), icon_url=message.author.display_avatar.url)
+
+            for attachment in message.attachments:
+                if attachment.content_type == "image/png":
+                    embed.set_image(url=attachment.url)
+                else:
+                    embed.add_field(name=f"Attachments Added", value=f"{attachment.url}")
+
+            await thread.send(embed=embed)
+            await message.add_reaction("✅")
+            return
 
     channel_id_rep = message.channel.id
     if isinstance(message.channel, discord.threads.Thread):
