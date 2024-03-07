@@ -315,7 +315,6 @@ async def on_message(message: discord.Message):
             selected_guild_id = guild_ids[int(reaction.emoji[0]) - 1]
             guild = bot.get_guild(selected_guild_id)
             dmservers.insert_one({"user_id": user.id, "chosen_guild": selected_guild_id, "created_time": timern, "deleted_time": delete_time, "resolved": True})
-            await message.delete()
             await msg.delete()
             await message.channel.send(f"ModMail Server has been swapped to {guild.name}.")    
             return         
