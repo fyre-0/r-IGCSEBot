@@ -282,7 +282,7 @@ async def on_message(message: discord.Message):
                 await message.channel.send(f"{member.mention}")
                 return  
 
-    if message.guild.id == GUILD_ID:
+    if message.guild and message.guild.id == GUILD_ID:
         if message.channel.name == "bot-news":
             if not await is_moderator(message.author) and message.author.id not in allowed_user_ids: 
                 return
@@ -300,7 +300,7 @@ async def on_message(message: discord.Message):
                     bot_news = bot.get_channel(gpdb.get_pref("botnews_channel", guild.id))
                     await bot_news.send(content=messagecontent)
                 break
-            await message.add_reaction("✅")     
+            await message.add_reaction("✅")
 
     if not message.guild:
         user = message.author
