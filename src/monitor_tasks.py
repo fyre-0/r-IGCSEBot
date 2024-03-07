@@ -11,7 +11,7 @@ from utils.mongodb import smdb, gpdb
 
 
 async def togglechannellock(channel_id, guild_id, unlock, *, unlocktime=0):
-    everyone = bot.get_guild(GUILD_ID).default_role
+    everyone = bot.get_guild(guild_id).default_role
     mod_log_channel = bot.get_channel(gpdb.get_pref("modlog_channel", guild_id)) 
     timern = int(time.time()) + 1
     channel = bot.get_channel(channel_id)
@@ -191,7 +191,7 @@ async def checklock():
                     result["channel_id"], result["guild_id"], result["unlock"], unlocktime=ult
                 )
 
-                clocks.update_one({"_id": result["_id"]}, {"$set": {"resolved": True}})
+                clocks.delete_one({"_id": result["_id"]})
 
         results = flocks.find({"resolved": False})
         for result in results:
@@ -200,7 +200,7 @@ async def checklock():
                 await toggleforumlock(
                     result["thread_id"], result["guild_id"], result["unlock"], unlocktime=ult
                 )
-                flocks.update_one({"_id": result["_id"]}, {"$set": {"resolved": True}})
+                flocks.delete_one({"_id": result["_id"]})
 
     except Exception:
         print(traceback.format_exc())
