@@ -25,7 +25,6 @@ async def get_thread(message: discord.Message, is_dm: bool, guild_id):
       channel = guild.get_channel(gpdb.get_pref("dm_threads_channel", guild_id))
       if channel is not None:
         newmsg_channel = guild.get_channel(gpdb.get_pref("modmail_logs_channel", guild_id)) 
-        print(channel)
         threads = channel.threads
         thread_name = f"{member_id}"
         thread = discord.utils.get(threads, name=thread_name)
