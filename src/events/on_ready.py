@@ -79,13 +79,8 @@ async def on_ready():
                     inline=False,
                 )
                 embed.add_field(
-                    name="Role Statistics",
-                    value=f"```No. of roles: {len(guild.roles)}\nguild Helpers: {len(guild.get_role(guild_HELPER_ROLE).members)}\nAS/AL Helpers: {len(guild.get_role(AL_HELPER_ROLE).members)}\nBot Developers: {len(guild.get_role(BOT_DEVELOPER_ROLE).members)}\nStaff Moderators: {len(guild.get_role(STAFF_MODERATOR_ROLE).members)}\nTemp Moderators: {len(guild.get_role(TEMP_MODERATOR_ROLE).members)}\nChat Moderators: {len(guild.get_role(CHAT_MODERATOR_ROLE).members)}```",
-                    inline=False,
-                )
-                embed.add_field(
                     name="Channels & Commands",
-                    value=f"```No. of users: {len(guild.humans)}\nNo. of bots: {len(guild.bots)}\nNo. of catagories: {len(guild.categories)}\nNo. of text-channels: {len(guild.text_channels)}\nNo. of voice-channels: {len(guild.voice_channels)}\nNo. of forum-channels: {len(guild.forum_channels)}\nNo. of slash-commands: {len(bot.get_all_application_commands())}```",
+                    value=f"```No. of roles: {len(guild.roles)}\nNo. of users: {len(guild.humans)}\nNo. of bots: {len(guild.bots)}\nNo. of catagories: {len(guild.categories)}\nNo. of text-channels: {len(guild.text_channels)}\nNo. of voice-channels: {len(guild.voice_channels)}\nNo. of forum-channels: {len(guild.forum_channels)}\nNo. of slash-commands: {len(bot.get_all_application_commands())}```",
                     inline=False,
                 )
                 embed.set_footer(text=f"{bot.user}", icon_url=bot.user.display_avatar.url)
