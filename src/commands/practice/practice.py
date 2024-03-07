@@ -196,7 +196,13 @@ async def new_session(interaction: discord.Interaction):
     else:
         thread_type = discord.ChannelType.public_thread
 
-    thread = await interaction.channel.create_thread(
+    channel = (
+        interaction.channel.parent_channel
+        if isinstance(interaction.channel, discord.Thread)
+        else interaction.channel
+    )
+
+    thread = await channel.create_thread(
         name=f"{interaction.user}'s practice session", type=thread_type
     )
 
