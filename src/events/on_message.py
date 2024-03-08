@@ -15,37 +15,58 @@ sticky_counter = {}
 user_message_counts = {}
 allowed_user_ids = {604335693757677588, 838682557976936509, 611165590744203285}
 
-async def get_thread(message: discord.Message, is_dm: bool, guild_id):
-      member_id: int = 0
-      if is_dm: member_id = message.author.id
-      else: member_id = int(message.content)
 
-      guild = bot.get_guild(guild_id)
-      member = guild.get_member(member_id)
-      channel = guild.get_channel(gpdb.get_pref("dm_threads_channel", guild_id))
-      if channel is not None:
-        newmsg_channel = guild.get_channel(gpdb.get_pref("modmail_logs_channel", guild_id)) 
+async def get_thread(message: discord.Message, is_dm: bool, guild_id):
+    member_id: int = 0
+    if is_dm:
+        member_id = message.author.id
+    else:
+        member_id = int(message.content)
+
+    guild = bot.get_guild(guild_id)
+    member = guild.get_member(member_id)
+    channel = guild.get_channel(gpdb.get_pref("dm_threads_channel", guild_id))
+    if channel is not None:
+        newmsg_channel = guild.get_channel(
+            gpdb.get_pref("modmail_logs_channel", guild_id)
+        )
         threads = channel.threads
         thread_name = f"{member_id}"
         thread = discord.utils.get(threads, name=thread_name)
         if is_dm:
-                if thread == None:
-                    thread = await channel.create_thread(name=thread_name, content=f"Username: `{member.name}`\nUser ID: `{member_id}`")
-                    embed = discord.Embed(title="New DM Recieved", description=f"Username: `{member.name}`\nUser ID: `{member_id}`\nThread: {thread.mention}", color=0xFF3E00)
-                    await newmsg_channel.send(embed=embed)
-                    return thread
-                else:
-                    embed = discord.Embed(title="New Message Recieved", description=f"Username: `{member.name}`\nUser ID: `{member_id}`\nThread: {thread.mention}", color=0x8DD5A2)
-                    await newmsg_channel.send(embed=embed)
-                    return thread       
+            if thread == None:
+                thread = await channel.create_thread(
+                    name=thread_name,
+                    content=f"Username: `{member.name}`\nUser ID: `{member_id}`",
+                )
+                embed = discord.Embed(
+                    title="New DM Recieved",
+                    description=f"Username: `{member.name}`\nUser ID: `{member_id}`\nThread: {thread.mention}",
+                    color=0xFF3E00,
+                )
+                await newmsg_channel.send(embed=embed)
+                return thread
+            else:
+                embed = discord.Embed(
+                    title="New Message Recieved",
+                    description=f"Username: `{member.name}`\nUser ID: `{member_id}`\nThread: {thread.mention}",
+                    color=0x8DD5A2,
+                )
+                await newmsg_channel.send(embed=embed)
+                return thread
         else:
-                if thread == None:
-                    thread = await channel.create_thread(name=thread_name, content=f"Username: `{member.name}`\nUser ID: `{member_id}`")
-                    await message.reply(f"DM Channel has been created at {thread.mention}!")
-                    return thread
-                else:
-                    await message.reply(f"DM Channel already exists for that user at {thread.mention}!")
-                    return thread   
+            if thread == None:
+                thread = await channel.create_thread(
+                    name=thread_name,
+                    content=f"Username: `{member.name}`\nUser ID: `{member_id}`",
+                )
+                await message.reply(f"DM Channel has been created at {thread.mention}!")
+                return thread
+            else:
+                await message.reply(
+                    f"DM Channel already exists for that user at {thread.mention}!"
+                )
+                return thread
 
 
 async def counting(message: discord.Message):
@@ -157,7 +178,9 @@ async def handle_rep(message: discord.Message):
                     color=0x8BF797,
                 )
                 await send_dm(user, embed=embed)
-                channel = bot.get_channel(gpdb.get_pref("dm_threads_channel", message.guild.id)) 
+                channel = bot.get_channel(
+                    gpdb.get_pref("dm_threads_channel", message.guild.id)
+                )
                 threads = channel.threads
                 thread_name = f"{user.id}"
                 thread = discord.utils.get(threads, name=thread_name)
@@ -204,7 +227,10 @@ async def on_message(message: discord.Message):
             "thanku",
             "tyvm",
             "thankyou",
+            "ty",
             "ty!",
+            "tq",
+            "tq!",
             "you're welcome",
             "your welcome",
             "ur welcome",
@@ -213,6 +239,8 @@ async def on_message(message: discord.Message):
             "np!",
             "yw",
             "yw!",
+            "nw",
+            "nw!",
         ]
     ):
         user_id = message.author.id
@@ -248,43 +276,80 @@ async def on_message(message: discord.Message):
             else:
                 user_message_counts[user_id] = {"count": 1, "timestamp": current_time}
 
-    if message.guild and bot.get_channel(gpdb.get_pref("create_dm_channel", message.guild.id)): 
-        if message.channel == bot.get_channel(gpdb.get_pref("create_dm_channel", message.guild.id)): await get_thread(message, False, message.guild.id)
+    if message.guild and bot.get_channel(
+        gpdb.get_pref("create_dm_channel", message.guild.id)
+    ):
+        if message.channel == bot.get_channel(
+            gpdb.get_pref("create_dm_channel", message.guild.id)
+        ):
+            await get_thread(message, False, message.guild.id)
 
-        if str(message.channel.type) in ["public_thread", "private_thread"] and message.channel.parent_id == gpdb.get_pref("dm_threads_channel", message.guild.id):
+        if str(message.channel.type) in [
+            "public_thread",
+            "private_thread",
+        ] and message.channel.parent_id == gpdb.get_pref(
+            "dm_threads_channel", message.guild.id
+        ):
             member = message.guild.get_member(int(message.channel.name))
             if member == None:
-                embed = discord.Embed(title="Error Encountered", description="I don't have permission to send direct messages to that user as they either left the server or has been banned/kicked.", colour=discord.Colour.red())
+                embed = discord.Embed(
+                    title="Error Encountered",
+                    description="I don't have permission to send direct messages to that user as they either left the server or has been banned/kicked.",
+                    colour=discord.Colour.red(),
+                )
                 embed.set_footer(text="DM Closed")
                 await message.channel.send(embed=embed)
             channel = await member.create_dm()
             if message.stickers:
                 for sticker in message.stickers:
-                        sticker_name = sticker.name
-                embed = discord.Embed(title="Message from r/IGCSE Moderators", description=f"{sticker_name} Sticker", colour=discord.Colour.green())
-                embed.set_author(name=str(message.author), icon_url=message.author.display_avatar.url) 
-            else:                  
-                embed = discord.Embed(title="Message from r/IGCSE Moderators", description=message.clean_content, colour=discord.Colour.green())
-                embed.set_author(name=str(message.author), icon_url=message.author.display_avatar.url)  
+                    sticker_name = sticker.name
+                embed = discord.Embed(
+                    title="Message from r/IGCSE Moderators",
+                    description=f"{sticker_name} Sticker",
+                    colour=discord.Colour.green(),
+                )
+                embed.set_author(
+                    name=str(message.author), icon_url=message.author.display_avatar.url
+                )
+            else:
+                embed = discord.Embed(
+                    title="Message from r/IGCSE Moderators",
+                    description=message.clean_content,
+                    colour=discord.Colour.green(),
+                )
+                embed.set_author(
+                    name=str(message.author), icon_url=message.author.display_avatar.url
+                )
             try:
                 for attachment in message.attachments:
-                        if attachment.content_type == "image/png":
-                            embed.set_image(url=attachment.url)
-                        else:
-                            embed.add_field(name=f"Attachments Added", value=f"{attachment.url}")
+                    if attachment.content_type == "image/png":
+                        embed.set_image(url=attachment.url)
+                    else:
+                        embed.add_field(
+                            name=f"Attachments Added", value=f"{attachment.url}"
+                        )
                 await channel.send(embed=embed)
                 await message.delete()
                 await message.channel.send(embed=embed)
             except:
                 perms = message.channel.overwrites_for(member)
-                perms.send_messages, perms.read_messages, perms.view_channel, perms.read_message_history, perms.attach_files = True, True, True, True, True
+                (
+                    perms.send_messages,
+                    perms.read_messages,
+                    perms.view_channel,
+                    perms.read_message_history,
+                    perms.attach_files,
+                ) = (True, True, True, True, True)
                 await message.channel.set_permissions(member, overwrite=perms)
                 await message.channel.send(f"{member.mention}")
-                return  
+                return
 
     if message.guild and message.guild.id == GUILD_ID:
         if message.channel.name == "bot-news":
-            if not await is_moderator(message.author) and message.author.id not in allowed_user_ids: 
+            if (
+                not await is_moderator(message.author)
+                and message.author.id not in allowed_user_ids
+            ):
                 return
             suffix = "\n\n~ r/IGCSE Bot Developer Team"
             messagecontent = message.clean_content + suffix
@@ -294,10 +359,12 @@ async def on_message(message: discord.Message):
                 if bot_news is not None:
                     await bot_news.send(content=messagecontent)
                 else:
-                    new_channel = await guild.create_text_channel('bot-news')
+                    new_channel = await guild.create_text_channel("bot-news")
                     gpdb.set_pref("botnews_channel", new_channel.id, guild.id)
                     time.sleep(1)
-                    bot_news = bot.get_channel(gpdb.get_pref("botnews_channel", guild.id))
+                    bot_news = bot.get_channel(
+                        gpdb.get_pref("botnews_channel", guild.id)
+                    )
                     await bot_news.send(content=messagecontent)
                 break
             await message.add_reaction("✅")
@@ -310,17 +377,25 @@ async def on_message(message: discord.Message):
         mutual_guilds = [guild for guild in user_obj.mutual_guilds]
         guild_ids = [guild.id for guild in mutual_guilds]
         no_mutual_guilds = len(mutual_guilds)
-        msg = None    
+        msg = None
         if message.content == ".swap":
             client = pymongo.MongoClient(LINK)
             db = client.IGCSEBot
             dmservers = db["dm_server_prefs"]
-            pref = dmservers.delete_one({"user_id": user.id})  
-            embed = discord.Embed(title="Select a server", description="Please select the server you want to send this message to. You can do so by reacting with the corresponding emote:\n\n", color=0xDDF19B)
+            pref = dmservers.delete_one({"user_id": user.id})
+            embed = discord.Embed(
+                title="Select a server",
+                description="Please select the server you want to send this message to. You can do so by reacting with the corresponding emote:\n\n",
+                color=0xDDF19B,
+            )
 
             for i, guild in enumerate(mutual_guilds):
                 emoji = f"{i+1}\N{COMBINING ENCLOSING KEYCAP}"
-                embed.add_field(name=f"{emoji} {guild.name}", value=f"Guild ID: {guild.id}", inline=True)
+                embed.add_field(
+                    name=f"{emoji} {guild.name}",
+                    value=f"Guild ID: {guild.id}",
+                    inline=True,
+                )
 
             msg = await message.channel.send(embed=embed)
 
@@ -329,15 +404,33 @@ async def on_message(message: discord.Message):
                 await msg.add_reaction(emoji)
 
             def check(reaction, user):
-                return user == message.author and reaction.message.id == msg.id and str(reaction.emoji) in [f"{i+1}\N{COMBINING ENCLOSING KEYCAP}" for i in range(no_mutual_guilds)]
+                return (
+                    user == message.author
+                    and reaction.message.id == msg.id
+                    and str(reaction.emoji)
+                    in [
+                        f"{i+1}\N{COMBINING ENCLOSING KEYCAP}"
+                        for i in range(no_mutual_guilds)
+                    ]
+                )
 
-            reaction, _ = await bot.wait_for('reaction_add', check=check)
+            reaction, _ = await bot.wait_for("reaction_add", check=check)
             selected_guild_id = guild_ids[int(reaction.emoji[0]) - 1]
             guild = bot.get_guild(selected_guild_id)
-            dmservers.insert_one({"user_id": user.id, "chosen_guild": selected_guild_id, "created_time": timern, "deleted_time": delete_time, "resolved": False})
+            dmservers.insert_one(
+                {
+                    "user_id": user.id,
+                    "chosen_guild": selected_guild_id,
+                    "created_time": timern,
+                    "deleted_time": delete_time,
+                    "resolved": False,
+                }
+            )
             await msg.delete()
-            await message.channel.send(f"ModMail Server has been swapped to {guild.name}.")    
-            return         
+            await message.channel.send(
+                f"ModMail Server has been swapped to {guild.name}."
+            )
+            return
 
         if no_mutual_guilds != 1:
             client = pymongo.MongoClient(LINK)
@@ -348,12 +441,22 @@ async def on_message(message: discord.Message):
             if pref:
                 selected_guild_id = pref["chosen_guild"]
             else:
-                embed = discord.Embed(title="Select a server", description="Please select the server you want to send this message to. You can do so by reacting with the corresponding emote:\n\n", color=0xDDF19B)
+                embed = discord.Embed(
+                    title="Select a server",
+                    description="Please select the server you want to send this message to. You can do so by reacting with the corresponding emote:\n\n",
+                    color=0xDDF19B,
+                )
 
                 for i, guild in enumerate(mutual_guilds):
                     emoji = f"{i+1}\N{COMBINING ENCLOSING KEYCAP}"
-                    embed.add_field(name=f"{emoji} {guild.name}", value=f"Guild ID: {guild.id}", inline=True)
-                    embed.set_footer(text="use '.swap' to change Modmail Guilds/Servers")
+                    embed.add_field(
+                        name=f"{emoji} {guild.name}",
+                        value=f"Guild ID: {guild.id}",
+                        inline=True,
+                    )
+                    embed.set_footer(
+                        text="use '.swap' to change Modmail Guilds/Servers"
+                    )
 
                 msg = await message.channel.send(embed=embed)
 
@@ -362,11 +465,27 @@ async def on_message(message: discord.Message):
                     await msg.add_reaction(emoji)
 
                 def check(reaction, user):
-                    return user == message.author and reaction.message.id == msg.id and str(reaction.emoji) in [f"{i+1}\N{COMBINING ENCLOSING KEYCAP}" for i in range(no_mutual_guilds)]
+                    return (
+                        user == message.author
+                        and reaction.message.id == msg.id
+                        and str(reaction.emoji)
+                        in [
+                            f"{i+1}\N{COMBINING ENCLOSING KEYCAP}"
+                            for i in range(no_mutual_guilds)
+                        ]
+                    )
 
-                reaction, _ = await bot.wait_for('reaction_add', check=check)
+                reaction, _ = await bot.wait_for("reaction_add", check=check)
                 selected_guild_id = guild_ids[int(reaction.emoji[0]) - 1]
-                dmservers.insert_one({"user_id": user.id, "chosen_guild": selected_guild_id, "created_time": timern, "deleted_time": delete_time, "resolved": False})
+                dmservers.insert_one(
+                    {
+                        "user_id": user.id,
+                        "chosen_guild": selected_guild_id,
+                        "created_time": timern,
+                        "deleted_time": delete_time,
+                        "resolved": False,
+                    }
+                )
                 await msg.delete()
 
             thread = await get_thread(message, True, selected_guild_id)
@@ -375,22 +494,36 @@ async def on_message(message: discord.Message):
             if message.stickers:
                 for sticker in message.stickers:
                     sticker_name = sticker.name
-                embed = discord.Embed(title="Message Received", description=f"{sticker_name} Sticker Received", colour=discord.Colour.green())
-                embed.set_author(name=str(message.author), icon_url=message.author.display_avatar.url)
+                embed = discord.Embed(
+                    title="Message Received",
+                    description=f"{sticker_name} Sticker Received",
+                    colour=discord.Colour.green(),
+                )
+                embed.set_author(
+                    name=str(message.author), icon_url=message.author.display_avatar.url
+                )
             else:
-                embed = discord.Embed(title="Message Received", description=message.clean_content, colour=discord.Colour.green())
-                embed.set_author(name=str(message.author), icon_url=message.author.display_avatar.url)
+                embed = discord.Embed(
+                    title="Message Received",
+                    description=message.clean_content,
+                    colour=discord.Colour.green(),
+                )
+                embed.set_author(
+                    name=str(message.author), icon_url=message.author.display_avatar.url
+                )
 
             for attachment in message.attachments:
                 if attachment.content_type == "image/png":
                     embed.set_image(url=attachment.url)
                 else:
-                    embed.add_field(name=f"Attachments Added", value=f"{attachment.url}")
+                    embed.add_field(
+                        name=f"Attachments Added", value=f"{attachment.url}"
+                    )
 
             await thread.send(embed=embed)
             await message.add_reaction("✅")
             return
-        
+
         else:
             thread = await get_thread(message, True, guild_ids[0])
             sticker_name = None
@@ -398,17 +531,31 @@ async def on_message(message: discord.Message):
             if message.stickers:
                 for sticker in message.stickers:
                     sticker_name = sticker.name
-                embed = discord.Embed(title="Message Received", description=f"{sticker_name} Sticker Received", colour=discord.Colour.green())
-                embed.set_author(name=str(message.author), icon_url=message.author.display_avatar.url)
+                embed = discord.Embed(
+                    title="Message Received",
+                    description=f"{sticker_name} Sticker Received",
+                    colour=discord.Colour.green(),
+                )
+                embed.set_author(
+                    name=str(message.author), icon_url=message.author.display_avatar.url
+                )
             else:
-                embed = discord.Embed(title="Message Received", description=message.clean_content, colour=discord.Colour.green())
-                embed.set_author(name=str(message.author), icon_url=message.author.display_avatar.url)
+                embed = discord.Embed(
+                    title="Message Received",
+                    description=message.clean_content,
+                    colour=discord.Colour.green(),
+                )
+                embed.set_author(
+                    name=str(message.author), icon_url=message.author.display_avatar.url
+                )
 
             for attachment in message.attachments:
                 if attachment.content_type == "image/png":
                     embed.set_image(url=attachment.url)
                 else:
-                    embed.add_field(name=f"Attachments Added", value=f"{attachment.url}")
+                    embed.add_field(
+                        name=f"Attachments Added", value=f"{attachment.url}"
+                    )
 
             await thread.send(embed=embed)
             await message.add_reaction("✅")
