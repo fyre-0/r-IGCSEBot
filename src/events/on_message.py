@@ -98,8 +98,8 @@ async def counting(message: discord.Message):
 
 
 async def is_welcome(text: str):
-    alternatives = ["you're welcome", "your welcome", "ur welcome", "no problem"]
-    alternatives_2 = ["np", "np!", "yw", "yw!"]
+    alternatives = ["you're welcome", "your welcome", "ur welcome", "no problem", "no worries"]
+    alternatives_2 = ["np", "yw", "nw"]
     lowercase = text.lower()
     if "welcome" == lowercase:
         return True
@@ -126,7 +126,7 @@ async def is_thanks(text: str):
         "thanku",
         "tyvm",
         "thankyou",
-        "ty!",
+        "tq",
     ]
     lowercase = text.lower()
     if "ty" in lowercase.split():
@@ -228,19 +228,14 @@ async def on_message(message: discord.Message):
             "tyvm",
             "thankyou",
             "ty",
-            "ty!",
             "tq",
-            "tq!",
             "you're welcome",
             "your welcome",
             "ur welcome",
             "no problem",
             "np",
-            "np!",
             "yw",
-            "yw!",
             "nw",
-            "nw!",
         ]
     ):
         user_id = message.author.id
