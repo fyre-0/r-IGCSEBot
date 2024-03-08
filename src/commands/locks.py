@@ -100,7 +100,9 @@ async def Channellockcommand(
 
     # user_id = f"<@{interaction.user.id}>"
     channel_id = f"<#{channelinput.id}>"
-    mod_log_channel = bot.get_channel(gpdb.get_pref("modlog_channel", interaction.guild.id)) 
+    mod_log_channel = bot.get_channel(
+        gpdb.get_pref("modlog_channel", interaction.guild.id)
+    )
     if mod_log_channel:
         embed = discord.Embed(
             description="Scheduled Channel Lockdown", colour=discord.Colour.red()
@@ -128,7 +130,7 @@ async def Channellockcommand(
         {
             "_id": "l" + str(timenow),
             "channel_id": channelinput.id,
-            "guild_id" : interaction.guild.id,
+            "guild_id": interaction.guild.id,
             "unlock": False,
             "time": locktime,
             "resolved": False,
@@ -139,7 +141,7 @@ async def Channellockcommand(
         {
             "_id": "u" + str(timenow),
             "channel_id": channelinput.id,
-            "guild_id" : interaction.guild.id,
+            "guild_id": interaction.guild.id,
             "unlock": True,
             "time": unlocktime,
             "resolved": False,
@@ -246,7 +248,9 @@ async def Forumlockcommand(
 
     # user_id = f"<@{interaction.user.id}>"
     thread_id = f"<#{threadinput.id}>"
-    mod_log_channel = bot.get_channel(gpdb.get_pref("modlog_channel", interaction.guild.id)) 
+    mod_log_channel = bot.get_channel(
+        gpdb.get_pref("modlog_channel", interaction.guild.id)
+    )
     if mod_log_channel:
         embed = discord.Embed(
             description="Scheduled Forum Lockdown", colour=discord.Colour.red()
@@ -275,7 +279,7 @@ async def Forumlockcommand(
             {
                 "_id": "l" + str(timenow),
                 "thread_id": threadinput.id,
-                "guild_id" : interaction.guild.id,
+                "guild_id": interaction.guild.id,
                 "unlock": False,
                 "time": locktime,
                 "resolved": False,
@@ -283,7 +287,7 @@ async def Forumlockcommand(
             {
                 "_id": "u" + str(timenow),
                 "thread_id": threadinput.id,
-                "guild_id" : interaction.guild.id,
+                "guild_id": interaction.guild.id,
                 "unlock": True,
                 "time": unlocktime,
                 "resolved": False,

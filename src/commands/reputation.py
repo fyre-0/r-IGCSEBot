@@ -38,12 +38,14 @@ async def change_rep(
 ):
     if await is_moderator(interaction.user):
         await interaction.response.defer()
-        mod_log_channel = bot.get_channel(gpdb.get_pref("modlog_channel", interaction.guild.id)) 
+        mod_log_channel = bot.get_channel(
+            gpdb.get_pref("modlog_channel", interaction.guild.id)
+        )
         timern = int(time.time()) + 1
         user_id = int(user.id)
         new_rep = int(new_rep)
         guild_id = int(interaction.guild.id)
-        rep = repdb.change_rep(user_id, new_rep, guild_id)    
+        rep = repdb.change_rep(user_id, new_rep, guild_id)
         if mod_log_channel:
             embed = discord.Embed(
                 description="Rep Changed", colour=discord.Colour.blurple()

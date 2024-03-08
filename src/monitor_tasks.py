@@ -12,7 +12,7 @@ from utils.mongodb import smdb, gpdb
 
 async def togglechannellock(channel_id, guild_id, unlock, *, unlocktime=0):
     everyone = bot.get_guild(guild_id).default_role
-    mod_log_channel = bot.get_channel(gpdb.get_pref("modlog_channel", guild_id)) 
+    mod_log_channel = bot.get_channel(gpdb.get_pref("modlog_channel", guild_id))
     timern = int(time.time()) + 1
     channel = bot.get_channel(channel_id)
     overwrite = channel.overwrites_for(everyone)
@@ -70,7 +70,7 @@ async def togglechannellock(channel_id, guild_id, unlock, *, unlocktime=0):
 
 
 async def toggleforumlock(thread_id, guild_id, unlock, unlocktime):
-    mod_log_channel = bot.get_channel(gpdb.get_pref("modlog_channel", guild_id)) 
+    mod_log_channel = bot.get_channel(gpdb.get_pref("modlog_channel", guild_id))
     timern = int(time.time()) + 1
     thread = bot.get_channel(thread_id)
     try:
@@ -127,7 +127,7 @@ async def toggleforumlock(thread_id, guild_id, unlock, unlocktime):
 @tasks.loop(hours=720)
 async def autorefreshhelpers():
     changed = []
-    mod_log_channel = bot.get_channel(gpdb.get_pref("modlog_channel", GUILD_ID)) 
+    mod_log_channel = bot.get_channel(gpdb.get_pref("modlog_channel", GUILD_ID))
     timenow = int(time.time()) + 1
     for chnl, role in helper_roles.items():
         try:
@@ -188,7 +188,10 @@ async def checklock():
             if result["time"] <= time.time():
                 ult = clocks.find_one({"_id": "u" + result["_id"][1:]})["time"]
                 await togglechannellock(
-                    result["channel_id"], result["guild_id"], result["unlock"], unlocktime=ult
+                    result["channel_id"],
+                    result["guild_id"],
+                    result["unlock"],
+                    unlocktime=ult,
                 )
 
                 clocks.delete_one({"_id": result["_id"]})
@@ -198,12 +201,16 @@ async def checklock():
             if result["time"] <= time.time():
                 ult = flocks.find_one({"_id": "u" + result["_id"][1:]})["time"]
                 await toggleforumlock(
-                    result["thread_id"], result["guild_id"], result["unlock"], unlocktime=ult
+                    result["thread_id"],
+                    result["guild_id"],
+                    result["unlock"],
+                    unlocktime=ult,
                 )
                 flocks.delete_one({"_id": result["_id"]})
 
     except Exception:
         print(traceback.format_exc())
+
 
 @tasks.loop(hours=24)
 async def resetdmprefs():
@@ -215,6 +222,7 @@ async def resetdmprefs():
     for result in results:
         if result["deleted_time"] <= timern:
             dmservers.delete_one({"_id": result["_id"]})
+
 
 @tasks.loop(seconds=20)
 async def checkmute():
@@ -228,7 +236,9 @@ async def checkmute():
             if int(result["unmute_time"]) <= timern:
                 user_id = int(result["user_id"])
                 guild_id = int(result["guild_id"])
-                mod_log_channel = bot.get_channel(gpdb.get_pref("modlog_channel", guild_id)) 
+                mod_log_channel = bot.get_channel(
+                    gpdb.get_pref("modlog_channel", guild_id)
+                )
                 guild = bot.get_guild(guild_id)
                 # The user ID may not be present in cache.
                 try:

@@ -39,7 +39,9 @@ async def votehotm(
         )
 
         helpers.update_one({"id": helper.id}, {"$inc": {"votes": 1}}, upsert=True)
-        hotm_log_channel = bot.get_channel(gpdb.get_pref("hotm_results_channel", interaction.guild.id)) 
+        hotm_log_channel = bot.get_channel(
+            gpdb.get_pref("hotm_results_channel", interaction.guild.id)
+        )
         if hotm_log_channel:
             await hotm_log_channel.send(
                 f"{interaction.user} ({interaction.user.id}) has voted for {helper} ({helper.id})"
@@ -47,14 +49,17 @@ async def votehotm(
 
         messages = [
             msg
-            for msg in await bot.get_channel(gpdb.get_pref("hotm_results_channel", interaction.guild.id)).history().flatten()
-            if msg.author.id == bot.user.id
-            and msg.content == "HOTM Voting Results"
+            for msg in await bot.get_channel(
+                gpdb.get_pref("hotm_results_channel", interaction.guild.id)
+            )
+            .history()
+            .flatten()
+            if msg.author.id == bot.user.id and msg.content == "HOTM Voting Results"
         ]
         if len(messages) == 0:
-            results_message = await bot.get_channel(gpdb.get_pref("hotm_results_channel", interaction.guild.id)).send(
-                content="HOTM Voting Results"
-            )
+            results_message = await bot.get_channel(
+                gpdb.get_pref("hotm_results_channel", interaction.guild.id)
+            ).send(content="HOTM Voting Results")
         else:
             results_message = messages[0]
 
@@ -68,9 +73,11 @@ async def votehotm(
             )
             await results_message.edit(embed=embed)
         else:
-            await interaction.send("Please set up HOTM using the `/set_preferences ` command!", ephemeral=True)
+            await interaction.send(
+                "Please set up HOTM using the `/set_preferences ` command!",
+                ephemeral=True,
+            )
 
-            
     else:
         await interaction.send(f"{helper} is not a helper.", ephemeral=True)
 
@@ -94,7 +101,11 @@ async def resethotm(interaction: discord.Interaction):
     db.drop_collection("hotmvoters")
     msgs = [
         msg
-        for msg in await bot.get_channel(gpdb.get_pref("hotm_results_channel", interaction.guild.id)).history().flatten()
+        for msg in await bot.get_channel(
+            gpdb.get_pref("hotm_results_channel", interaction.guild.id)
+        )
+        .history()
+        .flatten()
         if msg.author.id == bot.user.id and msg.content == "HOTM Voting Results"
     ]
     await msgs[0].delete()

@@ -25,7 +25,9 @@ class AddKeywords(discord.ui.Modal):
         self.add_item(self.autoresponse)
 
     async def callback(self, interaction: discord.Interaction):
-        mod_log_channel = bot.get_channel(gpdb.get_pref("modlog_channel", interaction.guild.id)) 
+        mod_log_channel = bot.get_channel(
+            gpdb.get_pref("modlog_channel", interaction.guild.id)
+        )
         if mod_log_channel:
             timern = int(time.time()) + 1
             kwdb.add_keyword(
@@ -71,7 +73,9 @@ class RemoveKeywords(discord.ui.Modal):
         self.add_item(self.keyword)
 
     async def callback(self, interaction: discord.Interaction):
-        mod_log_channel = bot.get_channel(gpdb.get_pref("modlog_channel", interaction.guild.id)) 
+        mod_log_channel = bot.get_channel(
+            gpdb.get_pref("modlog_channel", interaction.guild.id)
+        )
         if mod_log_channel:
             timern = int(time.time()) + 1
             kwdb.remove_keyword(self.keyword.value, interaction.guild.id)
@@ -92,7 +96,9 @@ class RemoveKeywords(discord.ui.Modal):
             embed.set_footer(text="r/IGCSE Bot#2063")
             await mod_log_channel.send(embed=embed)
             await interaction.send(
-                f"Deleted keyword `{self.keyword.value}`", ephemeral=True, delete_after=2
+                f"Deleted keyword `{self.keyword.value}`",
+                ephemeral=True,
+                delete_after=2,
             )
 
 

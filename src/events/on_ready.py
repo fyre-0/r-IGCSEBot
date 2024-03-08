@@ -42,12 +42,12 @@ async def on_ready():
     print(f"Logged in as {str(bot.user)}.")
     await bot.change_presence(
         activity=discord.Activity(type=discord.ActivityType.watching, name="r/IGCSE")
-    ) 
+    )
     await smdb.populate_cache()
     for loop in loops:
         if loop and not loop.is_running():
             loop.start()
-            
+
     views = View.find().all()
     for view in views:
         bot.add_view(
@@ -66,7 +66,8 @@ async def on_ready():
                 user = bot.user
                 format = "%d-%m-%Y"
                 embed = discord.Embed(
-                    title=f"{bot.user.display_name} restarted successfully!", colour=0x51BB56
+                    title=f"{bot.user.display_name} restarted successfully!",
+                    colour=0x51BB56,
                 )
                 embed.add_field(
                     name="Bot Information",
@@ -83,5 +84,7 @@ async def on_ready():
                     value=f"```No. of roles: {len(guild.roles)}\nNo. of users: {len(guild.humans)}\nNo. of bots: {len(guild.bots)}\nNo. of catagories: {len(guild.categories)}\nNo. of text-channels: {len(guild.text_channels)}\nNo. of voice-channels: {len(guild.voice_channels)}\nNo. of forum-channels: {len(guild.forum_channels)}\nNo. of slash-commands: {len(bot.get_all_application_commands())}```",
                     inline=False,
                 )
-                embed.set_footer(text=f"{bot.user}", icon_url=bot.user.display_avatar.url)
+                embed.set_footer(
+                    text=f"{bot.user}", icon_url=bot.user.display_avatar.url
+                )
                 await botlogs.send(embed=embed)

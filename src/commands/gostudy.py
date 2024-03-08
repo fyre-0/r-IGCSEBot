@@ -35,7 +35,9 @@ async def gostudy(
     mute = db["mute"]
     timern = int(time.time()) + 1
     channel = interaction.channel
-    mod_log_channel = bot.get_channel(gpdb.get_pref("modlog_channel", interaction.guild.id)) 
+    mod_log_channel = bot.get_channel(
+        gpdb.get_pref("modlog_channel", interaction.guild.id)
+    )
     if mod_log_channel:
         forced_mute_role = interaction.guild.get_role(FORCED_MUTE_ROLE)
         time_to_mute = 3600
@@ -77,17 +79,22 @@ async def gostudy(
                 )
 
                 embed.set_author(
-                    name=str(interaction.user), icon_url=interaction.user.display_avatar.url
+                    name=str(interaction.user),
+                    icon_url=interaction.user.display_avatar.url,
                 )
                 embed.add_field(name="User", value=f"{user.mention}", inline=False)
-                embed.add_field(name="Duration", value=f"<t:{unmute_time}:R>", inline=False)
+                embed.add_field(
+                    name="Duration", value=f"<t:{unmute_time}:R>", inline=False
+                )
                 embed.add_field(name="Date", value=f"<t:{timern}:F>", inline=False)
                 embed.add_field(
                     name="ID",
                     value=f"```py\nUser = {interaction.user.id}\nRole = {FORCED_MUTE_ROLE}```",
                     inline=False,
                 )
-                embed.set_footer(text=f"{bot.user}", icon_url=bot.user.display_avatar.url)
+                embed.set_footer(
+                    text=f"{bot.user}", icon_url=bot.user.display_avatar.url
+                )
 
                 await mod_log_channel.send(embed=embed)
                 await channel.send(
@@ -167,17 +174,22 @@ async def gostudy(
                     description="Go Study Mode Activated", colour=discord.Colour.red()
                 )
                 embed.set_author(
-                    name=str(interaction.user), icon_url=interaction.user.display_avatar.url
+                    name=str(interaction.user),
+                    icon_url=interaction.user.display_avatar.url,
                 )
                 embed.add_field(name="User", value=f"{user.mention}", inline=False)
-                embed.add_field(name="Duration", value=f"<t:{unmute_time}:R>", inline=False)
+                embed.add_field(
+                    name="Duration", value=f"<t:{unmute_time}:R>", inline=False
+                )
                 embed.add_field(name="Date", value=f"<t:{timern}:F>", inline=False)
                 embed.add_field(
                     name="ID",
                     value=f"```py\nUser = {interaction.user.id}\nRole = {FORCED_MUTE_ROLE}```",
                     inline=False,
                 )
-                embed.set_footer(text=f"{bot.user}", icon_url=bot.user.display_avatar.url)
+                embed.set_footer(
+                    text=f"{bot.user}", icon_url=bot.user.display_avatar.url
+                )
                 await mod_log_channel.send(embed=embed)
                 embed = discord.Embed(
                     description=f"Study time! You've been given a temporary break from the off-topic channels for the next hour, thanks to <@{interaction.user.id}>. Use this time to focus on your studies and make the most of it!\n\nThe role will be removed at <t:{unmute_time}:f>, which is <t:{unmute_time}:R>",
@@ -227,7 +239,9 @@ async def remove_gostudy(
     guild = bot.get_guild(GUILD_ID)
     timern = int(time.time()) + 1
     forced_mute_role = guild.get_role(FORCED_MUTE_ROLE)
-    mod_log_channel = bot.get_channel(gpdb.get_pref("modlog_channel", interaction.guild.id)) 
+    mod_log_channel = bot.get_channel(
+        gpdb.get_pref("modlog_channel", interaction.guild.id)
+    )
     if mod_log_channel:
         if user is None:
             user_id = interaction.user.id
@@ -254,7 +268,8 @@ async def remove_gostudy(
 
             await mod_log_channel.send(embed=embed)
             await interaction.send(
-                f"the Forced mute role has been removed from <@{user_id}>.", ephemeral=True
+                f"the Forced mute role has been removed from <@{user_id}>.",
+                ephemeral=True,
             )
 
         else:
@@ -283,5 +298,6 @@ async def remove_gostudy(
 
             await mod_log_channel.send(embed=embed)
             await interaction.send(
-                f"the Forced mute role has been removed from <@{user_id}>.", ephemeral=True
+                f"the Forced mute role has been removed from <@{user_id}>.",
+                ephemeral=True,
             )
