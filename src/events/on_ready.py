@@ -54,6 +54,7 @@ async def on_ready():
             MCQButtonsView(view["view_id"]), message_id=int(view["message_id"])
         )
     client = pymongo.MongoClient(LINK)
+    guild = bot.get_guild(GUILD_ID)
     db = client.IGCSEBot
     prefs = db["guild_preferences"]
     result = prefs.find_one({"guild_id": GUILD_ID})
