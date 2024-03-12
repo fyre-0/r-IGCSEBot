@@ -5,13 +5,19 @@ from utils.data import reactionroles_data
 
 
 class DropdownRR(discord.ui.Select):
-    def __init__(self, category, options):
+    def __init__(self, category, options, interaction: discord.Interaction):
         self._options = options
         selectOptions = [
             discord.SelectOption(emoji=option[0], label=option[1], value=option[2])
-            for option in options
+            for option in options if option[3] == False
         ]
         if category == "Colors":
+            if "1000+ Rep Club".lower() in [role.name.lower() for role in interaction.user.roles]:
+                extraOptions = [
+                    discord.SelectOption(emoji=option[0], label=option[1], value=option[2])
+                    for option in options if option[3] == True
+                ]
+                selectOptions.extend(extraOptions)
             super().__init__(
                 placeholder="Select your Color",
                 min_values=0,
@@ -58,11 +64,11 @@ class DropdownRR(discord.ui.Select):
 
 
 class DropdownViewRR(discord.ui.View):
-    def __init__(self, roles_type):
+    def __init__(self, roles_type, interaction: discord.Interaction):
         super().__init__(timeout=None)
 
         for category, options in reactionroles_data[roles_type].items():
-            self.add_item(DropdownRR(category, options))
+            self.add_item(DropdownRR(category, options, interaction))
 
 
 @bot.slash_command(
@@ -74,7 +80,7 @@ async def colorroles(interaction: discord.Interaction):
         or await is_server_booster(interaction.user)
         or await has_role(interaction.user, "100+ Rep Club")
     ):
-        await interaction.send(view=DropdownViewRR("Color Roles"), ephemeral=True)
+        await interaction.send(view=DropdownViewRR("Color Roles", interaction), ephemeral=True)
     else:
         await interaction.send(
             "This command is only available for Server Boosters and 100+ Rep Club members",
