@@ -12,7 +12,7 @@ class DropdownRR(discord.ui.Select):
             for option in options if option[3] == False
         ]
         if category == "Colors":
-            if "1000+ Rep Club".lower() in [role.name.lower() for role in interaction.user.roles]:
+            if "1000+ rep club" in [role.name.lower() for role in interaction.user.roles] or "server booster" in [role.name.lower() for role in interaction.user.roles]:
                 extraOptions = [
                     discord.SelectOption(emoji=option[0], label=option[1], value=option[2])
                     for option in options if option[3] == True
