@@ -245,21 +245,67 @@ class CancelPingBtn(discord.ui.View):
 
 
 @bot.slash_command(
-    name="helper_old",
-    description="[OUTDATED] pings helper for this subject in 15 minutes",
+    name="helper",
+    description="Ping a helper in any subject channel",
     guild_ids=[GUILD_ID],
 )
-async def helper_old(
+async def helper(
     interaction: discord.Interaction,
+    message_id: str = discord.SlashOption(
+        name="message_id",
+        description="The ID of the message containing the question.",
+        required=False,
+    ),
 ):
+    if message_id:
+        try:
+            message_id = int(message_id)
+        except ValueError:
+            await interaction.send(
+                "The provided message ID is invalid.", ephemeral=True
+)
+            return
+    try:
+        helper_role = discord.utils.get(
+            interaction.guild.roles, id=helper_roles[interaction.channel.id]
+        )
+    except Exception:
+        await interaction.send(
+            "There are no helper roles specified for this channel.", ephemeral=True
+        )
+        return
+    roles = [role.name.lower() for role in interaction.user.roles]
+    if "server booster" in roles:
+        if message_id:
+            url = f"https://discord.com/channels/{interaction.guild.id}/{interaction.channel.id}/{message_id}"
+            embed = discord.Embed(description=f"[Jump to the message.]({url})")
+            embed.set_author(
+                name=str(interaction.user), icon_url=interaction.user.display_avatar.url
+            )
+        else:
+            embed = discord.Embed()
+            embed.set_author(
+                name=str(interaction.user), icon_url=interaction.user.display_avatar.url
+            )
+        allowedMentions = discord.AllowedMentions()
+        await interaction.send(
+            content=helper_role.mention, embed=embed, allowed_mentions=allowedMentions
+        )
+        return
+    view = CancelPingBtn()
     embed = discord.Embed(
-        description="This command is now outdated, instead you can long-press/right-click on the message you want help with, go to 'Apps' then choose helper"
+        description=f"The helper role for this channel, `@{helper_role.name}`, will automatically be pinged (<t:{int(time.time() + 890)}:R>).\nIf your query has been resolved by then, please click on the `Cancel Ping` button."
     )
-    embed.set_image(
-        url="https://raw.githubusercontent.com/fyre-0/r-IGCSEBot/assets/helper_ping.png"
+    embed.set_author(
+        name=str(interaction.user), icon_url=interaction.user.display_avatar.url
     )
-
-    await interaction.send(embed=embed, ephemeral=True)
+    message = await interaction.send(embed=embed, view=view)
+    view.message = message
+    view.channel = interaction.channel
+    view.guild = interaction.guild
+    view.message_id = message_id
+    view.helper_role = helper_role
+    view.user = interaction.user
 
 
 @bot.message_command(
@@ -984,7 +1030,7 @@ class ChatModerator(discord.ui.Modal):
         self.add_item(self.timezone)
 
     async def callback(self, interaction: discord.Interaction):
-        chatmod_app_channel = bot.get_channel(gpdb.get_pref("chatmod_apps_channel", interaction.guild.id)) 
+        chatmod_app_channel = bot.get_channel(gpdb.get_pre  f("chatmod_apps_channel", interaction.guild.id)) 
 
         application_embed = discord.Embed(
             title="New application received", color=0xE3FB6D
