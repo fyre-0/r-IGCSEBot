@@ -1,8 +1,7 @@
 import time
 from bot import discord, bot
 from utils.constants import GUILD_ID
-from utils.mongodb import smdb, gpdb
-from utils.roles import is_moderator, is_bot_developer
+from utils.mongodb import smdb
 
 
 @bot.slash_command(
@@ -34,13 +33,6 @@ async def advstick(
 
     stick_time = int(stick_time)
     unstick_time = int(unstick_time)
-    if not await is_moderator(interaction.user) and not await is_bot_developer(interaction.user):
-        await interaction.send(
-            f"Sorry {interaction.user.mention},"
-            " you don't have the permission to perform this action.",
-            ephemeral=True,
-        )
-        return
 
     if stick_time < int(time.time()):
         await interaction.send(
@@ -59,25 +51,7 @@ async def advstick(
         stick_time,
         unstick_time,
     )
-    timenow = int(time.time()) + 1
+
     message = f"Advstick has been successfully scheduled to stick at <t:{stick_time}:F> (<t:{stick_time}:R>) and unstick at <t:{unstick_time}:F> (<t:{unstick_time}:R>)"
-    mod_log_channel = bot.get_channel(gpdb.get_pref("modlog_channel", interaction.guild.id)) 
-    if mod_log_channel:
-        embed = discord.Embed(
-            description="Sticky Scheduled", colour=discord.Colour.red()
-        )
-        embed.set_author(
-            name=str(interaction.user), icon_url=interaction.user.display_avatar.url
-        )
-        embed.add_field(name="Sticky Channel", value=f"{channel.id}", inline=False)
-        embed.add_field(name="Stick time", value=f"<t:{stick_time}:R>", inline=False)
-        embed.add_field(name="Unstick time", value=f"<t:{unstick_time}:R>", inline=False)
-        embed.add_field(name="Date", value=f"<t:{timenow}:F>", inline=False)
-        embed.add_field(
-            name="ID",
-            value=f"```py\nUser = {interaction.user.id}\nChannel = {channel.id}```",
-            inline=False,
-        )
-        embed.set_footer(text=f"{bot.user}", icon_url=bot.user.display_avatar.url)
-        await mod_log_channel.send(embed=embed)
+
     await interaction.send(message, ephemeral=True)

@@ -8,7 +8,7 @@ from bot import discord, bot, keywords, datetime, time, pymongo
 import sys
 from commands.dms import send_dm
 from utils.mongodb import gpdb, smdb, repdb, kwdb
-from utils.roles import is_moderator, is_helper, is_chat_moderator, is_bot_developer
+from utils.roles import is_moderator, is_helper, is_chat_moderator
 import global_vars
 
 sticky_counter = {}
@@ -480,7 +480,6 @@ async def on_message(message: discord.Message):
             await is_helper(message.author)
             or await is_moderator(message.author)
             or await is_chat_moderator(message.author)
-            or await is_bot_developer(message.author)
         ):
             pins = await message.channel.pins()
             pin_no = len(pins)
@@ -500,7 +499,6 @@ async def on_message(message: discord.Message):
             await is_helper(message.author)
             or await is_moderator(message.author)
             or await is_chat_moderator(message.author)
-            or await is_bot_developer(message.author)
         ):
             msg = await message.channel.fetch_message(message.reference.message_id)
             await msg.unpin()
@@ -510,7 +508,7 @@ async def on_message(message: discord.Message):
             await message.delete()
 
     if message.content.lower() == "stick":
-        if await is_moderator(message.author) or await is_bot_developer(message.author):
+        if await is_moderator(message.author):
             if message.reference is not None:
                 reference_msg = await message.channel.fetch_message(
                     message.reference.message_id
@@ -521,7 +519,7 @@ async def on_message(message: discord.Message):
                     )
 
     if message.content.lower() == "unstick":
-        if await is_moderator(message.author) or await is_bot_developer(message.author):
+        if await is_moderator(message.author):
             if message.reference is not None:
                 reference_msg = await message.channel.fetch_message(
                     message.reference.message_id
