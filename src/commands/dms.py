@@ -1,5 +1,5 @@
 from bot import bot, discord, commands
-from utils.mongodb import dmsdb
+from utils.mongodb import dmsdb, gpdb
 from utils.roles import is_chat_moderator, is_moderator
 from utils.constants import GUILD_ID, DMS_CLOSED_CHANNEL_ID
 
@@ -8,7 +8,8 @@ async def send_dm(member: discord.Member, **kwargs):
     try:
         await member.send(**kwargs)
     except Exception:
-        if member.guild.id == GUILD_ID:
+        guild = bot.get_channel(gpdb.get_pref("closed_dm_channel", member.guild.id)) 
+        if guild:
             thread = await dmsdb.get_thread(member)
             await thread.send(**kwargs, content=member.mention)
 

@@ -151,24 +151,24 @@ async def handle_rep(message: discord.Message):
                 await message.channel.send(
                     f"Gave +1 Rep to {user.mention} ({rep})\nWelcome to the {rep}+ Rep Club!"
                 )
-                embed = discord.Embed(
-                    title="Congratulations!",
-                    description=f"Congrats {user}! Thank you for your contribution towards our server. As our appreciation your dedication towards the server, we have added the ability for you to pick up your own color roles in ⁠<#946249349434863616>.\n\n**You may use the `/colorroles` command to do so. Please reply to this message if you have any questions.**",
+                hundredplusembed = discord.Embed(
+                    title="Congratulations 100+ Reps!",
+                    description=f"Congrats {user}! Thank you for your contribution towards our server. As our appreciation your dedication towards the server, we have added the ability for you to pick up your own color roles in ⁠<#946249349434863616>.\n\n**You may use the `/colorroles` command to do so. If you have any questions or need assistance, feel free to reply to this message.**",
                     color=0x8BF797,
-                )
-                await send_dm(user, embed=embed)
+                )              
+                await send_dm(user, embed=hundredplusembed)
                 channel = bot.get_channel(gpdb.get_pref("dm_threads_channel", message.guild.id)) 
                 threads = channel.threads
                 thread_name = f"{user.id}"
                 thread = discord.utils.get(threads, name=thread_name)
                 if thread is not None:
-                    await thread.send(embed=embed)
+                    await thread.send(embed=hundredplusembed)
                 else:
                     thread = await channel.create_thread(
                         name=thread_name,
                         content=f"Username: `{user.name}`\nUser ID: `{user.id}`",
                     )
-                    await thread.send(embed=embed)
+                    await thread.send(embed=hundredplusembed)
             elif rep == 500:
                 role = discord.utils.get(user.guild.roles, name=f"{rep}+ Rep Club")
                 await user.add_roles(role)
@@ -181,6 +181,24 @@ async def handle_rep(message: discord.Message):
                 await message.channel.send(
                     f"Gave +1 Rep to {user.mention} ({rep})\nWelcome to the {rep}+ Rep Club!"
                 )
+                thousandplusembed = discord.Embed(
+                    title="Congratulations on 1000+ Reps!",
+                    description=f"Congrats {user}! Thank you for your contribution towards our server. As our appreciation your dedication towards the server, we have added the additional colours to the colorrole command on the r/IGCSE Server! pick up your own color roles in ⁠<#946249349434863616>.\n\n**You may use the `/colorroles` command to do so. If you have any questions or need assistance, feel free to reply to this message.**",
+                    color=0x8BF797,
+                )                
+                await send_dm(user, embed=thousandplusembed)
+                channel = bot.get_channel(gpdb.get_pref("dm_threads_channel", message.guild.id)) 
+                threads = channel.threads
+                thread_name = f"{user.id}"
+                thread = discord.utils.get(threads, name=thread_name)
+                if thread is not None:
+                    await thread.send(embed=thousandplusembed)
+                else:
+                    thread = await channel.create_thread(
+                        name=thread_name,
+                        content=f"Username: `{user.name}`\nUser ID: `{user.id}`",
+                    )
+                    await thread.send(embed=thousandplusembed)                
             else:
                 await message.channel.send(f"Gave +1 Rep to {user} ({rep})")
 
@@ -189,6 +207,28 @@ async def handle_rep(message: discord.Message):
 async def on_message(message: discord.Message):
     if message.author.bot:
         return
+
+    if message.type == discord.MessageType.premium_guild_subscription:
+        user = message.author
+        serverboosterembed = discord.Embed(
+            title=f"Thank you for boosting {message.guild.name}",
+            description=f"Thank you {message.author} for boosting our server! Your support means the world to us. As a token of our gratitude, we've enhanced the colorrole command on the r/IGCSE Server, offering more options for personalization. Pick up your own color roles in <#946249349434863616>.\n\n💡 Simply use the `/colorroles` command to get started. If you have any questions, feel free to reply to this message. We're here to help!",
+            color=0x8BF797,
+        )
+        await send_dm(user, embed=serverboosterembed)
+        channel = bot.get_channel(gpdb.get_pref("dm_threads_channel", message.guild.id)) 
+        threads = channel.threads
+        thread_name = f"{user.id}"
+        thread = discord.utils.get(threads, name=thread_name)
+        if thread is not None:
+            await thread.send(embed=serverboosterembed)
+        else:
+            thread = await channel.create_thread(
+                name=thread_name,
+                content=f"Username: `{user.name}`\nUser ID: `{user.id}`",
+            )
+            await thread.send(embed=serverboosterembed)         
+
 
     if any(
         keyword in message.content.lower()
