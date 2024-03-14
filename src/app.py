@@ -114,7 +114,7 @@ class EvalModal(discord.ui.Modal):
     name="eval", description="Evaluate a piece of code.", guild_ids=[GUILD_ID]
 )
 async def _eval(interaction: discord.Interaction):
-    if not await is_moderator(interaction.user):
+    if not await is_moderator(interaction.user) and not await is_bot_developer(interaction.user):
         await interaction.send("This is not for you.", ephemeral=True)
         return
     eval_modal = EvalModal()
@@ -132,7 +132,7 @@ async def rrmake(
         required=True,
     ),
 ):
-    if await is_moderator(interaction.user):
+    if await is_moderator(interaction.user) or await is_bot_developer(interaction.user):
         guild = bot.get_guild(GUILD_ID)
         channel = interaction.channel
         try:
@@ -366,7 +366,7 @@ async def helper(interaction: discord.Interaction, message: discord.Message):
     guild_ids=[GUILD_ID],
 )
 async def refreshhelpers(ctx):
-    if not await is_moderator(ctx.author):
+    if not await is_moderator(ctx.author) and not await is_bot_developer(ctx.author):
         return
     changed = []
     for chnl, role in helper_roles.items():
@@ -409,7 +409,7 @@ async def refreshhelpers(ctx):
 
 @bot.command(description="Clear messages in a channel")
 async def clear(ctx, num_to_clear: int):
-    if not await is_moderator(ctx.author):
+    if not await is_moderator(ctx.author) and not await is_bot_developer(ctx.author):
         return
     try:
         await ctx.channel.purge(limit=num_to_clear + 1)
@@ -636,7 +636,7 @@ async def set_preferences(
     ),
 ):
 
-    if not await is_moderator(interaction.user):
+    if not await is_moderator(interaction.user) and not await is_bot_developer(interaction.user):
         await interaction.send(
             "You are not authorized to perform this action", ephemeral=True
         )
@@ -850,7 +850,7 @@ async def Instantlockcommand(
     ),
 ):
     await interaction.response.defer(ephemeral=True)
-    if not await is_moderator(interaction.user):
+    if not await is_moderator(interaction.user) and not await is_bot_developer(interaction.user):
         await interaction.send(
             f"Sorry {interaction.user.mention},"
             " you don't have the permission to perform this action.",
@@ -1030,7 +1030,7 @@ class ChatModerator(discord.ui.Modal):
         self.add_item(self.timezone)
 
     async def callback(self, interaction: discord.Interaction):
-        chatmod_app_channel = bot.get_channel(gpdb.get_pre  f("chatmod_apps_channel", interaction.guild.id)) 
+        chatmod_app_channel = bot.get_channel(gpdb.get_pref("chatmod_apps_channel", interaction.guild.id)) 
 
         application_embed = discord.Embed(
             title="New application received", color=0xE3FB6D
@@ -1140,7 +1140,7 @@ async def embed(
     ),
 ):
 
-    if not await is_moderator(interaction.user):
+    if not await is_moderator(interaction.user) and not await is_bot_developer(interaction.user):
         await interaction.send(
             "You do not have the necessary permissions to perform this action",
             ephemeral=True,
@@ -1361,7 +1361,7 @@ async def send_editcommand(
     ),
 ):
 
-    if not await is_moderator(interaction.user):
+    if not await is_moderator(interaction.user) and not await is_bot_developer(interaction.user):
         await interaction.send(
             "You are not authorized to perform this action.", ephemeral=True
         )

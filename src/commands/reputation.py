@@ -1,6 +1,6 @@
 from bot import bot, discord, time
 from utils.mongodb import repdb, gpdb
-from utils.roles import is_moderator
+from utils.roles import is_moderator, is_bot_developer
 from utils.constants import MODLOG_CHANNEL_ID
 
 
@@ -36,7 +36,7 @@ async def change_rep(
         max_value=99999,
     ),
 ):
-    if await is_moderator(interaction.user):
+    if await is_moderator(interaction.user) or await is_bot_developer(interaction.user):
         await interaction.response.defer()
         mod_log_channel = bot.get_channel(gpdb.get_pref("modlog_channel", interaction.guild.id)) 
         timern = int(time.time()) + 1
