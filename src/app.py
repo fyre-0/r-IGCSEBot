@@ -1030,7 +1030,7 @@ class ChatModerator(discord.ui.Modal):
         self.add_item(self.timezone)
 
     async def callback(self, interaction: discord.Interaction):
-        chatmod_app_channel = bot.get_channel(gpdb.get_pre  f("chatmod_apps_channel", interaction.guild.id)) 
+        chatmod_app_channel = bot.get_channel(gpdb.get_pref("chatmod_apps_channel", interaction.guild.id)) 
 
         application_embed = discord.Embed(
             title="New application received", color=0xE3FB6D
