@@ -45,7 +45,7 @@ async def advstick(
         return
 
     try:
-        message = await channel.fetch_message(message_id)
+        message = await interaction.channel.fetch_message(message_id)
     except discord.NotFound:
         await interaction.response.send_message("The requested message could not be found. It may have been deleted or the ID provided is incorrect.", ephemeral=True)
         return
