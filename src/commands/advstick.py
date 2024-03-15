@@ -57,24 +57,5 @@ async def advstick(
         unstick_time,
     )
 
-    timenow = int(time.time()) + 1
-
-    mod_log_channel = bot.get_channel(gpdb.get_pref("modlog_channel", interaction.guild.id)) 
-    if mod_log_channel:
-        embed = discord.Embed(color=0xDEA6FF)
-        embed.set_author(
-            name=str(interaction.user), icon_url=interaction.user.display_avatar.url
-        )
-        embed.add_field(name="Scheduled Embed", value=f"[Jump to Embed/Message](https://discord.com/channels/{channel.guild.id}/{channel.id}/{message_id})", inline=False)
-        embed.add_field(name="Stick time", value=f"<t:{stick_time}:R>", inline=False)
-        embed.add_field(name="Unstick time", value=f"<t:{unstick_time}:R>", inline=False)
-        embed.add_field(name="Date", value=f"<t:{timenow}:F>", inline=False)
-        embed.add_field(
-            name="ID",
-            value=f"```py\nUser = {interaction.user.id}\nMessage = {message_id}```",
-            inline=False,
-        )
-        embed.set_footer(text=f"{bot.user}", icon_url=bot.user.display_avatar.url)
-        await mod_log_channel.send(embed=embed)
         
     await interaction.send(f"Advstick has been successfully scheduled to stick at <t:{stick_time}:F> (<t:{stick_time}:R>) and unstick at <t:{unstick_time}:F> (<t:{unstick_time}:R>)", ephemeral=True)
