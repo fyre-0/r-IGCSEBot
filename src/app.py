@@ -1047,14 +1047,23 @@ class ChatModerator(discord.ui.Modal):
 
 
 class ApplyDropdown(discord.ui.Select):
-    def __init__(self):
+    def __init__(self, interaction: discord.Interaction):
         options = [
             discord.SelectOption(
                 label="Chat Moderator",
                 description="Apply for the chat moderator position",
                 emoji="💬",
-            )
+            ),
         ]
+        if "igcse helper" in [role.name.lower() for role in interaction.user.roles] or "as/al helper" in [role.name.lower() for role in interaction.user.roles]:
+            options.append(
+                discord.SelectOption(
+                    label="Debate Competition",
+                    description="Apply to be in the debate competition (Helpers only)",
+                    emoji="📝",
+                )
+            )
+        
         super().__init__(
             placeholder="Select the application type",
             min_values=1,
@@ -1066,6 +1075,19 @@ class ApplyDropdown(discord.ui.Select):
         if self.values[0] == "Chat Moderator":
             chat_modal = ChatModerator()
             await interaction.response.send_modal(modal=chat_modal)
+        elif self.values[0] == "Debate Competition":
+            # debate comp channel
+            channel = bot.get_channel(1219676797701197824)
+            application_embed = discord.Embed(
+                title="New application received", color=0xE3FB6D
+            )
+            application_embed.add_field(name="User", value=interaction.user, inline=False)
+            application_embed.add_field(name="Position", value="Debate Competition", inline=False)
+            await channel.send(embed=application_embed)
+            await interaction.send(
+                "Thank you for applying!",
+                ephemeral=True,
+            )
 
 
 @bot.slash_command(
@@ -1073,7 +1095,7 @@ class ApplyDropdown(discord.ui.Select):
 )
 async def apply(interaction: discord.Interaction):
     view = discord.ui.View()
-    view.add_item(ApplyDropdown())
+    view.add_item(ApplyDropdown(interaction))
     await interaction.send(view=view, ephemeral=True)
 
 class NewEmbed(discord.ui.Modal):
