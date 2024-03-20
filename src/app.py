@@ -1055,7 +1055,7 @@ class ApplyDropdown(discord.ui.Select):
                 emoji="💬",
             ),
         ]
-        if "igcse helper" in [role.name.lower() for role in interaction.user.roles] or "as/al helper" in [role.name.lower() for role in interaction.user.roles]:
+        if "igcse helper" in [role.name.lower() for role in interaction.user.roles] or "as/al helper" in [role.name.lower() for role in interaction.user.roles] or "100+ rep club" in [role.name.lower() for role in interaction.user.roles] or "server booster" in [role.name.lower() for role in interaction.user.roles]:
             options.append(
                 discord.SelectOption(
                     label="Debate Competition",
